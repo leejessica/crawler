@@ -4,21 +4,23 @@
 package mo.umac.crawler.yahoo.local;
 
 /**
- * This package deals with the coverage problems.
+ * This package deals with the general coverage problems.
  * @author yanhui
  *
  */
 public class Coverage {
 	
 	/**
-	 * Coverage a rectangle with a number of circles
+	 * Cover a rectangle with a number of small rectangle.
+	 * The circle is the circumcircle of this small rectangle.  
+	 * 
 	 */
-	private void coverageRectangle(){
+	private void coverageRectangleWithRectangle(){
 		
 	}
 	
 	/**
-	 * Coverage a circle with a number of circles
+	 * Cover a circle with a number of circles
 	 */
 	private void coverageCircle(){
 		

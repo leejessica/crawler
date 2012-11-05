@@ -89,7 +89,7 @@ public class Crawler {
 	 * @param filePath
 	 * @return
 	 */
-	public boolean crawler(String url, String filePath) {
+	private boolean crawler(String url, String filePath) {
 		
 		HttpClient httpclient = createHttpClient();
 		try {
@@ -132,7 +132,7 @@ public class Crawler {
 		return true;
 	}
 	
-	public HttpClient createHttpClient() {
+	private HttpClient createHttpClient() {
 		ThreadSafeClientConnManager manager = new ThreadSafeClientConnManager();
 		
 		HttpParams params = new BasicHttpParams();
