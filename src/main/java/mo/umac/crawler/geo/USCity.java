@@ -3,7 +3,6 @@
  */
 package mo.umac.crawler.geo;
 
-import mo.umac.crawler.utils.Point;
 import mo.umac.crawler.utils.Rectangle;
 
 /**
@@ -11,7 +10,7 @@ import mo.umac.crawler.utils.Rectangle;
  *
  */
 public class USCity {
-	private Rectangle cityBoundary = new Rectangle(new Point(0.0, 0.0), new Point(0.0, 0.0));
+	private Rectangle cityBoundary = null;
 	private String cityName = "";
 	
 	/**
