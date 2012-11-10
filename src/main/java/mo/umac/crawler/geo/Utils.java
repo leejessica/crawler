@@ -4,7 +4,7 @@
 package mo.umac.crawler.geo;
 
 /**
- * @author Kate YAN
+ * @author Kate Yim
  *
  */
 public class Utils {

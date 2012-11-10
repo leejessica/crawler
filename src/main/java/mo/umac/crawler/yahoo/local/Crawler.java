@@ -4,9 +4,12 @@
 package mo.umac.crawler.yahoo.local;
 
 import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 
 import mo.umac.crawler.utils.FileOperator;
 
@@ -25,7 +28,7 @@ import org.apache.log4j.Logger;
  * Conduct a search for a product or business name within a specified zipcode
  * using the Yahoo! Local search Service.
  * 
- * @author Kate YAN
+ * @author Kate Yim
  * 
  */
 public class Crawler {
@@ -63,7 +66,7 @@ public class Crawler {
 					entity.writeTo(output);
 				}
 				output.close();
-				//TODO deal with access limitations
+				// TODO deal with access limitations
 
 			}
 		} catch (Exception e) {
@@ -78,14 +81,78 @@ public class Crawler {
 		}
 	}
 
+	/**
+	 * Using HttpClient to crawl the xml web page.
+	 * 
+	 * The access limitation is 5000 queries per day.
+	 * 
+	 * @param mapFile
+	 *            A file record the map relationship between the name of saved
+	 *            XML file and the url.
+	 * @param folder
+	 *            A folder stores all saved XML files.
+	 */
+	public void crawl(String mapFileName, String folder) {
+		HttpClient httpclient = createHttpClient();
+		int i = 0;
+		boolean finish = false;
+		String partFileName = "";
+		String fileName = "";
+
+		BufferedWriter outputMap = null;
+		try {
+			outputMap = new BufferedWriter(new OutputStreamWriter(
+					new FileOutputStream(mapFileName, true)));
+
+			while (!finish) {
+				// TODO
+				// parse url -> partFileName
+				// latitude, longitude, query, zipcode, results, start
+
+				fileName = folder + partFileName;
+				// TODO
+				// outputMap.write(conent);
+
+				// crawling the file
+				File file = FileOperator.creatFileAscending(fileName);
+				OutputStream output = new BufferedOutputStream(
+						new FileOutputStream(file));
+				logger.debug("fetching... " + fileName);
+				HttpGet httpget = new HttpGet(fileName);
+				HttpResponse response;
+				response = httpclient.execute(httpget);
+				HttpEntity entity = response.getEntity();
+				if (entity != null) {
+					entity.writeTo(output);
+				}
+				output.close();
+				// TODO deal with access limitations
+
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("Error in crawler", e);
+			logger.error(fileName);
+		} finally {
+			try {
+				outputMap.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			// When HttpClient instance is no longer needed,
+			// shut down the connection manager to ensure
+			// immediate deallocation of all system resources
+			httpclient.getConnectionManager().shutdown();
+		}
+	}
 
 	public HttpClient createHttpClient() {
 		ThreadSafeClientConnManager manager = new ThreadSafeClientConnManager();
 
 		HttpParams params = new BasicHttpParams();
-		//TODO reset the time out
+		// TODO reset the time out
 		int timeout = 1000 * 60 * 5;
-		
+
 		HttpConnectionParams.setConnectionTimeout(params, timeout);
 		HttpConnectionParams.setSoTimeout(params, timeout);
 		HttpClient httpClient = new DefaultHttpClient(manager, params);
@@ -145,6 +212,24 @@ public class Crawler {
 			sb.append(radius);
 		}
 		return sb.toString();
+	}
+
+	/**
+	 * Concatenate the file name using these fields.
+	 * 
+	 * @param query
+	 * @param zip
+	 * @param results
+	 * @param start
+	 * @param latitude
+	 * @param longitude
+	 * @param radius
+	 * @return
+	 */
+	private String concatenateFileName(String query, int zip, int results,
+			int start, double latitude, double longitude, int radius) {
+		// TODO
+		return null;
 	}
 
 }

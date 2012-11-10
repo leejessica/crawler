@@ -3,14 +3,15 @@
  */
 package mo.umac.crawler.geo;
 
-import mo.umac.crawler.utils.Rectangle;
+import com.vividsolutions.jts.geom.Envelope;
+
 
 /**
- * @author Kate YAN
+ * @author Kate Yim
  *
  */
 public class USCity {
-	private Rectangle cityBoundary = null;
+	private Envelope cityBoundary = null;
 	private String cityName = "";
 	
 	/**
@@ -32,7 +33,7 @@ public class USCity {
 	 * Using a rectangle to bound this city or this country.
 	 * @return
 	 */
-	private Rectangle boundCity() {
+	private Envelope boundCity() {
 		//TODO
 		return cityBoundary;
 	}

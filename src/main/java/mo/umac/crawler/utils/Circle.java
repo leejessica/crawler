@@ -3,25 +3,26 @@
  */
 package mo.umac.crawler.utils;
 
-import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Coordinate;
+
 
 /**
  * This Circle represents a query which is also an area covered.
  * 
- * @author Kate YAN
+ * @author Kate Yim
  * 
  */
 public class Circle {
-	private Point center = null;
+	private Coordinate center = null;
 	/* The unit of radium is 'm' in the map. */
 	private double radium = 0.0;
 
-	public Circle(Point center, double radium) {
+	public Circle(Coordinate center, double radium) {
 		this.center = center;
 		this.radium = radium;
 	}
 
-	public Point getCenter() {
+	public Coordinate getCenter() {
 		return center;
 	}
 
@@ -29,7 +30,7 @@ public class Circle {
 		return radium;
 	}
 
-	public void setCenter(Point center) {
+	public void setCenter(Coordinate center) {
 		this.center = center;
 	}
 

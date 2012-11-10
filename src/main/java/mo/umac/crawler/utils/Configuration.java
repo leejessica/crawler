@@ -5,7 +5,7 @@ package mo.umac.crawler.utils;
 
 /**
  * General configurations
- * @author Kate YAN
+ * @author Kate Yim
  *
  */
 public class Configuration {
