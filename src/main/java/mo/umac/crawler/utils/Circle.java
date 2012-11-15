@@ -14,28 +14,21 @@ import com.vividsolutions.jts.geom.Coordinate;
  */
 public class Circle {
 	private Coordinate center = null;
-	/* The unit of radium is 'm' in the map. */
-	private double radium = 0.0;
+	/* The unit of radius is 'm' in the map. */
+	private double radius = 0.0;
 
-	public Circle(Coordinate center, double radium) {
+	public Circle(Coordinate center, double radius) {
 		this.center = center;
-		this.radium = radium;
+		this.radius = radius;
 	}
 
 	public Coordinate getCenter() {
 		return center;
 	}
 
-	public double getRadium() {
-		return radium;
+	public double getRadius() {
+		return radius;
 	}
 
-	public void setCenter(Coordinate center) {
-		this.center = center;
-	}
-
-	public void setRadium(double radium) {
-		this.radium = radium;
-	}
 
 }

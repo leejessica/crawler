@@ -58,5 +58,31 @@ public class FileOperator {
 		return file;
 	}
 
+	/**
+	 * Create a folder under the parent folder
+	 * 
+	 * @param parentFolderPath
+	 * @param folderName
+	 * @return the subfolder's path
+	 */
+	public static String createFolder(String parentFolderPath, String folderName) {
+		StringBuffer sb = new StringBuffer();
+		sb.append(parentFolderPath);
+//		sb.append("/");
+		sb.append(folderName);
+		sb.append("/");
+		// TODO create folder
+		
+		return sb.toString();
+	}
+	
+	/**
+	 * UScensus data are compressed in .zip format.
+	 * 
+	 * @param zipFileName the compressed zip file.
+	 */
+	public static void readFromZipFile(String zipFileName) {
+		// TODO unzip this file into a temporate folder.
+	}
 
 }

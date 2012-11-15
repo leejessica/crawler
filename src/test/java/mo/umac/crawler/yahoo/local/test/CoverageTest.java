@@ -1,6 +1,6 @@
 package mo.umac.crawler.yahoo.local.test;
 
-import com.vividsolutions.jts.index.quadtree.Quadtree;
+import com.vividsolutions.jts.geom.Coordinate;
 
 public class CoverageTest {
 
@@ -12,8 +12,12 @@ public class CoverageTest {
 
 	}
 
-	private void testQuadtree(){
-		Quadtree qt = new Quadtree();
+	public void mileToCoordinatesTest() {
+		// TODO
+	}
+
+	public void coordinateToMilesTest() {
+		// TODO
 	}
 	
 	

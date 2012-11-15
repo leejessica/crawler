@@ -3,10 +3,13 @@
  */
 package mo.umac.crawler.yahoo.local;
 
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
 import mo.umac.crawler.utils.Circle;
+
+import org.geotools.referencing.GeodeticCalculator;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
@@ -20,22 +23,107 @@ import com.vividsolutions.jts.geom.Envelope;
 public class Coverage {
 
 	/**
+	 * Compute the distance (in miles) between two points.
+	 * 
+	 * @param p1
+	 *            A start coordinate
+	 * @param p2
+	 *            An end coordinate
+	 * 
+	 */
+	public double coordinateToMiles(Coordinate p1, Coordinate p2) {
+		// TODO check
+		double mile = 0.0;
+		GeodeticCalculator calculator = new GeodeticCalculator();
+		calculator.setStartingGeographicPoint(p1.x, p1.y);
+		calculator.setDestinationGeographicPoint(p2.x, p2.y);
+		double meter = calculator.getOrthodromicDistance();
+		mile = meter * 0.000621371190;
+		return mile;
+	}
+
+	/**
+	 * Compute the coordinates represent a distance of a mile.
+	 * 
+	 * @param p1
+	 *            A starting coordinate
+	 * @param distance
+	 *            the distance (in miles) between two coordinates.
+	 */
+	public Coordinate mileToCoordinates(Coordinate p1, double miles,
+			double azimuth) {
+		double meter = miles * 1609.34;
+		GeodeticCalculator calculator = new GeodeticCalculator();
+		// TODO not sure!
+		calculator.setDirection(azimuth, meter);
+		Point2D point = calculator.getDestinationGeographicPoint();
+		Coordinate p2 = new Coordinate();
+		p2.x = point.getX();
+		p2.y = point.getY();
+		return p2;
+	}
+
+	/**
+	 * Divide a MBR into four small rectangles.
+	 * 
+	 * @param region
+	 *            the rectangle
+	 * @return A list contains 4 small rectangles
+	 */
+	public List divideEnvelope(Envelope region) {
+		ArrayList<Envelope> list = new ArrayList<Envelope>();
+		double minX = region.getMinX();
+		double maxX = region.getMaxX();
+		double minY = region.getMinY();
+		double maxY = region.getMaxY();
+		double halfX = (maxX - minX) / 2;
+		double halfY = (maxY - minY) / 2;
+		double x2;
+		double y2;
+		for (double x1 = minX; x1 < maxX; x1 = x1 + halfX) {
+			x2 = x1 + halfX;
+			for (double y1 = minY; y1 < maxY; y1 = y1 + halfY) {
+				y2 = y1 + halfY;
+				Envelope small = new Envelope(x1, x2, y1, y2);
+				list.add(small);
+			}
+		}
+		return list;
+	}
+
+	/**
 	 * Compute the unit rectangle from the region which is represented by a big
 	 * rectangle. The simplest implementation is compute the inscribed square in
 	 * the circle. The complex implementation is to consider the inscribed
 	 * rectangle.
 	 * 
 	 * @param rectangle
-	 *            this is the given region
+	 *            this is the given region.
 	 * @param maxR
-	 *            the maximum radium of the circle
+	 *            the maximum radius of the circle
 	 * @return A unit rectangle
 	 * 
 	 */
-	private Coordinate computeUnit(Envelope envelope, double maxR) {
+	public static Envelope computeUnit(Envelope envelope, double maxR) {
 		double x = maxR / Math.sqrt(2);
-		Coordinate unit = new Coordinate(x, x);
+		Envelope unit = new Envelope(0, x, 0, x);
 		return unit;
+	}
+
+	/**
+	 * Compute the radius of the circumcircle of the envelope
+	 * 
+	 * @param envelope
+	 * @return the radius
+	 */
+	public static Circle computeCircle(Envelope envelope) {
+		double height = envelope.getHeight();
+		double width = envelope.getWidth();
+		double radius = Math.sqrt(height * height + width * width) / 2;
+		Coordinate center = new Coordinate(envelope.centre().x,
+				envelope.centre().y, 0);
+		Circle circle = new Circle(center, radius);
+		return circle;
 	}
 
 	/**
@@ -46,7 +134,7 @@ public class Coverage {
 	 *            A big rectangle which covers the city/country
 	 * @param unit
 	 *            A small unit rectangle
-	 * 
+	 * @deprecated Compute at {@link Crawler.java}
 	 */
 	private List coverEnvelope(Envelope region, Coordinate unit) {
 		// TODO carefully design the returned list. Saving space! Maybe we can
@@ -74,49 +162,23 @@ public class Coverage {
 		return list;
 	}
 
+	public static Envelope firstEnvelopeInRegion(Envelope region, Envelope unit) {
+		Envelope first = new Envelope();
+		// TODO
+		return first;
+	}
+
 	/**
-	 * Divide a rectangle into four small rectangles.
+	 * The number of sub-regions by dividing the <code>region</code> by
+	 * <code>unit</code>
 	 * 
 	 * @param region
-	 *            the rectangle
-	 * @return A list contains 4 small rectangles
-	 */
-	private List divideRectagleWith(Envelope region) {
-		List list = new ArrayList<Envelope>();
-		double minX = region.getMinX();
-		double maxX = region.getMaxX();
-		double minY = region.getMinY();
-		double maxY = region.getMaxY();
-		double halfX = ( maxX - minX ) / 2;
-		double halfY = ( maxY - minY ) / 2;
-		double x2;
-		double y2;
-		for (double x1 = minX; x1 < maxX; x1 = x1 + halfX) {
-			x2 = x1 + halfX;
-			for (double y1 = minY; y1 < maxY; y1 = y1 + halfY) {
-				y2 = y1 + halfY;
-				Envelope small = new Envelope(x1, x2, y1, y2);
-				list.add(small);
-			}
-		}
-		return list;
-	}
-
-	/**
-	 * Compute the circumcircle of a rectangle
-	 * 
-	 * @param rectangle
+	 * @param unit
 	 * @return
-	 * 
-	 * @deprecated
 	 */
-	private Circle computeCircle(Envelope rectangle) {
+	public static int numsSubRegions(Envelope region, Envelope unit) {
 		// TODO
-		return null;
+		int number = 0;
+		return number;
 	}
-
-	private void divideRectangle(Envelope envelope) {
-
-	}
-
 }
