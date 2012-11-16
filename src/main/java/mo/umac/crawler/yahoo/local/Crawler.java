@@ -6,18 +6,22 @@ package mo.umac.crawler.yahoo.local;
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.List;
 
 import mo.umac.crawler.utils.Circle;
+import mo.umac.crawler.utils.DateUtils;
 import mo.umac.crawler.utils.FileOperator;
 import mo.umac.crawler.utils.UScensusData;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -40,44 +44,52 @@ public class Crawler {
 	public static Logger logger = Logger.getLogger(Crawler.class.getName());
 
 	/**
+	 * A folder stores all crawled .xml file from Yahoo Local.
+	 * 
+	 */
+	private final String folderName = "../yahoo-local/";
+
+	/**
+	 * A file stores the mapping relationship between the crawled file's name
+	 * and the search criteria.
+	 */
+	private final String mapFileName = folderName + "mapFile";
+	/**
 	 * The maximum radius (in miles) of the query. TODO allocation MAX_R
 	 */
 	private final double MAX_R = 0.0;
 
 	/**
-	 * My Yahoo appid.
-	 * 
-	 * @author Kate Yim
-	 */
-	private final String appid = "l6QevFbV34H1VKW58naZ8keJohc8NkMNvuWfVs2lR3ROJMtw63XOWBePbDcMBFfkDnU-";
-	/**
 	 * The maximum number of returned results by a query.
 	 */
-	private final int results = 20;
+	private final int maxResults = 20;
 	/**
 	 * The maximum starting result position to return.
 	 */
 	private final int maxStart = 250;
 
 	/**
-	 * The maximum number of results on can get through this query by only changing the start value.
+	 * The maximum number of results on can get through this query by only
+	 * changing the start value.
 	 */
 	private final int maxTotalResultsReturned = 270;
+
+	/**
+	 * The begin time, should be computed at the first query. But I can use this
+	 * to approximate this time.
+	 */
+	private long beginTime = System.currentTimeMillis();
 	
+	private final long dayTime = 24 * 60 * 60 * 1000;
+
 	public Crawler() {
 
 	}
 
 	/**
-	 * Crawling points in US by states
-	 * 
-	 * @param folder
-	 *            stores the crawled .xml files
+	 * Entry of the crawler
 	 */
-	private void crawlBasedOnState(String folder, String mapFileName) {
-		HttpClient httpclient = createHttpClient();
-		// TODO create a file recording the mapping relationship
-		File mapFile = new File(folder + mapFileName);
+	private void callCrawl() {
 		// state by state
 		@SuppressWarnings({ "unchecked" })
 		ArrayList<Envelope> envelopeStates = (ArrayList<Envelope>) UScensusData
@@ -85,76 +97,159 @@ public class Crawler {
 		@SuppressWarnings("unchecked")
 		ArrayList<String> nameStates = (ArrayList<String>) UScensusData
 				.stateName(UScensusData.STATE_DBF_FILE_NAME);
-		try {
-			for (int i = 0; i < envelopeStates.size(); i++) {
-				Envelope envelopeState = envelopeStates.get(i);
-				String stateName = nameStates.get(i);
-				// All crawled .xml files will be classified into the subFolders
-				// corresponding to their states' name
-				String subFolder = FileOperator.createFolder(folder, stateName);
 
-				Envelope unit = Coverage.computeUnit(envelopeState, MAX_R);
-				Envelope firstEnvelope = Coverage.firstEnvelopeInRegion(
-						envelopeState, unit);
-				Circle circle = Coverage.computeCircle(firstEnvelope);
-				// indicator for the while loop
-				int numSubRegions = Coverage
-						.numsSubRegions(envelopeState, unit);
-				while (numSubRegions >= 0) {
-					for (int start = 1; start <= maxStart; start += results) {
-						String url = concatenateUrl(appid, "*", 0, results,
-								start, circle.getCenter().y,
-								circle.getCenter().x, circle.getRadius());
-						// crawl...
-						String partFileName = concatenateFileName(null, 0,
-								numSubRegions, start, circle.getCenter().y,
-								circle.getCenter().x, circle.getRadius());
-						String xmlFile = folder + partFileName;
-						// TODO record the mapping relationship between url &
-						// fileName
-						File file = FileOperator.creatFileAscending(xmlFile);
-						OutputStream output = new BufferedOutputStream(
-								new FileOutputStream(file));
-						logger.debug("fetching... " + xmlFile);
-						HttpGet httpget = new HttpGet(xmlFile);
-						HttpResponse response = httpclient.execute(httpget);
-						HttpEntity entity = response.getEntity();
-						if (entity != null) {
-							entity.writeTo(output);
+		FileOperator.createFolder(folderName);
+		FileOperator.createFile(mapFileName);
+
+		HttpClient httpclient = createHttpClient();
+
+		// TODO Change it for different crawling machines
+		String appid = "l6QevFbV34H1VKW58naZ8keJohc8NkMNvuWfVs2lR3ROJMtw63XOWBePbDcMBFfkDnU-";
+		for (int i = 0; i < nameStates.size(); i++) {
+			int countGz = 0;
+			/* all file will be compressed into one .gz file */
+			List filesGz = new ArrayList<String>();
+			String stateName = nameStates.get(i);
+			String subFolder = FileOperator.createFolder(folderName, stateName);
+			crawlBasedOnState(subFolder, mapFileName, envelopeStates.get(i),
+					appid, 0, httpclient, countGz, filesGz);
+		}
+	}
+
+	/**
+	 * Crawling points in US by states. All crawled .xml files will be
+	 * classified into the subFolders corresponding to their states' name.
+	 * 
+	 * @param folder
+	 *            stores the crawled .xml files, consist by a folder's name +
+	 *            the state's name
+	 * @param mapFileName
+	 *            store the crawled file's name , the corresponding query
+	 *            criteria, and .gz file's name.
+	 * @param envelopeState
+	 *            a MBR of a state
+	 * 
+	 * @return numQueries used ?
+	 */
+	private int crawlBasedOnState(String subFolder, String mapFileName,
+			Envelope envelopeState, String appid, int numQueries,
+			HttpClient httpclient, int countGz, List filesGz) {
+		try {
+			Envelope unit = Coverage.computeUnit(envelopeState, MAX_R);
+			Envelope AEnvelope = Coverage.firstEnvelopeInRegion(envelopeState,
+					unit);
+			Circle circle = Coverage.computeCircle(AEnvelope);
+			// indicator for the while loop
+			int numSubRegions = Coverage.numsSubRegions(envelopeState, unit);
+			while (numSubRegions >= 0) {
+				for (int start = 1; start <= maxStart; start += maxResults) {
+					String url = concatenateUrl(appid, "*", 0, maxResults,
+							start, circle.getCenter().y, circle.getCenter().x,
+							circle.getRadius());
+					// crawl...
+					String partFileName = concatenateFileName(null, 0,
+							numSubRegions, start, circle.getCenter().y,
+							circle.getCenter().x, circle.getRadius());
+					String xmlFile = subFolder + partFileName;
+					// TODO record the mapping relationship between url &
+					// fileName
+					fetching(httpclient, xmlFile, url);
+					numQueries++;
+					if (numQueries % 5000 == 0) {
+						// TODO compute end time
+						// TODO sleep to satisfy 5000/day
+						long now = System.currentTimeMillis();
+						long diff = (now - beginTime);
+						if(diff < dayTime){
+							Thread.currentThread().sleep(dayTime - diff);
 						}
-						output.close();
-						ParseXml parseXml = new ParseXml(xmlFile);
-						parseXml.parse();
-						// deal with access limitations
-						Thread.currentThread().sleep(17280); // sleep 17.28s
-						if (parseXml.isLimitExceeded()) {
-							Thread.currentThread().sleep(5 * 60 * 1000); // sleep
-							continue;												// 5min
-						}
-						// TODO change to another region
-						if(parseXml.getTotalResultsAvailable() > maxTotalResultsReturned) {
-							
-						}
-						
 					}
-					// finished crawling all points in this sub-region
-					numSubRegions--;
+
+					//
+					ParseXml parseXml = new ParseXml(xmlFile);
+					parseXml.parse();
+					// deal with access limitations
+					if (parseXml.isLimitExceeded()) {
+						Thread.currentThread().sleep(5 * 60 * 1000); // sleep
+						// TODO check
+						// continue the previous loop
+						start -= maxResults;
+						continue;
+					}
+
+					countGz++;
+					filesGz.add(xmlFile);
+					if (countGz % 5000 == 0) {
+						FileOperator.gzFiles(filesGz, subFolder, "local");
+						filesGz.clear();
+					}
+
+					// TODO change to another region
+					if (parseXml.getTotalResultsAvailable() > maxTotalResultsReturned) {
+						// TODO not finished yet (divide but reserve there
+						// results)
+//						crawlBasedOnState(subFolder, mapFileName, AEnvelope,
+//								appid);
+					} else {
+						// turn to next page
+						continue;
+					}
 				}
+				// change circle to the next subRegion
+				AEnvelope = Coverage.nextEnvelopeInRegion(envelopeState,
+						AEnvelope, unit);
+				circle = Coverage.computeCircle(AEnvelope);
+				// finished crawling all points in this sub-region
+				numSubRegions--;
+
 			}
+			// gzip
+			FileOperator.gzFiles(filesGz, subFolder, "local");
+			filesGz.clear();
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Error in crawler", e);
 		} finally {
-			//TODO add it
-//			try {
-//				outputMap.close();
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//			}
+			// TODO add it
+			// try {
+			// outputMap.close();
+			// } catch (IOException e) {
+			// e.printStackTrace();
+			// }
 			// When HttpClient instance is no longer needed,
 			// shut down the connection manager to ensure
 			// immediate deallocation of all system resources
 			httpclient.getConnectionManager().shutdown();
+		}
+		return -1;
+	}
+
+	/**
+	 * Issue the query, and then save the returned .xml file.
+	 * 
+	 * @param httpclient
+	 * @param xmlFile
+	 * @param url
+	 */
+	private void fetching(HttpClient httpclient, String xmlFile, String url) {
+		File file = FileOperator.creatFileAscending(xmlFile);
+		OutputStream output;
+		try {
+			output = new BufferedOutputStream(new FileOutputStream(file));
+			logger.debug("fetching... " + url);
+			HttpGet httpget = new HttpGet(url);
+			HttpResponse response = httpclient.execute(httpget);
+			HttpEntity entity = response.getEntity();
+			if (entity != null) {
+				entity.writeTo(output);
+			}
+			output.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (ClientProtocolException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -274,8 +369,7 @@ public class Crawler {
 		PoolingClientConnectionManager manager = new PoolingClientConnectionManager();
 
 		HttpParams params = new BasicHttpParams();
-		// TODO reset the time out
-		int timeout = 1000 * 60 * 5;
+		int timeout = 1000 * 10;
 
 		HttpConnectionParams.setConnectionTimeout(params, timeout);
 		HttpConnectionParams.setSoTimeout(params, timeout);

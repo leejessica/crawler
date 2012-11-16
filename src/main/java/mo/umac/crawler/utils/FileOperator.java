@@ -3,11 +3,9 @@
  */
 package mo.umac.crawler.utils;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Safety check
@@ -76,6 +74,11 @@ public class FileOperator {
 		return sb.toString();
 	}
 	
+	public static void createFolder(String folderName) {
+		// TODO create folder
+		
+	}
+
 	/**
 	 * UScensus data are compressed in .zip format.
 	 * 
@@ -85,4 +88,24 @@ public class FileOperator {
 		// TODO unzip this file into a temporate folder.
 	}
 
+	public static void gzFolder(String folderPath) {
+		// TODO
+	}
+	
+	/**
+	 * compress files in the list.
+	 * 
+	 * @param files
+	 * @param folder
+	 * @param gzFileName the name of the .gz
+	 */
+	public static void gzFiles(List files, String folder, String gzFileName) {
+		// TODO create the gzFile file according to the order.
+		
+	}
+
+	public static void writeMapFile(String mapFileName) { 
+		// TODO write appendix
+	}
+	
 }

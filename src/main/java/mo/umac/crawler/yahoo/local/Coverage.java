@@ -181,4 +181,17 @@ public class Coverage {
 		int number = 0;
 		return number;
 	}
+
+	/**
+	 * Get next region according to the previous envelope
+	 * @param envelopeState The MBR of all regions
+	 * @param aEnvelope previous region
+	 * @param unit the unit region
+	 * @return
+	 */
+	public static Envelope nextEnvelopeInRegion(Envelope envelopeState,
+			Envelope aEnvelope, Envelope unit) {
+		// TODO 
+		return null;
+	}
 }
