@@ -3,9 +3,13 @@
  */
 package mo.umac.crawler.utils;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.log4j.Logger;
 
 /**
  * Safety check
@@ -14,6 +18,8 @@ import java.util.List;
  * 
  */
 public class FileOperator {
+
+	public static Logger logger = Logger.getLogger(FileOperator.class);
 
 	/**
 	 * Create file. If there exist the file in the folder, then rename it by
@@ -66,23 +72,24 @@ public class FileOperator {
 	public static String createFolder(String parentFolderPath, String folderName) {
 		StringBuffer sb = new StringBuffer();
 		sb.append(parentFolderPath);
-//		sb.append("/");
+		// sb.append("/");
 		sb.append(folderName);
 		sb.append("/");
 		// TODO create folder
-		
+
 		return sb.toString();
 	}
-	
+
 	public static void createFolder(String folderName) {
 		// TODO create folder
-		
+
 	}
 
 	/**
 	 * UScensus data are compressed in .zip format.
 	 * 
-	 * @param zipFileName the compressed zip file.
+	 * @param zipFileName
+	 *            the compressed zip file.
 	 */
 	public static void readFromZipFile(String zipFileName) {
 		// TODO unzip this file into a temporate folder.
@@ -91,21 +98,82 @@ public class FileOperator {
 	public static void gzFolder(String folderPath) {
 		// TODO
 	}
-	
+
 	/**
 	 * compress files in the list.
 	 * 
 	 * @param files
+	 *            , list of files; element: File
 	 * @param folder
-	 * @param gzFileName the name of the .gz
+	 * @param gzFileNamePrefix
+	 *            the prefix of the .gz file
 	 */
-	public static void gzFiles(List files, String folder, String gzFileName) {
+	public static void gzFiles(List files, String folder,
+			String gzFileNamePrefix) {
 		// TODO create the gzFile file according to the order.
-		
+
 	}
 
-	public static void writeMapFile(String mapFileName) { 
-		// TODO write appendix
+	/**
+	 * Writing the parameters into the mapFile
+	 * 
+	 * @param mapFileName
+	 * @param s
+	 */
+	public static void writeMapFile(BufferedWriter mapOutput,
+			String partFileName, String query, int zip, int results, int start,
+			double latitude, double longitude, double radius) {
+		// TODO
+		try {
+			// file name:
+			mapOutput.write(partFileName);
+			mapOutput.newLine();
+			// other information:
+			mapOutput.write(query);
+			mapOutput.write(";");
+			mapOutput.write(zip);
+			mapOutput.write(";");
+			mapOutput.write(results);
+			mapOutput.write(";");
+			mapOutput.write(start);
+			mapOutput.write(";");
+			mapOutput.write(Double.toString(latitude));
+			mapOutput.write(";");
+			mapOutput.write(Double.toString(longitude));
+			mapOutput.write(";");
+			mapOutput.write(Double.toString(radius));
+			// mapOutput.write(";");
+			mapOutput.newLine();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * @param folderPath
+	 * @return
+	 */
+	public static List traverseFolder(String folderPath) {
+		List<File> list = new ArrayList<File>();
+		File folder = new File(folderPath);
+		recursivelyTraverse(folder, list);
+		return list;
+	}
+
+	private static void recursivelyTraverse(File file, List list) {
+		if (file.isDirectory()) {
+			File[] files = file.listFiles();
+			for (int i = 0; i < files.length; i++) {
+				recursivelyTraverse(files[i], list);
+			}
+		} else {
+			if (!file.getName().contains("~")) {
+				list.add(file.getAbsolutePath());
+//				System.out.println(file.getName());
+//				System.out.println(file.getAbsolutePath());
+			}
+		}
 	}
 	
+
 }

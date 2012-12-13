@@ -3,6 +3,8 @@
  */
 package mo.umac.crawler.yahoo.local;
 
+import java.io.File;
+
 /**
  * Parse the returned xml file.
  * @author Kate Yim
@@ -10,23 +12,25 @@ package mo.umac.crawler.yahoo.local;
  */
 public class ParseXml {
 	
-	private String xmlFile = "";
+	private String xmlFileName = "";
+	private File xmlFile = null;
 	private int totalResultsAvailable = 0;
 	private int totalResultsReturned = 0;
 	private int firstResultPosition = 0;
 	private boolean limitExceeded = false;
 	
-	public ParseXml(String xmlFile) {
+	public ParseXml(String xmlFileName) {
+		this.xmlFileName = xmlFileName;
+	}
+	
+	public ParseXml(File xmlFile){
 		this.xmlFile = xmlFile;
 	}
 	
 	public void parse() {
-		// TODO parse
+		// TODO parse xml file ...
 	}
 
-	public String getXmlFile() {
-		return xmlFile;
-	}
 
 	public int getTotalResultsAvailable() {
 		return totalResultsAvailable;

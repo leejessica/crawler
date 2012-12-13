@@ -68,7 +68,7 @@ public class Coverage {
 	 * 
 	 * @param region
 	 *            the rectangle
-	 * @return A list contains 4 small rectangles
+	 * @return A list of envelopes containing 4 small rectangles
 	 */
 	public List divideEnvelope(Envelope region) {
 		ArrayList<Envelope> list = new ArrayList<Envelope>();
@@ -93,7 +93,7 @@ public class Coverage {
 
 	/**
 	 * Compute the unit rectangle from the region which is represented by a big
-	 * rectangle. The simplest implementation is compute the inscribed square in
+	 * rectangle. The simplest implementation is to compute the inscribed square in
 	 * the circle. The complex implementation is to consider the inscribed
 	 * rectangle.
 	 * 
@@ -162,7 +162,14 @@ public class Coverage {
 		return list;
 	}
 
-	public static Envelope firstEnvelopeInRegion(Envelope region, Envelope unit) {
+	/**
+	 * Get the first envelope in this region.
+	 * @param region
+	 * @param unit
+	 * @param overflow TODO
+	 * @return
+	 */
+	public static Envelope firstEnvelopeInRegion(Envelope region, Envelope unit, boolean overflow) {
 		Envelope first = new Envelope();
 		// TODO
 		return first;
@@ -184,14 +191,19 @@ public class Coverage {
 
 	/**
 	 * Get next region according to the previous envelope
-	 * @param envelopeState The MBR of all regions
-	 * @param aEnvelope previous region
-	 * @param unit the unit region
+	 * 
+	 * @param envelopeState
+	 *            The MBR of all regions
+	 * @param aEnvelope
+	 *            previous region
+	 * @param unit
+	 *            the unit region
+	 * @param overflow TODO
 	 * @return
 	 */
 	public static Envelope nextEnvelopeInRegion(Envelope envelopeState,
-			Envelope aEnvelope, Envelope unit) {
-		// TODO 
+			Envelope aEnvelope, Envelope unit, boolean overflow) {
+		// TODO
 		return null;
 	}
 }
