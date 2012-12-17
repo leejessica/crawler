@@ -172,8 +172,8 @@ public class Crawler {
 					File xmlFile = FileOperator.creatFileAscending(xmlFileName);
 
 					// TODO need checking...
-					FileOperator.writeMapFile(mapOutput, xmlFile.getName(), query,
-							zip, results, start, circle.getCenter().y,
+					FileOperator.writeMapFile(mapOutput, xmlFile.getName(),
+							query, zip, results, start, circle.getCenter().y,
 							circle.getCenter().x, circle.getRadius());
 
 					if (firstCrawl = false) {
@@ -193,11 +193,13 @@ public class Crawler {
 					}
 
 					//
-					ParseXml parseXml = new ParseXml(xmlFile);
-					parseXml.parse();
+					StaXParser parseXml = new StaXParser();
+					// TODO need check
+					ResultSet resultSet = parseXml
+							.readConfig(xmlFile.getPath());
 
 					// deal with access limitations
-					if (parseXml.isLimitExceeded()) {
+					if (resultSet == null) {
 						// TODO how to iteratively increase the sleeping time ?
 						Thread.currentThread().sleep(5 * 60 * 1000); // sleep
 						// TODO check
@@ -215,7 +217,7 @@ public class Crawler {
 
 					// Cannot get all available results from this query,
 					// then only query the first page, and record that page.
-					if (parseXml.getTotalResultsAvailable() > maxTotalResultsReturned) {
+					if (resultSet.getTotalResultsAvailable() > maxTotalResultsReturned) {
 						// TODO divide the region into 4 sub-regions;
 						for (int i = 0; i < 4; i++) {
 							// TODO check
@@ -223,7 +225,7 @@ public class Crawler {
 									appid, numQueries, httpclient, countGz,
 									filesGz, true);
 						}
-					} else if (start + maxResults <= parseXml
+					} else if (start + maxResults <= resultSet
 							.getTotalResultsAvailable()) {
 						// turn to next page
 						continue;
