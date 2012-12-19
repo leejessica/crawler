@@ -27,6 +27,7 @@ public class FileOperator {
 	 * 
 	 * @param filePath
 	 * @return
+	 * @deprecated
 	 */
 	public static File creatFileAscending(String filePath) {
 		File file = new File(filePath);
@@ -50,6 +51,10 @@ public class FileOperator {
 		return file;
 	}
 
+	public static File createFileAutoAscending(String folder, int number, String suffix) {
+		// FIXME  
+	}
+	
 	public static File createFile(String fileName) {
 		File file = new File(fileName);
 		if (!file.exists()) {
@@ -72,17 +77,14 @@ public class FileOperator {
 	public static String createFolder(String parentFolderPath, String folderName) {
 		StringBuffer sb = new StringBuffer();
 		sb.append(parentFolderPath);
-		// sb.append("/");
 		sb.append(folderName);
-		sb.append("/");
-		// TODO create folder
-
-		return sb.toString();
-	}
-
-	public static void createFolder(String folderName) {
-		// TODO create folder
-
+		String folderPath = sb.toString();
+		File dir = new File(folderPath);
+		boolean success = dir.mkdir();
+		if (!success) {
+			logger.error("Creating folder failed!");
+		}
+		return folderPath;
 	}
 
 	/**
@@ -169,11 +171,10 @@ public class FileOperator {
 		} else {
 			if (!file.getName().contains("~")) {
 				list.add(file.getAbsolutePath());
-//				System.out.println(file.getName());
-//				System.out.println(file.getAbsolutePath());
+				// System.out.println(file.getName());
+				// System.out.println(file.getAbsolutePath());
 			}
 		}
 	}
-	
 
 }

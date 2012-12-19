@@ -93,8 +93,8 @@ public class Coverage {
 
 	/**
 	 * Compute the unit rectangle from the region which is represented by a big
-	 * rectangle. The simplest implementation is to compute the inscribed square in
-	 * the circle. The complex implementation is to consider the inscribed
+	 * rectangle. The simplest implementation is to compute the inscribed square
+	 * in the circle. The complex implementation is to consider the inscribed
 	 * rectangle.
 	 * 
 	 * @param rectangle
@@ -163,19 +163,6 @@ public class Coverage {
 	}
 
 	/**
-	 * Get the first envelope in this region.
-	 * @param region
-	 * @param unit
-	 * @param overflow TODO
-	 * @return
-	 */
-	public static Envelope firstEnvelopeInRegion(Envelope region, Envelope unit, boolean overflow) {
-		Envelope first = new Envelope();
-		// TODO
-		return first;
-	}
-
-	/**
 	 * The number of sub-regions by dividing the <code>region</code> by
 	 * <code>unit</code>
 	 * 
@@ -184,9 +171,8 @@ public class Coverage {
 	 * @return
 	 */
 	public static int numsSubRegions(Envelope region, Envelope unit) {
-		// TODO
-		int number = 0;
-		return number;
+		return (int) (Math.ceil(region.getWidth() / unit.getWidth()) * Math
+				.ceil(region.getHeight() / unit.getHeight()));
 	}
 
 	/**
@@ -198,12 +184,48 @@ public class Coverage {
 	 *            previous region
 	 * @param unit
 	 *            the unit region
-	 * @param overflow TODO
+	 * @param overflow
+	 *            TODO
 	 * @return
 	 */
-	public static Envelope nextEnvelopeInRegion(Envelope envelopeState,
-			Envelope aEnvelope, Envelope unit, boolean overflow) {
+	public static Envelope nextEnvelopeInRegion(Envelope region,
+			Envelope previousEnvelope, Envelope unit, boolean overflow) {
 		// TODO
+		if (previousEnvelope == null) {
+			// return the first envelope
+		} else {
+			
+		}
 		return null;
+	}
+	
+	/**
+	 * Get the first envelope in this region.
+	 * 
+	 * @param region
+	 *            : the whole region need to be covered
+	 * @param unit
+	 *            : the unit rectangle
+	 * @param overflow
+	 *            : if overflow=true, then divide the rectangle, else find the
+	 *            left-corner rectangle in the region.
+	 * @return
+	 * @deprecated
+	 */
+	public static Envelope firstEnvelopeInRegion(Envelope region,
+			Envelope unit, boolean overflow) {
+		Envelope first = null;
+		// TODO check width & height
+		if (!overflow) {
+			first = new Envelope(region.getMinX(), region.getMinX()
+					+ unit.getWidth(), region.getMinY(), region.getMinY()
+					+ unit.getHeight());
+		} else {
+			// divide the region into 4 parts, and return the first part.
+			first = new Envelope(region.getMinX(), region.getMinX()
+					+ unit.getWidth() / 2, region.getMinY(), region.getMinY()
+					+ unit.getHeight() / 2);
+		}
+		return first;
 	}
 }

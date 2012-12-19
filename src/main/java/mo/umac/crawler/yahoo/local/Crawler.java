@@ -77,6 +77,13 @@ public class Crawler {
 
 	private final long dayTime = 24 * 60 * 60 * 1000;
 
+	/**
+	 * Record the time, because of the restriction of 5000 queries per day
+	 */
+	private long beginTime = 0;
+
+	HttpClient httpClient;
+
 	public Crawler() {
 
 	}
@@ -84,7 +91,7 @@ public class Crawler {
 	/**
 	 * Entry of the crawler
 	 */
-	private void callCrawl() {
+	public void crawl() {
 		// state by state
 		@SuppressWarnings({ "unchecked" })
 		ArrayList<Envelope> envelopeStates = (ArrayList<Envelope>) UScensusData
@@ -93,10 +100,10 @@ public class Crawler {
 		ArrayList<String> nameStates = (ArrayList<String>) UScensusData
 				.stateName(UScensusData.STATE_DBF_FILE_NAME);
 
-		FileOperator.createFolder(folderName);
+		FileOperator.createFolder("", folderName);
 		FileOperator.createFile(mapFileName);
 
-		HttpClient httpclient = createHttpClient();
+		httpClient = createHttpClient();
 
 		BufferedWriter mapOutput;
 		try {
@@ -114,9 +121,10 @@ public class Crawler {
 				String subFolder = FileOperator.createFolder(folderName,
 						stateName);
 				crawlBasedOnState(subFolder, mapOutput, envelopeStates.get(i),
-						appid, 0, httpclient, countGz, filesGz, false);
+						appid, 0, countGz, filesGz, false);
 			}
 			mapOutput.close();
+			httpClient.getConnectionManager().shutdown();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -125,8 +133,8 @@ public class Crawler {
 	}
 
 	/**
-	 * Crawling points in US by states. All crawled .xml files will be
-	 * classified into the subFolders corresponding to their states' name.
+	 * Crawl points in US by states. All crawled .xml files will be classified
+	 * into the subFolders corresponding to their states' name.
 	 * 
 	 * @param mapOutput
 	 *            store the crawled file's name , the corresponding query
@@ -142,124 +150,161 @@ public class Crawler {
 	 * @return numQueries used ?
 	 */
 	private int crawlBasedOnState(String subFolder, BufferedWriter mapOutput,
-			Envelope envelopeState, String appid, int numQueries,
-			HttpClient httpclient, int countGz, List filesGz, boolean overflow) {
-		long beginTime = 0;
+			Envelope envelopeState, String appid, int numQueries, int countGz,
+			List filesGz, boolean overflow) {
 		String query = "*";
 		int zip = 0;
 		int results = maxResults;
-		try {
-
-			Envelope unit = Coverage.computeUnit(envelopeState, MAX_R);
-			Envelope AEnvelope = Coverage.firstEnvelopeInRegion(envelopeState,
-					unit, overflow);
-			Circle circle = Coverage.computeCircle(AEnvelope);
-			// indicator for the while loop
-			int numSubRegions = Coverage.numsSubRegions(envelopeState, unit);
-			while (numSubRegions >= 0) {
-				// This loop represents traversing every sub-region.
-				for (int start = 1; start <= maxStart; start += maxResults) {
-					// This loop represents turning to next page.
-					String url = concatenateUrl(appid, query, zip, results,
-							start, circle.getCenter().y, circle.getCenter().x,
-							circle.getRadius());
-					// crawl...
-					String partFileName = concatenateFileName(null, 0,
-							numSubRegions, start, circle.getCenter().y,
-							circle.getCenter().x, circle.getRadius());
-					String xmlFileName = subFolder + partFileName + ".xml";
-
-					File xmlFile = FileOperator.creatFileAscending(xmlFileName);
-
-					// TODO need checking...
-					FileOperator.writeMapFile(mapOutput, xmlFile.getName(),
-							query, zip, results, start, circle.getCenter().y,
-							circle.getCenter().x, circle.getRadius());
-
-					if (firstCrawl = false) {
-						firstCrawl = true;
-						beginTime = System.currentTimeMillis();
-					}
-					fetching(httpclient, xmlFile, url);
-					numQueries++;
-					if (numQueries % 5000 == 0) {
-						// sleep to satisfy 5000/day
-						long now = System.currentTimeMillis();
-						long diff = (now - beginTime);
-						if (diff < dayTime) {
-							Thread.currentThread().sleep(dayTime - diff);
-						}
-						beginTime = System.currentTimeMillis();
-					}
-
-					//
-					StaXParser parseXml = new StaXParser();
-					// TODO need check
-					ResultSet resultSet = parseXml
-							.readConfig(xmlFile.getPath());
-
-					// deal with access limitations
-					if (resultSet == null) {
-						// TODO how to iteratively increase the sleeping time ?
-						Thread.currentThread().sleep(5 * 60 * 1000); // sleep
-						// TODO check
-						// continue the previous loop
-						start -= maxResults;
-						continue;
-					}
-
-					countGz++;
-					filesGz.add(xmlFile);
-					if (countGz % 5000 == 0) {
-						FileOperator.gzFiles(filesGz, subFolder, "local");
-						filesGz.clear();
-					}
-
-					// Cannot get all available results from this query,
-					// then only query the first page, and record that page.
-					if (resultSet.getTotalResultsAvailable() > maxTotalResultsReturned) {
-						// TODO divide the region into 4 sub-regions;
-						for (int i = 0; i < 4; i++) {
-							// TODO check
-							crawlBasedOnState(subFolder, mapOutput, AEnvelope,
-									appid, numQueries, httpclient, countGz,
-									filesGz, true);
-						}
-					} else if (start + maxResults <= resultSet
-							.getTotalResultsAvailable()) {
-						// turn to next page
-						continue;
-					} else {
-						// crawl another region
-						break;
-					}
-				}
-				// change circle to the next subRegion
-				AEnvelope = Coverage.nextEnvelopeInRegion(envelopeState,
-						AEnvelope, unit, overflow);
-				circle = Coverage.computeCircle(AEnvelope);
-				// finished crawling all points in this sub-region
-				numSubRegions--;
+		Envelope firstEnvelope = null;
+		Envelope unit = Coverage.computeUnit(envelopeState, MAX_R);
+		Envelope aEnvelope = firstEnvelope;
+		Envelope region = envelopeState;
+		int numSubRegions = Coverage.numsSubRegions(envelopeState, unit);
+		// This loop represents traversing every sub-region.
+		for (int i = 0; i < numSubRegions; i++) {
+			aEnvelope = Coverage.nextEnvelopeInRegion(region, aEnvelope, unit,
+					overflow);
+			Circle circle = Coverage.computeCircle(aEnvelope);
+			// First Query
+			int start = 1;
+			QueryCondition qc = new QueryCondition(subFolder, mapOutput,
+					envelopeState, appid, start, circle, numQueries, countGz,
+					filesGz, overflow, query, zip, results);
+			ResultSet resultSet = query(qc);
+			if (resultSet.isLimitExceeded()) {
+				// TODO wait
 			}
-			// gzip
-			FileOperator.gzFiles(filesGz, subFolder, "local");
-			filesGz.clear();
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.error("Error in crawler", e);
-		} finally {
-			// TODO add it
-			// try {
-			// outputMap.close();
-			// } catch (IOException e) {
-			// e.printStackTrace();
-			// }
-			// When HttpClient instance is no longer needed,
-			// shut down the connection manager to ensure
-			// immediate deallocation of all system resources
-			httpclient.getConnectionManager().shutdown();
+			if (resultSet.isUnexpectedError()) {
+				// TODO record which .xml file is error.
+				logger.error("TODO");
+				// TODO exit or change to next region!
+				// System.exit(0);
+				aEnvelope = firstEnvelope;
+				// TODO change to next region
+				// region = ?
+				break;
+			}
+			// Cannot get all tuples by turning over the page
+			if( resultSet.getTotalResultsAvailable() > maxTotalResultsReturned ) {
+				// stop or crawled?
+				
+			}
+
+			
+			// TODO
+
+			// This loop represents turning to next page.
+			for (; start <= maxStart; start += maxResults) {
+				qc = new QueryCondition(subFolder, mapOutput, envelopeState,
+						appid, start, circle, numQueries, countGz, filesGz,
+						overflow, query, zip, results);
+				query(qc);
+
+				numQueries++;
+				if (numQueries % 5000 == 0) {
+					// sleep to satisfy 5000/day
+					long now = System.currentTimeMillis();
+					long diff = (now - beginTime);
+					if (diff < dayTime) {
+						Thread.currentThread().sleep(dayTime - diff);
+					}
+					beginTime = System.currentTimeMillis();
+				}
+
+				countGz++;
+				filesGz.add(xmlFile);
+				if (countGz % 5000 == 0) {
+					// TODO gzip
+					// FileOperator.gzFiles(filesGz, subFolder, "local");
+					// filesGz.clear();
+				}
+
+			}
 		}
+		// TODO gzip
+		// FileOperator.gzFiles(filesGz, subFolder, "local");
+		// filesGz.clear();
+
 		return -1;
+	}
+
+	/**
+	 * The query process, including construct the url; create the .xml file;
+	 * fetching from the web; parse the .xml file, storing the result in the
+	 * in-memory db, etc.
+	 * 
+	 * @param qc
+	 *            All information need in one query
+	 * @return The parsed result set.
+	 */
+	private ResultSet query(QueryCondition qc) {
+		String url = qc.toUrl();
+		/****************** Change to In-memory DB ***************************/
+		// file's name
+		// String partFileName = concatenateFileName(null, 0, results, start,
+		// circle.getCenter().y, circle.getCenter().x, circle.getRadius());
+		// String xmlFileName = subFolder + partFileName + ".xml";
+		// File xmlFile = FileOperator.creatFileAscending(xmlFileName);
+
+		File xmlFile = FileOperator.createFileAutoAscending(qc.getSubFolder(),
+				qc.getNumQueries(), ".xml");
+		// FIXME change to in-memory db
+
+		// FileOperator.writeMapFile(mapOutput, xmlFile.getName(), query, zip,
+		// results, start, circle.getCenter().y, circle.getCenter().x,
+		// circle.getRadius());
+
+		/****************** Change to In-memory DB ***************************/
+
+		if (firstCrawl = false) {
+			firstCrawl = true;
+			beginTime = System.currentTimeMillis();
+		}
+		fetching(httpClient, xmlFile, url);
+		//
+		StaXParser parseXml = new StaXParser();
+		ResultSet resultSet = parseXml.readConfig(xmlFile.getPath());
+		return resultSet;
+	}
+
+	private QueryCondition nextPage() {
+		return null;
+	}
+
+	private int numberPages(ResultSet resultSet) {
+		int num = 0;
+
+		return num;
+	}
+
+	private List<Envelope> divideARectangle() {
+		return null;
+	}
+
+	private QueryCondition nextQC(QueryCondition preQC, ResultSet resultSet) {
+		// deal with access limitations
+		if (resultSet == null) {
+			// TODO how to iteratively increase the sleeping time ?
+			Thread.currentThread().sleep(5 * 60 * 1000); // sleep
+			return preQC;
+		}
+		// Cannot get all available results from this query,
+		// then only query the first page, and record that page.
+		if (resultSet.getTotalResultsAvailable() > maxTotalResultsReturned) {
+			// TODO divide the region into 4 sub-regions;
+			for (int i = 0; i < 4; i++) {
+				// FIXME wrong
+				crawlBasedOnState(subFolder, mapOutput, AEnvelope, appid,
+						numQueries, httpClient, countGz, filesGz, true);
+			}
+		} else if (start + maxResults <= resultSet.getTotalResultsAvailable()) {
+			// turn to next page
+			continue;
+		} else {
+			// crawl another region
+			break;
+		}
+		return null;
 	}
 
 	/**
@@ -415,62 +460,6 @@ public class Crawler {
 	}
 
 	/**
-	 * Construct the query url according to the Yahoo Local API {@link http
-	 * ://developer.yahoo.com/search/local/V3/localSearch.html}.
-	 * 
-	 * @param appid
-	 *            Yahoo application id
-	 * @param query
-	 *            A keyword to search
-	 * @param zip
-	 * @param results
-	 * @param start
-	 *            The starting result position to return (1-based).
-	 * @param latitude
-	 * @param longitude
-	 * @param radius
-	 * @return
-	 */
-	private String concatenateUrl(String appid, String query, int zip,
-			int results, int start, double latitude, double longitude,
-			double radius) {
-		StringBuffer sb = new StringBuffer();
-		String head = "http://local.yahooapis.com/LocalSearchService/V3/localSearch?";
-		sb.append(head);
-		sb.append("appid=");
-		sb.append(appid);
-		if (query != null) {
-			sb.append("&query=");
-			sb.append(query);
-		}
-		if (zip > 0) {
-			sb.append("&zip=");
-			sb.append(zip);
-		}
-		if (results > 0) {
-			sb.append("&results=");
-			sb.append(results);
-		}
-		if (start > 0) {
-			sb.append("&start=");
-			sb.append(start);
-		}
-		if (latitude > 0) {
-			sb.append("&latitude=");
-			sb.append(latitude);
-		}
-		if (longitude > 0) {
-			sb.append("&longitude=");
-			sb.append(longitude);
-		}
-		if (radius > 0) {
-			sb.append("&radius=");
-			sb.append(radius);
-		}
-		return sb.toString();
-	}
-
-	/**
 	 * Concatenate the file name using these fields.
 	 * 
 	 * @param query
@@ -484,8 +473,36 @@ public class Crawler {
 	 */
 	private String concatenateFileName(String query, int zip, int results,
 			int start, double latitude, double longitude, double radius) {
-		// TODO concatenateFileName
-		return null;
+		StringBuffer sb = new StringBuffer();
+		if (query != null) {
+			sb.append("query=");
+			sb.append(query);
+		}
+		if (zip > 0) {
+			sb.append(",zip=");
+			sb.append(zip);
+		}
+		if (results > 0) {
+			sb.append(",results=");
+			sb.append(results);
+		}
+		if (start > 0) {
+			sb.append(",start=");
+			sb.append(start);
+		}
+		if (latitude > 0) {
+			sb.append(",latitude=");
+			sb.append(latitude);
+		}
+		if (longitude > 0) {
+			sb.append(",longitude=");
+			sb.append(longitude);
+		}
+		if (radius > 0) {
+			sb.append(",radius=");
+			sb.append(radius);
+		}
+		return sb.toString();
 	}
 
 }

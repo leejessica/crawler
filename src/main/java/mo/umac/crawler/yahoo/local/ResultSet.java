@@ -10,18 +10,36 @@ import java.util.List;
  * ResultsSet of the xml page returned by Yahoo Local!
  * 
  * @author kate
- *
+ * 
  */
 public class ResultSet {
 	private String xmlFileName = "";
+
 	private File xmlFile = null;
+
 	private int totalResultsAvailable = 0;
+
 	private int totalResultsReturned = 0;
+
 	private int firstResultPosition = 0;
+
 	private List<Result> results;
-	
+
 	private boolean limitExceeded = false;
+
+	private boolean UnexpectedError = false;
 	
+	public void setLimitExceeded(boolean limitExceeded) {
+		this.limitExceeded = limitExceeded;
+	}
+
+	public void setUnexpectedError(boolean unexpectedError) {
+		UnexpectedError = unexpectedError;
+	}
+
+	public boolean isUnexpectedError() {
+		return UnexpectedError;
+	}
 
 	public int getTotalResultsAvailable() {
 		return totalResultsAvailable;
@@ -34,8 +52,8 @@ public class ResultSet {
 	public int getFirstResultPosition() {
 		return firstResultPosition;
 	}
-	
-	public boolean isLimitExceeded(){
+
+	public boolean isLimitExceeded() {
 		return limitExceeded;
 	}
 
@@ -74,6 +92,5 @@ public class ResultSet {
 	public void setFirstResultPosition(int firstResultPosition) {
 		this.firstResultPosition = firstResultPosition;
 	}
-	
-}
 
+}
