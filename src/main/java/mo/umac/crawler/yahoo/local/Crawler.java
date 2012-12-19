@@ -185,12 +185,15 @@ public class Crawler {
 				break;
 			}
 			// Cannot get all tuples by turning over the page
-			if( resultSet.getTotalResultsAvailable() > maxTotalResultsReturned ) {
+			if (resultSet.getTotalResultsAvailable() > maxTotalResultsReturned) {
 				// stop or crawled?
-				
+
+			}
+			// underflow
+			if (resultSet.getResults() == null) {
+
 			}
 
-			
 			// TODO
 
 			// This loop represents turning to next page.
