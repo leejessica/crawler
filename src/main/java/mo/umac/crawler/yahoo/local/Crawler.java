@@ -29,6 +29,7 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.log4j.Logger;
+import org.geotools.feature.visitor.MaxVisitor.MaxResult;
 
 import com.vividsolutions.jts.geom.Envelope;
 
@@ -91,7 +92,7 @@ public class Crawler {
 	/**
 	 * Entry of the crawler
 	 */
-	public void crawl() {
+	public void callCrawling() {
 		// state by state
 		@SuppressWarnings({ "unchecked" })
 		ArrayList<Envelope> envelopeStates = (ArrayList<Envelope>) UScensusData
@@ -120,8 +121,8 @@ public class Crawler {
 				String stateName = nameStates.get(i);
 				String subFolder = FileOperator.createFolder(folderName,
 						stateName);
-				crawlBasedOnState(subFolder, mapOutput, envelopeStates.get(i),
-						appid, 0, countGz, filesGz, false);
+				crawl(subFolder, mapOutput, envelopeStates.get(i),
+						appid, 0, false);
 			}
 			mapOutput.close();
 			httpClient.getConnectionManager().shutdown();
@@ -135,7 +136,6 @@ public class Crawler {
 	/**
 	 * Crawl points in US by states. All crawled .xml files will be classified
 	 * into the subFolders corresponding to their states' name.
-	 * 
 	 * @param mapOutput
 	 *            store the crawled file's name , the corresponding query
 	 *            criteria, and .gz file's name.
@@ -149,9 +149,8 @@ public class Crawler {
 	 * 
 	 * @return numQueries used ?
 	 */
-	private int crawlBasedOnState(String subFolder, BufferedWriter mapOutput,
-			Envelope envelopeState, String appid, int numQueries, int countGz,
-			List filesGz, boolean overflow) {
+	private int crawl(String subFolder, BufferedWriter mapOutput,
+			Envelope envelopeState, String appid, int numQueries, boolean overflow) {
 		String query = "*";
 		int zip = 0;
 		int results = maxResults;
@@ -171,6 +170,8 @@ public class Crawler {
 					envelopeState, appid, start, circle, numQueries, countGz,
 					filesGz, overflow, query, zip, results);
 			ResultSet resultSet = query(qc);
+			numQueries++;
+
 			if (resultSet.isLimitExceeded()) {
 				// TODO wait
 			}
@@ -186,47 +187,29 @@ public class Crawler {
 			}
 			// Cannot get all tuples by turning over the page
 			if (resultSet.getTotalResultsAvailable() > maxTotalResultsReturned) {
-				// stop or crawled?
-
+				// continue crawling, because this returned tuples are useful in
+				// analyzing data distributions in overflow queries
+				// do nothing: continue turn over the page
 			}
 			// underflow
 			if (resultSet.getResults() == null) {
-
+				// go to next region
+				// TODO change qc
+				continue;
 			}
 
 			// TODO
 
-			// This loop represents turning to next page.
-			for (; start <= maxStart; start += maxResults) {
+			// This loop represents turning over the page.
+			int maxStartForThisQuery = maxStartForThisQuery(resultSet);
+			for (start += maxResults; start < maxStartForThisQuery; start += maxResults) {
 				qc = new QueryCondition(subFolder, mapOutput, envelopeState,
 						appid, start, circle, numQueries, countGz, filesGz,
 						overflow, query, zip, results);
 				query(qc);
-
 				numQueries++;
-				if (numQueries % 5000 == 0) {
-					// sleep to satisfy 5000/day
-					long now = System.currentTimeMillis();
-					long diff = (now - beginTime);
-					if (diff < dayTime) {
-						Thread.currentThread().sleep(dayTime - diff);
-					}
-					beginTime = System.currentTimeMillis();
-				}
-
-				countGz++;
-				filesGz.add(xmlFile);
-				if (countGz % 5000 == 0) {
-					// TODO gzip
-					// FileOperator.gzFiles(filesGz, subFolder, "local");
-					// filesGz.clear();
-				}
-
 			}
 		}
-		// TODO gzip
-		// FileOperator.gzFiles(filesGz, subFolder, "local");
-		// filesGz.clear();
 
 		return -1;
 	}
@@ -263,6 +246,7 @@ public class Crawler {
 			firstCrawl = true;
 			beginTime = System.currentTimeMillis();
 		}
+		checkTime(qc.getNumQueries(), beginTime);
 		fetching(httpClient, xmlFile, url);
 		//
 		StaXParser parseXml = new StaXParser();
@@ -270,20 +254,52 @@ public class Crawler {
 		return resultSet;
 	}
 
-	private QueryCondition nextPage() {
-		return null;
+	/**
+	 * Check whether it still follows the query limitation
+	 * 
+	 * @param numQueries
+	 * @param beginTime
+	 */
+	private void checkTime(int numQueries, long beginTime) {
+		if (numQueries % 5000 == 0) {
+			// sleep to satisfy 5000/day
+			long now = System.currentTimeMillis();
+			long diff = (now - beginTime);
+			if (diff < dayTime) {
+				try {
+					Thread.currentThread().sleep(dayTime - diff);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			beginTime = System.currentTimeMillis();
+		}
 	}
 
-	private int numberPages(ResultSet resultSet) {
-		int num = 0;
-
-		return num;
+	/**
+	 * Calculate the maximum start number
+	 * 
+	 * @param resultSet
+	 * @return the max start value in constructing a query.
+	 */
+	private int maxStartForThisQuery(ResultSet resultSet) {
+		int totalResultAvailable = resultSet.getTotalResultsAvailable();
+		if (totalResultAvailable > maxStart + maxResults) {
+			return maxStart;
+		}
+		return (int) (Math.floor(1.0 * totalResultAvailable / maxResults) * 20);
 	}
 
 	private List<Envelope> divideARectangle() {
 		return null;
 	}
 
+	/**
+	 * Next region, or next one in four!
+	 * @param preQC
+	 * @param resultSet
+	 * @return
+	 */
 	private QueryCondition nextQC(QueryCondition preQC, ResultSet resultSet) {
 		// deal with access limitations
 		if (resultSet == null) {
