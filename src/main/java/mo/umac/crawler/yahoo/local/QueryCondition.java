@@ -31,8 +31,8 @@ public class QueryCondition {
 
 	public QueryCondition(String subFolder, BufferedWriter mapOutput,
 			Envelope envelopeState, String appid, int start, Circle circle,
-			int numQueries, int countGz, List filesGz,
-			boolean overflow, String query, int zip, int results) {
+			int numQueries, boolean overflow, String query,
+			int zip, int results) {
 		super();
 		this.subFolder = subFolder;
 		this.mapOutput = mapOutput;

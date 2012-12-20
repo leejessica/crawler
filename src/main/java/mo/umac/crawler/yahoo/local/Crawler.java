@@ -159,7 +159,7 @@ public class Crawler {
 		Envelope aEnvelope = firstEnvelope;
 		Envelope region = envelopeState;
 		int numSubRegions = Coverage.numsSubRegions(envelopeState, unit);
-		// This loop represents traversing every sub-region.
+		// This loop represents traversing every sub-region
 		for (int i = 0; i < numSubRegions; i++) {
 			aEnvelope = Coverage.nextEnvelopeInRegion(region, aEnvelope, unit,
 					overflow);
@@ -167,8 +167,8 @@ public class Crawler {
 			// First Query
 			int start = 1;
 			QueryCondition qc = new QueryCondition(subFolder, mapOutput,
-					envelopeState, appid, start, circle, numQueries, countGz,
-					filesGz, overflow, query, zip, results);
+					envelopeState, appid, start, circle, numQueries, overflow,
+					query, zip, results);
 			ResultSet resultSet = query(qc);
 			numQueries++;
 
@@ -204,8 +204,8 @@ public class Crawler {
 			int maxStartForThisQuery = maxStartForThisQuery(resultSet);
 			for (start += maxResults; start < maxStartForThisQuery; start += maxResults) {
 				qc = new QueryCondition(subFolder, mapOutput, envelopeState,
-						appid, start, circle, numQueries, countGz, filesGz,
-						overflow, query, zip, results);
+						appid, start, circle, numQueries, overflow, query,
+						zip, results);
 				query(qc);
 				numQueries++;
 			}
