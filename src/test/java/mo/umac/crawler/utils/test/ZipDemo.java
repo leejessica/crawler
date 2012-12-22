@@ -11,7 +11,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipException;
 
-import mo.umac.crawler.utils.FileOperator;
+import mo.umac.utils.FileOperator;
 
 public class ZipDemo {
 

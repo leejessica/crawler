@@ -1,6 +1,6 @@
 package mo.umac.crawler.utils.test;
 
-import mo.umac.crawler.utils.UScensusData;
+import mo.umac.utils.UScensusData;
 
 public class UScensusDataTest {
 

@@ -3,9 +3,9 @@
  */
 package mo.umac.crawler.yahoo.local.test;
 
-import mo.umac.crawler.yahoo.local.Result;
-import mo.umac.crawler.yahoo.local.ResultSet;
-import mo.umac.crawler.yahoo.local.StaXParser;
+import mo.umac.parser.Result;
+import mo.umac.parser.ResultSet;
+import mo.umac.parser.StaXParser;
 
 /**
  * @author kate

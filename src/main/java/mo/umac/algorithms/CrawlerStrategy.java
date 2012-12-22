@@ -1,0 +1,310 @@
+/**
+ * 
+ */
+package mo.umac.algorithms;
+
+import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.List;
+
+import mo.umac.crawler.Crawler;
+import mo.umac.crawler.QueryCondition;
+import mo.umac.parser.ResultSet;
+import mo.umac.parser.StaXParser;
+import mo.umac.utils.FileOperator;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
+import org.apache.log4j.Logger;
+
+import com.vividsolutions.jts.geom.Envelope;
+
+/**
+ * @author kate
+ * 
+ */
+public abstract class CrawlerStrategy {
+
+	//
+	public static Logger logger = Logger.getLogger(Crawler.class.getName());
+
+	/**
+	 * A folder stores all crawled .xml file from Yahoo Local.
+	 * 
+	 */
+	protected final String folderName = "../yahoo-local/";
+
+	/**
+	 * A file stores the mapping relationship between the crawled file's name
+	 * and the search criteria.
+	 */
+	protected final String mapFileName = folderName + "mapFile";
+	/**
+	 * The maximum radius (in miles) of the query. TODO allocation MAX_R
+	 */
+	protected final double MAX_R = 0.0;
+
+	/**
+	 * The maximum number of returned results by a query.
+	 */
+	protected final int maxResults = 20;
+	/**
+	 * The maximum starting result position to return.
+	 */
+	protected final int maxStart = 250;
+
+	/**
+	 * The maximum number of results on can get through this query by only
+	 * changing the start value.
+	 */
+	protected final int maxTotalResultsReturned = maxStart + maxResults; // =270;
+
+	protected boolean firstCrawl = false;
+
+	protected final long dayTime = 24 * 60 * 60 * 1000;
+
+	/**
+	 * Record the time, because of the restriction of 5000 queries per day
+	 */
+	protected long beginTime = 0;
+
+	protected HttpClient httpClient;
+
+	protected BufferedWriter mapOutput;
+
+	protected int numQueries;
+
+	protected String query = "*";
+
+	protected int zip = 0;
+
+	protected int results = maxResults;
+
+	protected Envelope firstEnvelope = null;
+
+	public abstract int crawl(String appid, String subFolder,
+			Envelope preEnvelope, Envelope wholeEnvelope, int numQueries,
+			boolean overflow);
+
+	/**
+	 * The query process, including construct the url; create the .xml file;
+	 * fetching from the web; parse the .xml file, storing the result in the
+	 * in-memory db, etc.
+	 * 
+	 * @param qc
+	 *            All information need in one query
+	 * @return The parsed result set.
+	 */
+	protected ResultSet query(QueryCondition qc) {
+		String url = qc.toUrl();
+		/****************** Change to In-memory DB ***************************/
+		// file's name
+		// String partFileName = concatenateFileName(null, 0, results, start,
+		// circle.getCenter().y, circle.getCenter().x, circle.getRadius());
+		// String xmlFileName = subFolder + partFileName + ".xml";
+		// File xmlFile = FileOperator.creatFileAscending(xmlFileName);
+
+		File xmlFile = FileOperator.createFileAutoAscending(qc.getSubFolder(),
+				qc.getNumQueries(), ".xml");
+		// FIXME change to in-memory db
+
+		// FileOperator.writeMapFile(mapOutput, xmlFile.getName(), query, zip,
+		// results, start, circle.getCenter().y, circle.getCenter().x,
+		// circle.getRadius());
+
+		/****************** Change to In-memory DB ***************************/
+
+		if (firstCrawl = false) {
+			firstCrawl = true;
+			beginTime = System.currentTimeMillis();
+		}
+		checkTime(qc.getNumQueries(), beginTime);
+		fetching(httpClient, xmlFile, url);
+		//
+		StaXParser parseXml = new StaXParser();
+		ResultSet resultSet = parseXml.readConfig(xmlFile.getPath());
+		return resultSet;
+	}
+
+	/**
+	 * Check whether it still follows the query limitation
+	 * 
+	 * @param numQueries
+	 * @param beginTime
+	 */
+	protected void checkTime(int numQueries, long beginTime) {
+		if (numQueries % 5000 == 0) {
+			// sleep to satisfy 5000/day
+			long now = System.currentTimeMillis();
+			long diff = (now - beginTime);
+			if (diff < dayTime) {
+				try {
+					Thread.currentThread().sleep(dayTime - diff);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			beginTime = System.currentTimeMillis();
+		}
+	}
+
+	/**
+	 * Calculate the maximum start number
+	 * 
+	 * @param resultSet
+	 * @return the max start value in constructing a query.
+	 */
+	protected int maxStartForThisQuery(ResultSet resultSet) {
+		int totalResultAvailable = resultSet.getTotalResultsAvailable();
+		if (totalResultAvailable > maxStart + maxResults) {
+			return maxStart;
+		}
+		return (int) (Math.floor(1.0 * totalResultAvailable / maxResults) * 20);
+	}
+
+	protected List<Envelope> divideARectangle() {
+		return null;
+	}
+
+	/**
+	 * Next region, or next one in four!
+	 * 
+	 * @param preQC
+	 * @param resultSet
+	 * @return
+	 * @deprecated
+	 */
+	protected QueryCondition nextQC(QueryCondition preQC, ResultSet resultSet) {
+		// deal with access limitations
+		if (resultSet == null) {
+			// TODO how to iteratively increase the sleeping time ?
+			try {
+				Thread.currentThread().sleep(5 * 60 * 1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} // sleep
+			return preQC;
+		}
+		// Cannot get all available results from this query,
+		// then only query the first page, and record that page.
+		/*
+		 * if (resultSet.getTotalResultsAvailable() > maxTotalResultsReturned) {
+		 * // TODO divide the region into 4 sub-regions; for (int i = 0; i < 4;
+		 * i++) { // FIXME wrong crawlBasedOnState(subFolder, mapOutput,
+		 * AEnvelope, appid, numQueries, httpClient, countGz, filesGz, true); }
+		 * } else if (start + maxResults <=
+		 * resultSet.getTotalResultsAvailable()) { // turn to next page
+		 * continue; } else { // crawl another region break; }
+		 */
+		return null;
+	}
+	
+	
+	protected boolean finishedCrawling(Envelope preEnvelope, Envelope region) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	/**
+	 * Issue the query, and then save the returned .xml file.
+	 * 
+	 * @param httpclient
+	 * @param xmlFile
+	 * @param url
+	 */
+	protected void fetching(HttpClient httpclient, File xmlFile, String url) {
+		OutputStream output;
+		try {
+			output = new BufferedOutputStream(new FileOutputStream(xmlFile));
+			logger.debug("fetching... " + url);
+			HttpGet httpget = new HttpGet(url);
+			HttpResponse response = httpclient.execute(httpget);
+			HttpEntity entity = response.getEntity();
+			if (entity != null) {
+				entity.writeTo(output);
+			}
+			output.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (ClientProtocolException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	protected HttpClient createHttpClient() {
+		// ThreadSafeClientConnManager manager = new
+		// ThreadSafeClientConnManager();
+		// TODO check
+		PoolingClientConnectionManager manager = new PoolingClientConnectionManager();
+
+		HttpParams params = new BasicHttpParams();
+		int timeout = 1000 * 10;
+
+		HttpConnectionParams.setConnectionTimeout(params, timeout);
+		HttpConnectionParams.setSoTimeout(params, timeout);
+		HttpClient httpClient = new DefaultHttpClient(manager, params);
+		return httpClient;
+	}
+
+	/**
+	 * Concatenate the file name using these fields.
+	 * 
+	 * @param query
+	 * @param zip
+	 * @param results
+	 * @param start
+	 * @param latitude
+	 * @param longitude
+	 * @param radius
+	 * @return
+	 */
+	protected String concatenateFileName(String query, int zip, int results,
+			int start, double latitude, double longitude, double radius) {
+		StringBuffer sb = new StringBuffer();
+		if (query != null) {
+			sb.append("query=");
+			sb.append(query);
+		}
+		if (zip > 0) {
+			sb.append(",zip=");
+			sb.append(zip);
+		}
+		if (results > 0) {
+			sb.append(",results=");
+			sb.append(results);
+		}
+		if (start > 0) {
+			sb.append(",start=");
+			sb.append(start);
+		}
+		if (latitude > 0) {
+			sb.append(",latitude=");
+			sb.append(latitude);
+		}
+		if (longitude > 0) {
+			sb.append(",longitude=");
+			sb.append(longitude);
+		}
+		if (radius > 0) {
+			sb.append(",radius=");
+			sb.append(radius);
+		}
+		return sb.toString();
+	}
+}

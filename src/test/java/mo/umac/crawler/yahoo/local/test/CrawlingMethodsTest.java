@@ -25,9 +25,9 @@ import org.apache.log4j.xml.DOMConfigurator;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
-import mo.umac.crawler.utils.Configuration;
-import mo.umac.crawler.utils.FileOperator;
-import mo.umac.crawler.yahoo.local.Crawler;
+import mo.umac.crawler.Crawler;
+import mo.umac.utils.Configuration;
+import mo.umac.utils.FileOperator;
 
 /**
  * This class tests kinds of crawler methods, include Jsoup, saveFile, HttpClient.
