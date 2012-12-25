@@ -36,7 +36,7 @@ public class Ergodic extends CrawlerStrategy {
 	private boolean crawl(String appid, String subFolder, Envelope preEnvelope,
 			Envelope region, Envelope unit, boolean overflow) {
 		Envelope aEnvelope;
-		// If it is the last region, then end the crawl process.
+		// If it is the last region, then end the crawling process.
 		if (finishedCrawling(preEnvelope, region)) {
 			return true;
 		}
