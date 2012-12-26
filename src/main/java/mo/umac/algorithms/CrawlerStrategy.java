@@ -12,10 +12,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 
-import mo.umac.crawler.Crawler;
+import mo.umac.crawler.Coverage;
 import mo.umac.crawler.QueryCondition;
 import mo.umac.parser.ResultSet;
 import mo.umac.parser.StaXParser;
+import mo.umac.utils.Circle;
 import mo.umac.utils.FileOperator;
 
 import org.apache.http.HttpEntity;
@@ -23,17 +24,12 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.PoolingClientConnectionManager;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
 import org.apache.log4j.Logger;
 
 import com.vividsolutions.jts.geom.Envelope;
 
 /**
- * @author kate
+ * @author Kate Yim
  * 
  */
 public abstract class CrawlerStrategy {
@@ -95,9 +91,114 @@ public abstract class CrawlerStrategy {
 
 	protected Envelope firstEnvelope = null;
 
-	public abstract int crawl(String appid, String subFolder,
-			Envelope preEnvelope, Envelope wholeEnvelope, int numQueries,
-			boolean overflow);
+	/**
+	 * Crawl points in US by states. All crawled .xml files will be classified
+	 * into the subFolders corresponding to their states' name.
+	 * 
+	 * @param mapOutput
+	 *            store the crawled file's name , the corresponding query
+	 *            criteria, and .gz file's name.
+	 * @param envelopeState
+	 *            a MBR of a state
+	 * @param overflow
+	 *            TODO
+	 * @param folder
+	 *            stores the crawled .xml files, consist by a folder's name +
+	 *            the state's name
+	 * 
+	 * @return true: End; false: Not End
+	 */
+	public boolean crawl(String appid, String subFolder, Envelope preEnvelope,
+			Envelope region, Envelope unit, boolean overflow) {
+		Envelope aEnvelope;
+		// If it is the last region, then end the crawling process.
+		if (finishedCrawling(preEnvelope, region)) {
+			return true;
+		}
+		// This loop represents traversing every sub-region
+		aEnvelope = nextEnvelopeInRegion(region, preEnvelope, unit, overflow);
+		Circle circle = Coverage.computeCircle(aEnvelope);
+		// the first page for any query
+		int start = 1;
+		QueryCondition qc = new QueryCondition(subFolder, mapOutput, region,
+				appid, start, circle, numQueries, overflow, query, zip, results);
+		ResultSet resultSet = query(qc);
+		numQueries++;
+		// This loop represents turning over the page.
+		int maxStartForThisQuery = maxStartForThisQuery(resultSet);
+		for (start += maxResults; start < maxStartForThisQuery; start += maxResults) {
+			qc = new QueryCondition(subFolder, mapOutput, region, appid, start,
+					circle, numQueries, overflow, query, zip, results);
+			query(qc);
+			numQueries++;
+		}
+		return false;
+	}
+
+	/**
+	 * Get next region according to the previous envelope
+	 * 
+	 * @param envelopeState
+	 *            The MBR of all regions
+	 * @param aEnvelope
+	 *            previous region
+	 * @param unit
+	 *            the unit region
+	 * @param overflow
+	 * @return
+	 */
+	public Envelope nextEnvelopeInRegion(Envelope region,
+			Envelope previousEnvelope, Envelope unit, boolean overflow) {
+		if (previousEnvelope == null) {
+			return firstEnvelopeInRegion(region, unit, overflow);
+		} else {
+			return nextButNotFirstEnvelopeInRegion(region, previousEnvelope,
+					unit, overflow);
+		}
+	}
+	
+
+	/**
+	 * Get the first envelope in this region.
+	 * 
+	 * @param region
+	 *            : the whole region need to be covered
+	 * @param unit
+	 *            : the unit rectangle
+	 * @param overflow
+	 *            : if overflow=true, then divide the rectangle, else find the
+	 *            left-corner rectangle in the region.
+	 * @return
+	 */
+	public abstract Envelope firstEnvelopeInRegion(Envelope region,
+			Envelope unit, boolean overflow);
+	
+	/**
+	 * Compute the next envelope (not the first one!)
+	 * 
+	 * @param region
+	 * @param unit
+	 * @param overflow
+	 * @return
+	 */
+	public Envelope nextButNotFirstEnvelopeInRegion(Envelope region,
+			Envelope previousEnvelope, Envelope unit, boolean overflow) {
+		// TODO check
+		double x1 = 0;
+		double y1 = 0;
+		// Get to the right-most boundary
+		if (previousEnvelope.getMaxX() >= region.getMaxX()) {
+			x1 = region.getMinX();
+			y1 = previousEnvelope.getMaxY();
+		} else {
+			x1 = previousEnvelope.getMaxX();
+			y1 = previousEnvelope.getMinY();
+		}
+		Envelope next = new Envelope(x1, x1 + unit.getWidth(), y1, y1
+				+ unit.getHeight());
+		return next;
+	}
+
 
 	/**
 	 * The query process, including construct the url; create the .xml file;
@@ -137,6 +238,34 @@ public abstract class CrawlerStrategy {
 		StaXParser parseXml = new StaXParser();
 		ResultSet resultSet = parseXml.readConfig(xmlFile.getPath());
 		return resultSet;
+	}
+
+	/**
+	 * Issue the query, and then save the returned .xml file.
+	 * 
+	 * @param httpclient
+	 * @param xmlFile
+	 * @param url
+	 */
+	protected void fetching(HttpClient httpclient, File xmlFile, String url) {
+		OutputStream output;
+		try {
+			output = new BufferedOutputStream(new FileOutputStream(xmlFile));
+			logger.debug("fetching... " + url);
+			HttpGet httpget = new HttpGet(url);
+			HttpResponse response = httpclient.execute(httpget);
+			HttpEntity entity = response.getEntity();
+			if (entity != null) {
+				entity.writeTo(output);
+			}
+			output.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (ClientProtocolException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -212,54 +341,22 @@ public abstract class CrawlerStrategy {
 		 */
 		return null;
 	}
-	
-	
-	protected boolean finishedCrawling(Envelope preEnvelope, Envelope region) {
-		// TODO Auto-generated method stub
-		return false;
-	}
 
 	/**
-	 * Issue the query, and then save the returned .xml file.
-	 * 
-	 * @param httpclient
-	 * @param xmlFile
-	 * @param url
+	 * @param previousEnvelope
+	 * @param region
+	 * @return
 	 */
-	protected void fetching(HttpClient httpclient, File xmlFile, String url) {
-		OutputStream output;
-		try {
-			output = new BufferedOutputStream(new FileOutputStream(xmlFile));
-			logger.debug("fetching... " + url);
-			HttpGet httpget = new HttpGet(url);
-			HttpResponse response = httpclient.execute(httpget);
-			HttpEntity entity = response.getEntity();
-			if (entity != null) {
-				entity.writeTo(output);
+	protected boolean finishedCrawling(Envelope previousEnvelope,
+			Envelope region) {
+		// Get to the right-most boundary
+		if (previousEnvelope.getMaxX() >= region.getMaxX()) {
+			// Get to the upper-most boundary
+			if (previousEnvelope.getMaxY() >= region.getMaxY()) {
+				return true;
 			}
-			output.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
-	}
-
-	protected HttpClient createHttpClient() {
-		// ThreadSafeClientConnManager manager = new
-		// ThreadSafeClientConnManager();
-		// TODO check
-		PoolingClientConnectionManager manager = new PoolingClientConnectionManager();
-
-		HttpParams params = new BasicHttpParams();
-		int timeout = 1000 * 10;
-
-		HttpConnectionParams.setConnectionTimeout(params, timeout);
-		HttpConnectionParams.setSoTimeout(params, timeout);
-		HttpClient httpClient = new DefaultHttpClient(manager, params);
-		return httpClient;
+		return false;
 	}
 
 	/**

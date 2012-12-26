@@ -20,8 +20,6 @@ public class QueryCondition {
 	private int start;
 	private Circle circle;
 	private int numQueries;
-	private int countGz;
-	private List filesGz;
 	private boolean overflow;
 	private String query;
 	private int zip;
@@ -43,8 +41,6 @@ public class QueryCondition {
 		this.start = start;
 		this.circle = circle;
 		this.numQueries = numQueries;
-		this.countGz = countGz;
-		this.filesGz = filesGz;
 		this.overflow = overflow;
 		this.query = query;
 		this.zip = zip;
@@ -167,22 +163,6 @@ public class QueryCondition {
 
 	public void setNumQueries(int numQueries) {
 		this.numQueries = numQueries;
-	}
-
-	public int getCountGz() {
-		return countGz;
-	}
-
-	public void setCountGz(int countGz) {
-		this.countGz = countGz;
-	}
-
-	public List getFilesGz() {
-		return filesGz;
-	}
-
-	public void setFilesGz(List filesGz) {
-		this.filesGz = filesGz;
 	}
 
 	public boolean isOverflow() {

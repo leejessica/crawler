@@ -7,6 +7,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
+import mo.umac.algorithms.Crawler;
 import mo.umac.utils.Circle;
 
 import org.geotools.referencing.GeodeticCalculator;
@@ -173,59 +174,5 @@ public class Coverage {
 	public static int numsSubRegions(Envelope region, Envelope unit) {
 		return (int) (Math.ceil(region.getWidth() / unit.getWidth()) * Math
 				.ceil(region.getHeight() / unit.getHeight()));
-	}
-
-	/**
-	 * Get next region according to the previous envelope
-	 * 
-	 * @param envelopeState
-	 *            The MBR of all regions
-	 * @param aEnvelope
-	 *            previous region
-	 * @param unit
-	 *            the unit region
-	 * @param overflow
-	 *            TODO
-	 * @return
-	 */
-	public static Envelope nextEnvelopeInRegion(Envelope region,
-			Envelope previousEnvelope, Envelope unit, boolean overflow) {
-		// TODO
-		if (previousEnvelope == null) {
-			// return the first envelope
-		} else {
-			
-		}
-		return null;
-	}
-	
-	/**
-	 * Get the first envelope in this region.
-	 * 
-	 * @param region
-	 *            : the whole region need to be covered
-	 * @param unit
-	 *            : the unit rectangle
-	 * @param overflow
-	 *            : if overflow=true, then divide the rectangle, else find the
-	 *            left-corner rectangle in the region.
-	 * @return
-	 * @deprecated
-	 */
-	public static Envelope firstEnvelopeInRegion(Envelope region,
-			Envelope unit, boolean overflow) {
-		Envelope first = null;
-		// TODO check width & height
-		if (!overflow) {
-			first = new Envelope(region.getMinX(), region.getMinX()
-					+ unit.getWidth(), region.getMinY(), region.getMinY()
-					+ unit.getHeight());
-		} else {
-			// divide the region into 4 parts, and return the first part.
-			first = new Envelope(region.getMinX(), region.getMinX()
-					+ unit.getWidth() / 2, region.getMinY(), region.getMinY()
-					+ unit.getHeight() / 2);
-		}
-		return first;
 	}
 }

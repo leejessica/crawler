@@ -53,6 +53,7 @@ public class FileOperator {
 
 	public static File createFileAutoAscending(String folder, int number, String suffix) {
 		// FIXME  
+		return null;
 	}
 	
 	public static File createFile(String fileName) {
