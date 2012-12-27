@@ -7,7 +7,6 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
-import mo.umac.algorithms.Crawler;
 import mo.umac.utils.Circle;
 
 import org.geotools.referencing.GeodeticCalculator;

@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import mo.umac.crawler.QueryCondition;
+
 import org.apache.log4j.Logger;
 
 /**
@@ -51,11 +53,12 @@ public class FileOperator {
 		return file;
 	}
 
-	public static File createFileAutoAscending(String folder, int number, String suffix) {
-		// FIXME  
+	public static File createFileAutoAscending(String folder, int number,
+			String suffix) {
+		// FIXME
 		return null;
 	}
-	
+
 	public static File createFile(String fileName) {
 		File file = new File(fileName);
 		if (!file.exists()) {
@@ -150,6 +153,10 @@ public class FileOperator {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public static void writeMapFile(String partFileName, QueryCondition qc) {
+
 	}
 
 	/**
