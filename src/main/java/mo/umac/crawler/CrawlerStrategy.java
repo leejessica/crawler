@@ -22,6 +22,11 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.apache.log4j.Logger;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -35,22 +40,6 @@ public abstract class CrawlerStrategy {
 	//
 	public static Logger logger = Logger.getLogger(CrawlerStrategy.class
 			.getName());
-
-	/**
-	 * A folder stores all crawled .xml file from Yahoo Local.
-	 * 
-	 */
-	protected final String folderName = "../yahoo-local/";
-
-	/**
-	 * A file stores the mapping relationship between the crawled file's name
-	 * and the search criteria.
-	 */
-	protected final String mapFileName = folderName + "mapFile";
-	/**
-	 * The maximum radius (in miles) of the query. TODO allocation MAX_R
-	 */
-	protected final double MAX_R = 0.0;
 
 	/**
 	 * The maximum number of returned results by a query.
@@ -89,50 +78,22 @@ public abstract class CrawlerStrategy {
 	protected int results = maxResults;
 
 	protected Envelope firstEnvelope = null;
+	
+	/**
+	 * A folder stores all crawled .xml file from Yahoo Local.
+	 * 
+	 */
+	protected final String folderName = "../yahoo-local/";
 
 	/**
-	 * Crawl points in US by states. All crawled .xml files will be classified
-	 * into the subFolders corresponding to their states' name.
-	 * 
-	 * @param mapOutput
-	 *            store the crawled file's name , the corresponding query
-	 *            criteria, and .gz file's name.
-	 * @param envelopeState
-	 *            a MBR of a state
-	 * @param overflow
-	 *            TODO
-	 * @param folder
-	 *            stores the crawled .xml files, consist by a folder's name +
-	 *            the state's name
-	 * 
-	 * @return true: End; false: Not End
+	 * A file stores the mapping relationship between the crawled file's name
+	 * and the search criteria.
 	 */
-	public boolean crawl(String appid, String subFolder, Envelope preEnvelope,
-			Envelope region, Envelope unit, boolean overflow) {
-		Envelope aEnvelope;
-		// If it is the last region, then end the crawling process.
-		if (finishedCrawling(preEnvelope, region)) {
-			return true;
-		}
-		// This loop represents traversing every sub-region
-		aEnvelope = nextEnvelopeInRegion(region, preEnvelope, unit, overflow);
-		Circle circle = Coverage.computeCircle(aEnvelope);
-		// the first page for any query
-		int start = 1;
-		QueryCondition qc = new QueryCondition(subFolder, mapOutput, region,
-				appid, start, circle, numQueries, overflow, query, zip, results);
-		ResultSet resultSet = query(qc);
-		numQueries++;
-		// This loop represents turning over the page.
-		int maxStartForThisQuery = maxStartForThisQuery(resultSet);
-		for (start += maxResults; start < maxStartForThisQuery; start += maxResults) {
-			qc = new QueryCondition(subFolder, mapOutput, region, appid, start,
-					circle, numQueries, overflow, query, zip, results);
-			query(qc);
-			numQueries++;
-		}
-		return false;
-	}
+	protected final String mapFileName = folderName + "mapFile";
+	/**
+	 * The maximum radius (in miles) of the query. TODO allocation MAX_R
+	 */
+	protected final double MAX_R = 0.0;
 
 	/**
 	 * Get next region according to the previous envelope
@@ -168,8 +129,10 @@ public abstract class CrawlerStrategy {
 	 *            left-corner rectangle in the region.
 	 * @return
 	 */
-	public abstract Envelope firstEnvelopeInRegion(Envelope region,
-			Envelope unit, boolean overflow);
+	public Envelope firstEnvelopeInRegion(Envelope region, Envelope unit,
+			boolean overflow) {
+		return null;
+	}
 
 	/**
 	 * Compute the next envelope (not the first one!)
@@ -208,19 +171,9 @@ public abstract class CrawlerStrategy {
 	 */
 	protected ResultSet query(QueryCondition qc) {
 		String url = qc.toUrl();
-		// file's name
-		// String partFileName = concatenateFileName(null, 0, results,
-		// qc.getStart(), qc.getCircle().getCenter().y, qc.getCircle()
-		// .getCenter().x, qc.getCircle().getRadius());
-		// String xmlFileName = subFolder + partFileName + ".xml";
-		// File xmlFile = FileOperator.creatFileAscending(xmlFileName);
 
 		File xmlFile = FileOperator.createFileAutoAscending(qc.getSubFolder(),
 				qc.getNumQueries(), ".xml");
-
-		// FileOperator.writeMapFile(mapOutput, xmlFile.getName(), query, zip,
-		// results, start, circle.getCenter().y, circle.getCenter().x,
-		// circle.getRadius());
 
 		if (firstCrawl = false) {
 			firstCrawl = true;
@@ -231,7 +184,7 @@ public abstract class CrawlerStrategy {
 		//
 		StaXParser parseXml = new StaXParser();
 		ResultSet resultSet = parseXml.readConfig(xmlFile.getPath());
-		// 
+		//
 		if (resultSet.getResults() != null) {
 			FileOperator.writeMapFile(xmlFile.getName(), qc);
 		}
@@ -247,7 +200,7 @@ public abstract class CrawlerStrategy {
 			logger.error("TODO");
 			// TODO exit or change to next region!
 			// System.exit(0);
-//			aEnvelope = firstEnvelope;
+			// aEnvelope = firstEnvelope;
 			// TODO change to next region
 			// region = ?
 		}
@@ -381,6 +334,21 @@ public abstract class CrawlerStrategy {
 			}
 		}
 		return false;
+	}
+
+	protected HttpClient createHttpClient() {
+		// ThreadSafeClientConnManager manager = new
+		// ThreadSafeClientConnManager();
+		// TODO check
+		PoolingClientConnectionManager manager = new PoolingClientConnectionManager();
+
+		HttpParams params = new BasicHttpParams();
+		int timeout = 1000 * 10;
+
+		HttpConnectionParams.setConnectionTimeout(params, timeout);
+		HttpConnectionParams.setSoTimeout(params, timeout);
+		HttpClient httpClient = new DefaultHttpClient(manager, params);
+		return httpClient;
 	}
 
 	/**

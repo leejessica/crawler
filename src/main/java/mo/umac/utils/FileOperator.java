@@ -156,7 +156,7 @@ public class FileOperator {
 	}
 
 	public static void writeMapFile(String partFileName, QueryCondition qc) {
-
+		// TODO
 	}
 
 	/**
