@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import mo.umac.crawler.QueryCondition;
+import mo.umac.crawler.YahooLocalQuery;
 
 import org.apache.log4j.Logger;
 
@@ -53,10 +53,42 @@ public class FileOperator {
 		return file;
 	}
 
+	/**
+	 * Create the corresponding .xml file for the query.
+	 * 
+	 * @param folder
+	 * @param number
+	 *            the number of queries when issuing this corresponding query.
+	 * @param suffix
+	 *            which is ".xml"
+	 * @return
+	 */
 	public static File createFileAutoAscending(String folder, int number,
 			String suffix) {
-		// FIXME
-		return null;
+		String filePath = folder + number + suffix;
+		File file = new File(filePath);
+		String lastNumString;
+		int lastNum;
+		while (file.exists()) {
+			if (filePath.indexOf("-") != -1) {
+				// has "-"
+				lastNumString = filePath.substring(filePath.indexOf("-") + 1,
+						filePath.indexOf(".xml"));
+				lastNum = Integer.parseInt(lastNumString);
+				filePath = filePath.substring(0, filePath.indexOf("-")) + "-"
+						+ (lastNum + 1) + ".xml";
+			} else {
+				filePath = filePath.substring(0, filePath.indexOf(".xml"))
+						+ "-" + 0 + ".xml";
+			}
+			file = new File(filePath);
+		}
+		try {
+			file.createNewFile();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return file;
 	}
 
 	public static File createFile(String fileName) {
@@ -88,75 +120,7 @@ public class FileOperator {
 		if (!success) {
 			logger.error("Creating folder failed!");
 		}
-		return folderPath;
-	}
-
-	/**
-	 * UScensus data are compressed in .zip format.
-	 * 
-	 * @param zipFileName
-	 *            the compressed zip file.
-	 */
-	public static void readFromZipFile(String zipFileName) {
-		// TODO unzip this file into a temporate folder.
-	}
-
-	public static void gzFolder(String folderPath) {
-		// TODO
-	}
-
-	/**
-	 * compress files in the list.
-	 * 
-	 * @param files
-	 *            , list of files; element: File
-	 * @param folder
-	 * @param gzFileNamePrefix
-	 *            the prefix of the .gz file
-	 */
-	public static void gzFiles(List files, String folder,
-			String gzFileNamePrefix) {
-		// TODO create the gzFile file according to the order.
-
-	}
-
-	/**
-	 * Writing the parameters into the mapFile
-	 * 
-	 * @param mapFileName
-	 * @param s
-	 */
-	public static void writeMapFile(BufferedWriter mapOutput,
-			String partFileName, String query, int zip, int results, int start,
-			double latitude, double longitude, double radius) {
-		// TODO
-		try {
-			// file name:
-			mapOutput.write(partFileName);
-			mapOutput.newLine();
-			// other information:
-			mapOutput.write(query);
-			mapOutput.write(";");
-			mapOutput.write(zip);
-			mapOutput.write(";");
-			mapOutput.write(results);
-			mapOutput.write(";");
-			mapOutput.write(start);
-			mapOutput.write(";");
-			mapOutput.write(Double.toString(latitude));
-			mapOutput.write(";");
-			mapOutput.write(Double.toString(longitude));
-			mapOutput.write(";");
-			mapOutput.write(Double.toString(radius));
-			// mapOutput.write(";");
-			mapOutput.newLine();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static void writeMapFile(String partFileName, QueryCondition qc) {
-		// TODO
+		return folderPath + "/";
 	}
 
 	/**

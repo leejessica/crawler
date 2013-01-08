@@ -3,6 +3,7 @@
  */
 package mo.umac.parser;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.util.List;
 
@@ -16,7 +17,9 @@ public class ResultSet {
 	private String xmlFileName = "";
 
 	private File xmlFile = null;
-
+	
+	private BufferedWriter resultsOutput;
+	
 	private int totalResultsAvailable = 0;
 
 	private int totalResultsReturned = 0;
@@ -91,6 +94,14 @@ public class ResultSet {
 
 	public void setFirstResultPosition(int firstResultPosition) {
 		this.firstResultPosition = firstResultPosition;
+	}
+
+	public BufferedWriter getResultsOutput() {
+		return resultsOutput;
+	}
+
+	public void setResultsOutput(BufferedWriter resultsOutput) {
+		this.resultsOutput = resultsOutput;
 	}
 
 }

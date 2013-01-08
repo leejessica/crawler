@@ -271,7 +271,9 @@ public class StaXParser {
 					}
 				}
 			}
-			resultSet.setResults(results);
+			if(resultSet != null){
+				resultSet.setResults(results);
+			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (XMLStreamException e) {

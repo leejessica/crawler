@@ -10,11 +10,16 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
+import mo.umac.geo.Circle;
+import mo.umac.geo.Coverage;
+import mo.umac.geo.UScensusData;
 import mo.umac.parser.ResultSet;
 import mo.umac.parser.StaXParser;
-import mo.umac.utils.Circle;
 import mo.umac.utils.FileOperator;
 
 import org.apache.http.HttpEntity;
@@ -37,28 +42,28 @@ import com.vividsolutions.jts.geom.Envelope;
  */
 public abstract class CrawlerStrategy {
 
-	//
 	public static Logger logger = Logger.getLogger(CrawlerStrategy.class
 			.getName());
 
 	/**
 	 * The maximum number of returned results by a query.
 	 */
-	protected final int maxResults = 20;
+	protected final int MAX_RESULTS_NUM = 20;
 	/**
 	 * The maximum starting result position to return.
 	 */
-	protected final int maxStart = 250;
+	protected final int MAX_START = 250;
 
 	/**
 	 * The maximum number of results on can get through this query by only
 	 * changing the start value.
 	 */
-	protected final int maxTotalResultsReturned = maxStart + maxResults; // =270;
+	protected final int MAX_TOTAL_RESULTS_RETURNED = MAX_START
+			+ MAX_RESULTS_NUM; // =270;
+
+	protected final long DAY_TIME = 24 * 60 * 60 * 1000;
 
 	protected boolean firstCrawl = false;
-
-	protected final long dayTime = 24 * 60 * 60 * 1000;
 
 	/**
 	 * Record the time, because of the restriction of 5000 queries per day
@@ -67,33 +72,73 @@ public abstract class CrawlerStrategy {
 
 	protected HttpClient httpClient;
 
-	protected BufferedWriter mapOutput;
-
-	protected int numQueries;
+	protected int numQueries = 1;
 
 	protected String query = "*";
 
 	protected int zip = 0;
 
-	protected int results = maxResults;
-
 	protected Envelope firstEnvelope = null;
-	
-	/**
-	 * A folder stores all crawled .xml file from Yahoo Local.
-	 * 
-	 */
-	protected final String folderName = "../yahoo-local/";
 
 	/**
-	 * A file stores the mapping relationship between the crawled file's name
-	 * and the search criteria.
-	 */
-	protected final String mapFileName = folderName + "mapFile";
-	/**
-	 * The maximum radius (in miles) of the query. TODO allocation MAX_R
+	 * The maximum radius (in miles) of the query.
 	 */
 	protected final double MAX_R = 0.0;
+
+	/**
+	 * Entrance of the crawler
+	 */
+	public void callCrawling() {
+		// crawl state by state
+		LinkedList<Envelope> envelopeStates = (LinkedList<Envelope>) UScensusData
+				.MBR(UScensusData.STATE_SHP_FILE_NAME);
+		LinkedList<String> nameStates = (LinkedList<String>) UScensusData
+				.stateName(UScensusData.STATE_DBF_FILE_NAME);
+
+		FileOperator.createFolder("", DBFile.FOLDER_NAME);
+		// FileOperator.createFile(DBFile.DB_FILE_NAME);
+
+		httpClient = createHttpClient();
+
+		try {
+
+			// Change it for different crawling machines
+			String appid = "l6QevFbV34H1VKW58naZ8keJohc8NkMNvuWfVs2lR3ROJMtw63XOWBePbDcMBFfkDnU-";
+			for (int i = 0; i < nameStates.size(); i++) {
+				String stateName = nameStates.get(i);
+				String subFolder = FileOperator.createFolder(
+						DBFile.FOLDER_NAME, stateName);
+				// query file
+				String queryFile = subFolder + DBFile.QUERY_FILE_NAME;
+				FileOperator.createFile(queryFile);
+				BufferedWriter queryOutput = new BufferedWriter(
+						new OutputStreamWriter(new FileOutputStream(queryFile,
+								true)));
+				// results file
+				String resultsFile = subFolder + DBFile.RESULT_FILE_NAME;
+				FileOperator.createFile(resultsFile);
+				BufferedWriter resultsOutput = new BufferedWriter(
+						new OutputStreamWriter(new FileOutputStream(
+								resultsFile, true)));
+				//
+				Envelope envelopeState = envelopeStates.get(i);
+				crawl(appid, subFolder, envelopeState, queryOutput,
+						resultsOutput);
+				//
+				queryOutput.close();
+				resultsOutput.close();
+			}
+			httpClient.getConnectionManager().shutdown();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	protected abstract boolean crawl(String appid, String subFolder,
+			Envelope envelopeState, BufferedWriter queryOutput,
+			BufferedWriter resultsOutput);
 
 	/**
 	 * Get next region according to the previous envelope
@@ -144,7 +189,6 @@ public abstract class CrawlerStrategy {
 	 */
 	public Envelope nextButNotFirstEnvelopeInRegion(Envelope region,
 			Envelope previousEnvelope, Envelope unit, boolean overflow) {
-		// TODO check
 		double x1 = 0;
 		double y1 = 0;
 		// Get to the right-most boundary
@@ -161,60 +205,87 @@ public abstract class CrawlerStrategy {
 	}
 
 	/**
+	 * Common steps in one crawling procedure
+	 * 
+	 * @param appid
+	 * @param aEnvelope
+	 * @param subFolder
+	 * @param queryOutput
+	 * @param resultsOutput
+	 *            TODO
+	 * @return whether this crawling procedure is overflow
+	 */
+	protected boolean oneCrawlingProcedure(String appid, Envelope aEnvelope,
+			String subFolder, BufferedWriter queryOutput,
+			BufferedWriter resultsOutput) {
+		// the first page for any query
+		int start = 1;
+		Circle circle = Coverage.computeCircle(aEnvelope);
+		YahooLocalQuery qc = new YahooLocalQuery(subFolder, queryOutput,
+				resultsOutput, aEnvelope, appid, start, circle, numQueries,
+				query, zip, MAX_RESULTS_NUM);
+		ResultSet resultSet = query(qc);
+		// This loop represents turning over the page.
+		int maxStartForThisQuery = maxStartForThisQuery(resultSet);
+		for (start += MAX_RESULTS_NUM; start < maxStartForThisQuery; start += MAX_RESULTS_NUM) {
+			qc = new YahooLocalQuery(subFolder, queryOutput, resultsOutput,
+					aEnvelope, appid, start, circle, numQueries, query, zip,
+					MAX_RESULTS_NUM);
+			query(qc);
+		}
+		// the last query
+		if (maxStartForThisQuery == MAX_TOTAL_RESULTS_RETURNED) {
+			qc = new YahooLocalQuery(subFolder, queryOutput, resultsOutput,
+					aEnvelope, appid, maxStartForThisQuery, circle, numQueries,
+					query, zip, MAX_RESULTS_NUM);
+			query(qc);
+		}
+
+		boolean overflow = false;
+		if (resultSet.getTotalResultsAvailable() > MAX_TOTAL_RESULTS_RETURNED) {
+			overflow = true;
+		}
+		return overflow;
+	}
+
+	/**
 	 * The query process, including construct the url; create the .xml file;
-	 * fetching from the web; parse the .xml file, storing the result in the
-	 * in-memory db, etc.
+	 * fetching from the web; parse the .xml file, storing the result, etc.
 	 * 
 	 * @param qc
 	 *            All information need in one query
 	 * @return The parsed result set.
 	 */
-	protected ResultSet query(QueryCondition qc) {
+	protected ResultSet query(YahooLocalQuery qc) {
 		String url = qc.toUrl();
+
+		logger.debug(url);
 
 		File xmlFile = FileOperator.createFileAutoAscending(qc.getSubFolder(),
 				qc.getNumQueries(), ".xml");
 
-		if (firstCrawl = false) {
+		if (!firstCrawl) {
 			firstCrawl = true;
 			beginTime = System.currentTimeMillis();
 		}
 		checkTime(qc.getNumQueries(), beginTime);
 		fetching(httpClient, xmlFile, url);
+		numQueries++;
 		//
 		StaXParser parseXml = new StaXParser();
 		ResultSet resultSet = parseXml.readConfig(xmlFile.getPath());
+		resultSet.setResultsOutput(qc.getResultsOutput());
 		//
-		if (resultSet.getResults() != null) {
-			FileOperator.writeMapFile(xmlFile.getName(), qc);
+		if (resultSet != null) {
+			DBFile.writeQueryFile(xmlFile.getName(), qc, resultSet);
+			if (resultSet.getTotalResultsReturned() > 0) {
+				DBFile.writeResultsFile(xmlFile.getName(), resultSet);
+			}
+		} else {
+			// maybe error or exceed time limitation 
+			logger.info("resultSet == null; at " + xmlFile.getName());
 		}
 		return resultSet;
-	}
-
-	protected void analyzeResultSet(ResultSet resultSet) {
-		if (resultSet.isLimitExceeded()) {
-			// TODO wait
-		}
-		if (resultSet.isUnexpectedError()) {
-			// TODO record which .xml file is error.
-			logger.error("TODO");
-			// TODO exit or change to next region!
-			// System.exit(0);
-			// aEnvelope = firstEnvelope;
-			// TODO change to next region
-			// region = ?
-		}
-		// Cannot get all tuples by turning over the page
-		if (resultSet.getTotalResultsAvailable() > maxTotalResultsReturned) {
-			// continue crawling, because this returned tuples are useful in
-			// analyzing data distributions in overflow queries
-			// do nothing: continue turn over the page
-		}
-		// underflow
-		if (resultSet.getResults() == null) {
-			// go to next region
-			// TODO change qc
-		}
 	}
 
 	/**
@@ -256,9 +327,9 @@ public abstract class CrawlerStrategy {
 			// sleep to satisfy 5000/day
 			long now = System.currentTimeMillis();
 			long diff = (now - beginTime);
-			if (diff < dayTime) {
+			if (diff < DAY_TIME) {
 				try {
-					Thread.currentThread().sleep(dayTime - diff);
+					Thread.currentThread().sleep(DAY_TIME - diff);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -268,54 +339,20 @@ public abstract class CrawlerStrategy {
 	}
 
 	/**
-	 * Calculate the maximum start number
+	 * Calculate the maximum start number of a query
 	 * 
 	 * @param resultSet
 	 * @return the max start value in constructing a query.
 	 */
 	protected int maxStartForThisQuery(ResultSet resultSet) {
 		int totalResultAvailable = resultSet.getTotalResultsAvailable();
-		if (totalResultAvailable > maxStart + maxResults) {
-			return maxStart;
+		if (totalResultAvailable > MAX_START + MAX_RESULTS_NUM) {
+			return MAX_START;
 		}
-		return (int) (Math.floor(1.0 * totalResultAvailable / maxResults) * 20);
+		return (int) (Math.floor(1.0 * totalResultAvailable / MAX_RESULTS_NUM) * 20);
 	}
 
 	protected List<Envelope> divideARectangle() {
-		return null;
-	}
-
-	/**
-	 * Next region, or next one in four!
-	 * 
-	 * @param preQC
-	 * @param resultSet
-	 * @return
-	 * @deprecated
-	 */
-	protected QueryCondition nextQC(QueryCondition preQC, ResultSet resultSet) {
-		// deal with access limitations
-		if (resultSet == null) {
-			// TODO how to iteratively increase the sleeping time ?
-			try {
-				Thread.currentThread().sleep(5 * 60 * 1000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} // sleep
-			return preQC;
-		}
-		// Cannot get all available results from this query,
-		// then only query the first page, and record that page.
-		/*
-		 * if (resultSet.getTotalResultsAvailable() > maxTotalResultsReturned) {
-		 * // TODO divide the region into 4 sub-regions; for (int i = 0; i < 4;
-		 * i++) { // FIXME wrong crawlBasedOnState(subFolder, mapOutput,
-		 * AEnvelope, appid, numQueries, httpClient, countGz, filesGz, true); }
-		 * } else if (start + maxResults <=
-		 * resultSet.getTotalResultsAvailable()) { // turn to next page
-		 * continue; } else { // crawl another region break; }
-		 */
 		return null;
 	}
 
