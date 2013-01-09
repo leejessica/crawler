@@ -190,24 +190,4 @@ public class CrawlingMethodsTest {
 		return doc;
 	}
 
-	/**
-	 * Save the Html document into a file
-	 * 
-	 * @param doc
-	 *            A Html document
-	 * @param filePath
-	 *            A path of the destination file
-	 */
-	private static void saveDocument(Document doc, String filePath) {
-		File file = FileOperator.creatFileAscending(filePath);
-		try {
-			BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-			writer.write(doc.html());
-			// Thread.sleep(1000);
-			writer.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
 }

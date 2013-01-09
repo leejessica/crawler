@@ -125,6 +125,8 @@ public abstract class CrawlerStrategy {
 				crawl(appid, subFolder, envelopeState, queryOutput,
 						resultsOutput);
 				//
+				queryOutput.flush();
+				resultsOutput.flush();
 				queryOutput.close();
 				resultsOutput.close();
 			}
@@ -212,11 +214,10 @@ public abstract class CrawlerStrategy {
 	 * @param subFolder
 	 * @param queryOutput
 	 * @param resultsOutput
-	 *            TODO
-	 * @return whether this crawling procedure is overflow
+	 * @return an indicator of the result of this query
 	 */
-	protected boolean oneCrawlingProcedure(String appid, Envelope aEnvelope,
-			String subFolder, BufferedWriter queryOutput,
+	protected IndicatorResult oneCrawlingProcedure(String appid,
+			Envelope aEnvelope, String subFolder, BufferedWriter queryOutput,
 			BufferedWriter resultsOutput) {
 		// the first page for any query
 		int start = 1;
@@ -225,27 +226,30 @@ public abstract class CrawlerStrategy {
 				resultsOutput, aEnvelope, appid, start, circle, numQueries,
 				query, zip, MAX_RESULTS_NUM);
 		ResultSet resultSet = query(qc);
-		// This loop represents turning over the page.
-		int maxStartForThisQuery = maxStartForThisQuery(resultSet);
-		for (start += MAX_RESULTS_NUM; start < maxStartForThisQuery; start += MAX_RESULTS_NUM) {
-			qc = new YahooLocalQuery(subFolder, queryOutput, resultsOutput,
-					aEnvelope, appid, start, circle, numQueries, query, zip,
-					MAX_RESULTS_NUM);
-			query(qc);
-		}
-		// the last query
-		if (maxStartForThisQuery == MAX_TOTAL_RESULTS_RETURNED) {
-			qc = new YahooLocalQuery(subFolder, queryOutput, resultsOutput,
-					aEnvelope, appid, maxStartForThisQuery, circle, numQueries,
-					query, zip, MAX_RESULTS_NUM);
-			query(qc);
-		}
+		if (resultSet != null) {
+			// This loop represents turning over the page.
+			int maxStartForThisQuery = maxStartForThisQuery(resultSet);
+			for (start += MAX_RESULTS_NUM; start < maxStartForThisQuery; start += MAX_RESULTS_NUM) {
+				qc = new YahooLocalQuery(subFolder, queryOutput, resultsOutput,
+						aEnvelope, appid, start, circle, numQueries, query,
+						zip, MAX_RESULTS_NUM);
+				query(qc);
+			}
+			// the last query
+			if (maxStartForThisQuery == MAX_TOTAL_RESULTS_RETURNED) {
+				qc = new YahooLocalQuery(subFolder, queryOutput, resultsOutput,
+						aEnvelope, appid, maxStartForThisQuery, circle,
+						numQueries, query, zip, MAX_RESULTS_NUM);
+				query(qc);
+			}
 
-		boolean overflow = false;
-		if (resultSet.getTotalResultsAvailable() > MAX_TOTAL_RESULTS_RETURNED) {
-			overflow = true;
+			if (resultSet.getTotalResultsAvailable() > MAX_TOTAL_RESULTS_RETURNED) {
+				return IndicatorResult.OVERFLOW;
+			}
+		} else {
+			return IndicatorResult.ERROR;
 		}
-		return overflow;
+		return IndicatorResult.NONOVERFLOW;
 	}
 
 	/**
@@ -259,31 +263,46 @@ public abstract class CrawlerStrategy {
 	protected ResultSet query(YahooLocalQuery qc) {
 		String url = qc.toUrl();
 
+		logger.debug("numQueries=" + numQueries);
 		logger.debug(url);
 
 		File xmlFile = FileOperator.createFileAutoAscending(qc.getSubFolder(),
 				qc.getNumQueries(), ".xml");
-
 		if (!firstCrawl) {
 			firstCrawl = true;
 			beginTime = System.currentTimeMillis();
 		}
-		checkTime(qc.getNumQueries(), beginTime);
+		// writing to the files
+		if (qc.getNumQueries() % 100 == 0) {
+			logger.debug("For testing flush..." + qc.getNumQueries());
+			try { 
+				qc.getQueryOutput().flush();
+				qc.getResultsOutput().flush();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		if (qc.getNumQueries() % 5000 == 0) {
+			logger.info("numQueries=" + numQueries);
+			logger.info(url);
+			// TODO gzip
+			checkTime(beginTime);
+		}
 		fetching(httpClient, xmlFile, url);
 		numQueries++;
 		//
 		StaXParser parseXml = new StaXParser();
 		ResultSet resultSet = parseXml.readConfig(xmlFile.getPath());
-		resultSet.setResultsOutput(qc.getResultsOutput());
 		//
 		if (resultSet != null) {
+			resultSet.setResultsOutput(qc.getResultsOutput());
 			DBFile.writeQueryFile(xmlFile.getName(), qc, resultSet);
 			if (resultSet.getTotalResultsReturned() > 0) {
 				DBFile.writeResultsFile(xmlFile.getName(), resultSet);
 			}
 		} else {
-			// maybe error or exceed time limitation 
-			logger.info("resultSet == null; at " + xmlFile.getName());
+			logger.error(xmlFile.getName() + ":" + qc.toString());
+			checkTime(beginTime);
 		}
 		return resultSet;
 	}
@@ -322,20 +341,18 @@ public abstract class CrawlerStrategy {
 	 * @param numQueries
 	 * @param beginTime
 	 */
-	protected void checkTime(int numQueries, long beginTime) {
-		if (numQueries % 5000 == 0) {
-			// sleep to satisfy 5000/day
-			long now = System.currentTimeMillis();
-			long diff = (now - beginTime);
-			if (diff < DAY_TIME) {
-				try {
-					Thread.currentThread().sleep(DAY_TIME - diff);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+	protected void checkTime(long beginTime) {
+		// sleep to satisfy 5000/day
+		long now = System.currentTimeMillis();
+		long diff = (now - beginTime);
+		if (diff < DAY_TIME) {
+			try {
+				Thread.currentThread().sleep(DAY_TIME - diff);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
-			beginTime = System.currentTimeMillis();
 		}
+		beginTime = System.currentTimeMillis();
 	}
 
 	/**
@@ -374,14 +391,9 @@ public abstract class CrawlerStrategy {
 	}
 
 	protected HttpClient createHttpClient() {
-		// ThreadSafeClientConnManager manager = new
-		// ThreadSafeClientConnManager();
-		// TODO check
 		PoolingClientConnectionManager manager = new PoolingClientConnectionManager();
-
 		HttpParams params = new BasicHttpParams();
 		int timeout = 1000 * 10;
-
 		HttpConnectionParams.setConnectionTimeout(params, timeout);
 		HttpConnectionParams.setSoTimeout(params, timeout);
 		HttpClient httpClient = new DefaultHttpClient(manager, params);

@@ -1,1 +1,2 @@
-ERROR (mo.umac.utils.FileOperator:121)- Creating folder failed!
+ERROR (mo.umac.utils.FileOperator:86)- Creating folder ../yahoolocal/ failed!
+INFO (mo.umac.crawler.CrawlerStrategy:277)- For testing flush...100

@@ -3,18 +3,13 @@
  */
 package mo.umac.utils;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import mo.umac.crawler.YahooLocalQuery;
-
 import org.apache.log4j.Logger;
 
 /**
- * Safety check
  * 
  * @author Kate Yim
  * 
@@ -22,36 +17,6 @@ import org.apache.log4j.Logger;
 public class FileOperator {
 
 	public static Logger logger = Logger.getLogger(FileOperator.class);
-
-	/**
-	 * Create file. If there exist the file in the folder, then rename it by
-	 * adding an ascending number.
-	 * 
-	 * @param filePath
-	 * @return
-	 * @deprecated
-	 */
-	public static File creatFileAscending(String filePath) {
-		File file = new File(filePath);
-		int i = 0;
-		int endIndex = 0;
-		while (file.exists()) {
-			if (filePath.indexOf("-") != -1) {
-				endIndex = filePath.indexOf(".xml");
-			} else {
-				endIndex = filePath.indexOf(".xml");
-			}
-			filePath = filePath.substring(0, endIndex) + "-" + i + ".xml";
-			file = new File(filePath);
-			i++;
-		}
-		try {
-			file.createNewFile();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return file;
-	}
 
 	/**
 	 * Create the corresponding .xml file for the query.
@@ -118,7 +83,7 @@ public class FileOperator {
 		File dir = new File(folderPath);
 		boolean success = dir.mkdir();
 		if (!success) {
-			logger.error("Creating folder failed!");
+			logger.error("Creating folder " + folderPath + " failed!");
 		}
 		return folderPath + "/";
 	}

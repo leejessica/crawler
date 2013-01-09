@@ -51,11 +51,11 @@ public class DBFile {
 			// other information:
 			dbOutput.write(query);
 			dbOutput.write(";");
-			dbOutput.write(zip);
+			dbOutput.write(Integer.toString(zip));
 			dbOutput.write(";");
-			dbOutput.write(results);
+			dbOutput.write(Integer.toString(results));
 			dbOutput.write(";");
-			dbOutput.write(start);
+			dbOutput.write(Integer.toString(start));
 			dbOutput.write(";");
 			dbOutput.write(Double.toString(latitude));
 			dbOutput.write(";");
@@ -63,11 +63,11 @@ public class DBFile {
 			dbOutput.write(";");
 			dbOutput.write(Double.toString(radius));
 			dbOutput.write(";");
-			dbOutput.write(resultSet.getTotalResultsAvailable());
+			dbOutput.write(Integer.toString(resultSet.getTotalResultsAvailable()));
 			dbOutput.write(";");
-			dbOutput.write(resultSet.getTotalResultsReturned());
+			dbOutput.write(Integer.toString(resultSet.getTotalResultsReturned()));
 			dbOutput.write(";");
-			dbOutput.write(resultSet.getFirstResultPosition());
+			dbOutput.write(Integer.toString(resultSet.getFirstResultPosition()));
 			dbOutput.newLine();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -104,7 +104,7 @@ public class DBFile {
 				resultsOutput.write(partFileName);
 				resultsOutput.write(";");
 				// other information:
-				resultsOutput.write(id);
+				resultsOutput.write(Integer.toString(id));
 				resultsOutput.write(";");
 				resultsOutput.write(title);
 				resultsOutput.write(";");
@@ -122,7 +122,7 @@ public class DBFile {
 					int categoryId = category.getId();
 					String categorynName = category.getName();
 					resultsOutput.write(";");
-					resultsOutput.write(categoryId);
+					resultsOutput.write(Integer.toString(categoryId));
 					resultsOutput.write(";");
 					resultsOutput.write(categorynName);
 				}

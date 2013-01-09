@@ -25,10 +25,6 @@ public class YahooLocalQuery {
 	private int zip;
 	private int results;
 
-	public YahooLocalQuery() {
-
-	}
-
 	public YahooLocalQuery(String subFolder, BufferedWriter queryOutput,
 			BufferedWriter resultsOutput, Envelope envelopeState, String appid, int start,
 			Circle circle, int numQueries, String query, int zip, int results) {
@@ -44,6 +40,29 @@ public class YahooLocalQuery {
 		this.query = query;
 		this.zip = zip;
 		this.results = results;
+	}
+	
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("appid=");
+		sb.append(appid);
+		sb.append("&query=");
+		sb.append(query);
+		if (zip > 0) {
+			sb.append("&zip=");
+			sb.append(zip);
+		}
+		sb.append("&results=");
+		sb.append(results);
+		sb.append("&start=");
+		sb.append(start);
+		sb.append("&latitude=");
+		sb.append(circle.getCenter().y);
+		sb.append("&longitude=");
+		sb.append(circle.getCenter().x);
+		sb.append("&radius=");
+		sb.append(circle.getRadius());
+		return sb.toString();
 	}
 
 	/**

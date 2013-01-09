@@ -30,13 +30,24 @@ public class QuadTreeCrawler extends CrawlerStrategy {
 	 */
 	public boolean crawl(String appid, String subFolder, Envelope aEnvelope,
 			BufferedWriter queryOutput, BufferedWriter resultsOutput) {
-		boolean overflow = oneCrawlingProcedure(appid, aEnvelope, subFolder,
-				queryOutput, resultsOutput);
-		if (overflow) {
+		logger.debug("crawling [" + aEnvelope.getMinX() + ","
+				+ aEnvelope.getMaxX() + "," + aEnvelope.getMinY() + ","
+				+ aEnvelope.getMaxY() + "]");
+		IndicatorResult indicatorResult = oneCrawlingProcedure(appid,
+				aEnvelope, subFolder, queryOutput, resultsOutput);
+		if (indicatorResult == IndicatorResult.OVERFLOW) {
 			ArrayList<Envelope> envelopeList = Coverage
 					.divideEnvelope(aEnvelope);
-			for (int i = 0; i <= envelopeList.size(); i++) {
-				crawl(appid, subFolder, envelopeList.get(i), queryOutput,
+			logger.debug("divided aEnvelope into ");
+			for (int i = 0; i < envelopeList.size(); i++) {
+				logger.debug("[" + envelopeList.get(i).getMinX() + ","
+						+ envelopeList.get(i).getMaxX() + ","
+						+ envelopeList.get(i).getMinY() + ","
+						+ envelopeList.get(i).getMaxY() + "]");
+			}
+			for (int i = 0; i < envelopeList.size(); i++) {
+				Envelope dividedEnvelope = envelopeList.get(i);
+				crawl(appid, subFolder, dividedEnvelope, queryOutput,
 						resultsOutput);
 			}
 		}
