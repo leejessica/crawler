@@ -6,6 +6,8 @@ public class Client {
 
 	public static String LOG_PROPERTY_PATH = "./src/main/resources/log4j.xml";
 	
+//	public static String LOG_PROPERTY_PATH = "log4j.xml";
+	
 	/**
 	 * @param args
 	 */
