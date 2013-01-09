@@ -14,7 +14,7 @@
 	</appender>
 	<!--Release log-->
 	<appender name="Release" class="org.apache.log4j.RollingFileAppender">
-		<param name="File" value="log/info.log" />
+		<param name="File" value="../crawlerlog/info.log" />
 		<param name="Append" value="false" />
 		<param name="MaxFileSize" value="10000KB" />
 		<param name="MaxBackupIndex" value="50" /> 
@@ -31,7 +31,7 @@
 	<!--Error log-->
 	<appender name="Error" class="org.apache.log4j.RollingFileAppender">
 		<param name="Append" value="false" />
-		<param name="File" value="log/error.log" />
+		<param name="File" value="../crawlerlog/error.log" />
 		<param name="MaxFileSize" value="1000KB" />
 		<param name="MaxBackupIndex" value="50" />
 		<layout class="org.apache.log4j.PatternLayout">
@@ -45,7 +45,7 @@
 	</appender>
 	<!--Debug log-->
 	<appender name="Debug" class="org.apache.log4j.RollingFileAppender">
-		<param name="File" value="log/debug.log" />
+		<param name="File" value="../crawlerlog/debug.log" />
 		<param name="Append" value="false" />
 		<param name="MaxFileSize" value="10000KB" />
 		<param name="MaxBackupIndex" value="2000" /> 
