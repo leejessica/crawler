@@ -111,8 +111,8 @@ public class BruteForceCrawler extends CrawlerStrategy {
 	}
 
 	@Override
-	protected boolean crawl(String appid, String subFolder,
+	protected IndicatorResult crawl(String appid, String subFolder,
 			Envelope envelopeState, BufferedWriter queryOutput, BufferedWriter resultsOutput) {
-		return false;
+		return IndicatorResult.ERROR;
 	}
 }

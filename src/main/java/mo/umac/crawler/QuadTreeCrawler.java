@@ -28,7 +28,7 @@ public class QuadTreeCrawler extends CrawlerStrategy {
 	 * @param region
 	 * @return whether it is finished
 	 */
-	public boolean crawl(String appid, String subFolder, Envelope aEnvelope,
+	public IndicatorResult crawl(String appid, String subFolder, Envelope aEnvelope,
 			BufferedWriter queryOutput, BufferedWriter resultsOutput) {
 		logger.debug("crawling [" + aEnvelope.getMinX() + ","
 				+ aEnvelope.getMaxX() + "," + aEnvelope.getMinY() + ","
@@ -51,7 +51,7 @@ public class QuadTreeCrawler extends CrawlerStrategy {
 						resultsOutput);
 			}
 		}
-		return true;
+		return indicatorResult;
 	}
 
 }

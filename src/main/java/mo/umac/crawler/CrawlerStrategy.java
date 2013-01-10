@@ -143,7 +143,7 @@ public abstract class CrawlerStrategy {
 		}
 	}
 
-	protected abstract boolean crawl(String appid, String subFolder,
+	protected abstract IndicatorResult crawl(String appid, String subFolder,
 			Envelope envelopeState, BufferedWriter queryOutput,
 			BufferedWriter resultsOutput);
 
@@ -234,16 +234,20 @@ public abstract class CrawlerStrategy {
 		if (resultSet != null) {
 			// This loop represents turning over the page.
 			int maxStartForThisQuery = maxStartForThisQuery(resultSet);
-			logger.debug("maxStartForThisQuery=" + maxStartForThisQuery);
+			// logger.debug("totalResultsAvailable="
+			// + resultSet.getTotalResultsAvailable());
+			// logger.debug("maxStartForThisQuery=" + maxStartForThisQuery);
+			//
 			for (start += MAX_RESULTS_NUM; start < maxStartForThisQuery; start += MAX_RESULTS_NUM) {
+				// logger.info("strat=" + start);
 				qc = new YahooLocalQuery(subFolder, queryOutput, resultsOutput,
 						aEnvelope, appid, start, circle, numQueries, query,
 						zip, MAX_RESULTS_NUM);
 				query(qc);
 			}
-			// TODO check page number
 			// the last query
-			if (maxStartForThisQuery == MAX_TOTAL_RESULTS_RETURNED) {
+			if (maxStartForThisQuery == MAX_START) {
+				// logger.info("maxStartForThisQuery == MAX_START");
 				qc = new YahooLocalQuery(subFolder, queryOutput, resultsOutput,
 						aEnvelope, appid, maxStartForThisQuery, circle,
 						numQueries, query, zip, MAX_RESULTS_NUM);
@@ -308,7 +312,12 @@ public abstract class CrawlerStrategy {
 				DBFile.writeResultsFile(xmlFile.getName(), resultSet);
 			}
 		} else {
-			// TODO more check operations
+			try {
+				qc.getQueryOutput().flush();
+				qc.getResultsOutput().flush();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			logger.error(xmlFile.getName() + ":" + url);
 			checkTime(beginTime);
 		}
