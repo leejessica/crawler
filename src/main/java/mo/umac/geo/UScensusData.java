@@ -39,13 +39,13 @@ public class UScensusData {
 	 * The geometry information file (.shp) for the US states. It has been
 	 * download from {@link http://www.census.gov/geo/maps-data/data/tiger.html}
 	 */
-	public static final String STATE_SHP_FILE_NAME = "./src/main/resources/UScensus/tl_2012_us_state/tl_2012_us_state.shp";
+	public static String STATE_SHP_FILE_NAME = "./src/main/resources/UScensus/tl_2012_us_state/tl_2012_us_state.shp";
 
 	/**
 	 * The geometry information file (.dbf) for the US states. It has been
 	 * download from {@link http://www.census.gov/geo/maps-data/data/tiger.html}
 	 */
-	public static final String STATE_DBF_FILE_NAME = "./src/main/resources/UScensus/tl_2012_us_state/tl_2012_us_state.dbf";
+	public static String STATE_DBF_FILE_NAME = "./src/main/resources/UScensus/tl_2012_us_state/tl_2012_us_state.dbf";
 
 	/**
 	 * Get the minimum boundary rectangles from the .shp file.
