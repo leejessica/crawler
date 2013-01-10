@@ -104,12 +104,12 @@ public abstract class CrawlerStrategy {
 
 			// TODO Change it for different crawling machines
 			// kate.yanhui@yahoo.com
-			// String appid =
-			// "l6QevFbV34H1VKW58naZ8keJohc8NkMNvuWfVs2lR3ROJMtw63XOWBePbDcMBFfkDnU-";
+			String appid = "l6QevFbV34H1VKW58naZ8keJohc8NkMNvuWfVs2lR3ROJMtw63XOWBePbDcMBFfkDnU-";
 			// kate.yan.code@gmail.com
-			String appid = "tsKnW6HV34GaeBtQ_48Z6.0cqxXf_oqNpluRpN5lsnwXhGGc_FaBw0S16_UnaHH1P6DhMItQB7SYDRbySnSD4xFJF_iaV6M-";
-			for (int i = nameStates.size() - 1; i >= 0; i--) {
-				// for (int i = 0; i < nameStates.size(); i++) {
+			// String appid =
+			// "tsKnW6HV34GaeBtQ_48Z6.0cqxXf_oqNpluRpN5lsnwXhGGc_FaBw0S16_UnaHH1P6DhMItQB7SYDRbySnSD4xFJF_iaV6M-";
+			for (int i = 0; i < nameStates.size(); i++) {
+				// for (int i = nameStates.size() - 1; i >= 0; i--) {
 				String stateName = nameStates.get(i);
 				String subFolder = FileOperator.createFolder(
 						DBFile.FOLDER_NAME, stateName);
@@ -234,12 +234,14 @@ public abstract class CrawlerStrategy {
 		if (resultSet != null) {
 			// This loop represents turning over the page.
 			int maxStartForThisQuery = maxStartForThisQuery(resultSet);
+			logger.debug("maxStartForThisQuery=" + maxStartForThisQuery);
 			for (start += MAX_RESULTS_NUM; start < maxStartForThisQuery; start += MAX_RESULTS_NUM) {
 				qc = new YahooLocalQuery(subFolder, queryOutput, resultsOutput,
 						aEnvelope, appid, start, circle, numQueries, query,
 						zip, MAX_RESULTS_NUM);
 				query(qc);
 			}
+			// TODO check page number
 			// the last query
 			if (maxStartForThisQuery == MAX_TOTAL_RESULTS_RETURNED) {
 				qc = new YahooLocalQuery(subFolder, queryOutput, resultsOutput,
@@ -306,7 +308,8 @@ public abstract class CrawlerStrategy {
 				DBFile.writeResultsFile(xmlFile.getName(), resultSet);
 			}
 		} else {
-			logger.error(xmlFile.getName() + ":" + qc.toString());
+			// TODO more check operations
+			logger.error(xmlFile.getName() + ":" + url);
 			checkTime(beginTime);
 		}
 		return resultSet;

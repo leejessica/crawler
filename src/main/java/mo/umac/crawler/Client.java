@@ -12,7 +12,7 @@ public class Client {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		initialResourceFolder(true);
+		initialResourceFolder(false);
 		DOMConfigurator.configure(Client.LOG_PROPERTY_PATH);
 		CrawlerStrategy crawlerStrategy = new QuadTreeCrawler();
 		CrawlerContext crawlerContext = new CrawlerContext(crawlerStrategy);
