@@ -1,5 +1,19 @@
 Manifest-Version: 1.0
-Built-By: yanhui
-Build-Jdk: 1.6.0_06
+Class-Path: lib/log4j-1.2.16.jar lib/httpclient-4.2.2.jar lib/httpcore
+ -4.2.2.jar lib/commons-logging-1.1.1.jar lib/commons-codec-1.6.jar li
+ b/jsoup-1.6.1.jar lib/jts-1.11.jar lib/xercesImpl-2.4.0.jar lib/gt-sh
+ apefile-8.3.jar lib/gt-data-8.3.jar lib/gt-main-8.3.jar lib/gt-api-8.
+ 3.jar lib/gt-referencing-8.3.jar lib/vecmath-1.3.2.jar lib/commons-po
+ ol-1.5.4.jar lib/gt-metadata-8.3.jar lib/gt-opengis-8.3.jar lib/jsr-2
+ 75-1.0-beta-2.jar lib/jgridshift-1.0.jar lib/jdom-1.0.jar lib/jai_cor
+ e-1.1.3.jar lib/gt-swing-8.3.jar lib/gt-render-8.3.jar lib/gt-coverag
+ e-8.3.jar lib/jai_imageio-1.1.jar lib/imageio-ext-tiff-1.1.5.jar lib/
+ imageio-ext-utilities-1.1.5.jar lib/jai_codec-1.1.3.jar lib/jt-zonals
+ tats-1.3.0.jar lib/jt-utils-1.3.0.jar lib/gt-cql-8.3.jar lib/miglayou
+ t-3.7-swing.jar lib/commons-compress-1.2.jar lib/stax-1.2.0.jar lib/s
+ tax-api-1.0.1.jar
+Build-Jdk: 1.6.0_24
+Built-By: kate
 Created-By: Maven Integration for Eclipse
+Main-Class: mo.umac.crawler.Client
 

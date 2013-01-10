@@ -22,9 +22,9 @@ public class Client {
 	public static void initialResourceFolder(boolean packaging) {
 		if (packaging) {
 			// for packaging, set the resources folder as
-			Client.LOG_PROPERTY_PATH = "log4j.xml";
-			UScensusData.STATE_SHP_FILE_NAME = "resources/UScensus/tl_2012_us_state/tl_2012_us_state.shp";
-			UScensusData.STATE_DBF_FILE_NAME = "resources/UScensus/tl_2012_us_state/tl_2012_us_state.dbf";
+			Client.LOG_PROPERTY_PATH = "target/log4j.xml";
+			UScensusData.STATE_SHP_FILE_NAME = "target/UScensus/tl_2012_us_state/tl_2012_us_state.shp";
+			UScensusData.STATE_DBF_FILE_NAME = "target/UScensus/tl_2012_us_state/tl_2012_us_state.dbf";
 		} else {
 			// for debugging, set the resources folder as
 			Client.LOG_PROPERTY_PATH = "./src/main/resources/log4j.xml";
