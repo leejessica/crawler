@@ -102,9 +102,14 @@ public abstract class CrawlerStrategy {
 
 		try {
 
-			// Change it for different crawling machines
-			String appid = "l6QevFbV34H1VKW58naZ8keJohc8NkMNvuWfVs2lR3ROJMtw63XOWBePbDcMBFfkDnU-";
-			for (int i = 0; i < nameStates.size(); i++) {
+			// TODO Change it for different crawling machines
+			// kate.yanhui@yahoo.com
+			// String appid =
+			// "l6QevFbV34H1VKW58naZ8keJohc8NkMNvuWfVs2lR3ROJMtw63XOWBePbDcMBFfkDnU-";
+			// kate.yan.code@gmail.com
+			String appid = "tsKnW6HV34GaeBtQ_48Z6.0cqxXf_oqNpluRpN5lsnwXhGGc_FaBw0S16_UnaHH1P6DhMItQB7SYDRbySnSD4xFJF_iaV6M-";
+			for (int i = nameStates.size() - 1; i >= 0; i--) {
+				// for (int i = 0; i < nameStates.size(); i++) {
 				String stateName = nameStates.get(i);
 				String subFolder = FileOperator.createFolder(
 						DBFile.FOLDER_NAME, stateName);
@@ -275,7 +280,7 @@ public abstract class CrawlerStrategy {
 		// writing to the files
 		if (qc.getNumQueries() % 100 == 0) {
 			logger.debug("For testing flush..." + qc.getNumQueries());
-			try { 
+			try {
 				qc.getQueryOutput().flush();
 				qc.getResultsOutput().flush();
 			} catch (IOException e) {
