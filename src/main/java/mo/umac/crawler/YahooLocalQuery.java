@@ -1,6 +1,7 @@
 package mo.umac.crawler;
 
 import java.io.BufferedWriter;
+import java.math.BigDecimal;
 import java.util.List;
 
 import mo.umac.geo.Circle;
@@ -26,8 +27,9 @@ public class YahooLocalQuery {
 	private int results;
 
 	public YahooLocalQuery(String subFolder, BufferedWriter queryOutput,
-			BufferedWriter resultsOutput, Envelope envelopeState, String appid, int start,
-			Circle circle, int numQueries, String query, int zip, int results) {
+			BufferedWriter resultsOutput, Envelope envelopeState, String appid,
+			int start, Circle circle, int numQueries, String query, int zip,
+			int results) {
 		super();
 		this.subFolder = subFolder;
 		this.queryOutput = queryOutput;
@@ -41,7 +43,7 @@ public class YahooLocalQuery {
 		this.zip = zip;
 		this.results = results;
 	}
-	
+
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("appid=");
@@ -99,11 +101,17 @@ public class YahooLocalQuery {
 		sb.append("&start=");
 		sb.append(start);
 		sb.append("&latitude=");
-		sb.append(circle.getCenter().y);
+		String latitude = new BigDecimal(circle.getCenter().y).toPlainString();
+		// sb.append(circle.getCenter().y);
+		sb.append(latitude);
 		sb.append("&longitude=");
-		sb.append(circle.getCenter().x);
+		String longitude = new BigDecimal(circle.getCenter().x).toPlainString();
+		sb.append(longitude);
+		// sb.append(circle.getCenter().x);
 		sb.append("&radius=");
-		sb.append(circle.getRadius());
+		String radius = new BigDecimal(circle.getRadius()).toPlainString();
+		// sb.append(circle.getRadius());
+		sb.append(radius);
 		return sb.toString();
 	}
 

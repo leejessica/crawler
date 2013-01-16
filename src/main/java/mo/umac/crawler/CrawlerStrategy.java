@@ -411,7 +411,7 @@ public abstract class CrawlerStrategy {
 	protected HttpClient createHttpClient() {
 		PoolingClientConnectionManager manager = new PoolingClientConnectionManager();
 		HttpParams params = new BasicHttpParams();
-		int timeout = 1000 * 10;
+		int timeout = 1000 * 100;
 		HttpConnectionParams.setConnectionTimeout(params, timeout);
 		HttpConnectionParams.setSoTimeout(params, timeout);
 		HttpClient httpClient = new DefaultHttpClient(manager, params);
