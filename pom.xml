@@ -149,7 +149,7 @@
 								<goal>copy-resources</goal>
 							</goals>
 							<configuration>
-								<encoding>UTF-8</encoding>
+								<!-- <encoding>UTF-8</encoding> -->
 								<outputDirectory>${project.build.directory}</outputDirectory>
 								<!-- 把配置文件拷到和jar包同一个路径下 -->
 								<resources>
