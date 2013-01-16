@@ -45,6 +45,10 @@ public abstract class CrawlerStrategy {
 	public static Logger logger = Logger.getLogger(CrawlerStrategy.class
 			.getName());
 
+	public static final String APPID = "appid";
+
+	public static String PROPERTY_PATH = "./src/main/resources/crawler.properties";
+
 	/**
 	 * The maximum number of returned results by a query.
 	 */
@@ -101,13 +105,8 @@ public abstract class CrawlerStrategy {
 		httpClient = createHttpClient();
 
 		try {
-
-			// TODO Change it for different crawling machines
-			// kate.yanhui@yahoo.com
-			String appid = "l6QevFbV34H1VKW58naZ8keJohc8NkMNvuWfVs2lR3ROJMtw63XOWBePbDcMBFfkDnU-";
-			// kate.yan.code@gmail.com
-			// String appid =
-			// "tsKnW6HV34GaeBtQ_48Z6.0cqxXf_oqNpluRpN5lsnwXhGGc_FaBw0S16_UnaHH1P6DhMItQB7SYDRbySnSD4xFJF_iaV6M-";
+			String appid = FileOperator
+					.readAppid(CrawlerStrategy.PROPERTY_PATH);
 			for (int i = 0; i < nameStates.size(); i++) {
 				// for (int i = nameStates.size() - 1; i >= 0; i--) {
 				String stateName = nameStates.get(i);
@@ -340,6 +339,8 @@ public abstract class CrawlerStrategy {
 			HttpResponse response = httpclient.execute(httpget);
 			HttpEntity entity = response.getEntity();
 			if (entity != null) {
+				// FIXME read time out exception may cause other exceptions in
+				// parsing the xml file
 				entity.writeTo(output);
 			}
 			output.close();

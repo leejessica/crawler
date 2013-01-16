@@ -3,10 +3,15 @@
  */
 package mo.umac.utils;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
+import mo.umac.crawler.CrawlerStrategy;
 import org.apache.log4j.Logger;
 
 /**
@@ -112,6 +117,27 @@ public class FileOperator {
 				// System.out.println(file.getAbsolutePath());
 			}
 		}
+	}
+
+	/**
+	 * Reading Yahoo! develop appid from the property file
+	 * 
+	 * @param propertyFile
+	 */
+	public static String readAppid(String propertyFile) {
+		Properties props = new Properties();
+		String appid = null;
+		try {
+			InputStream in = new BufferedInputStream(new FileInputStream(
+					propertyFile));
+			props.load(in);
+			appid = props.getProperty(CrawlerStrategy.APPID);
+			in.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+			logger.error("Error in load " + propertyFile, e);
+		}
+		return appid;
 	}
 
 }
