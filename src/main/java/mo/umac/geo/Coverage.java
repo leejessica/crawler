@@ -82,6 +82,7 @@ public class Coverage {
 			x2 = x1 + halfX;
 			for (double y1 = minY; y1 < maxY; y1 = y1 + halfY) {
 				y2 = y1 + halfY;
+				// FIXME out of memory. How many levels does it drill down? - The reason is the radius.
 				Envelope small = new Envelope(x1, x2, y1, y2);
 				list.add(small);
 			}
