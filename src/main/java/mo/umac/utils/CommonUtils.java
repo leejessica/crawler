@@ -44,7 +44,7 @@ public class CommonUtils {
 		for (Entry<T, E> entry : map.entrySet()) {
 			T key = entry.getKey();
 			E value = entry.getValue();
-			System.out.println(key.toString() + "=" + value);
+//			System.out.println(key.toString() + "=" + value);
 		}
 	}
 }

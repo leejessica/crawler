@@ -84,7 +84,7 @@ public abstract class CrawlerStrategy {
 
 	protected int numQueries = 1;
 
-	protected String query = "*";
+	protected String query = "restaurants";
 
 	protected int zip = 0;
 
@@ -119,7 +119,7 @@ public abstract class CrawlerStrategy {
 		Object searchingResult;
 		if (categoryName != null) {
 			categoryIDMap = FileOperator.readCategoryID(CATEGORY_ID_PATH);
-			CommonUtils.ergodicAMap(categoryIDMap);
+//			CommonUtils.ergodicAMap(categoryIDMap);
 			searchingResult = CommonUtils.getKeyByValue(categoryIDMap, categoryName); 
 			if(searchingResult != null){
 				category = (Integer)searchingResult;
@@ -300,8 +300,8 @@ public abstract class CrawlerStrategy {
 	protected ResultSet query(YahooLocalQuery qc) {
 		String url = qc.toUrl();
 
-		logger.info("numQueries=" + numQueries);
-		logger.info(url);
+//		logger.info("numQueries=" + numQueries);
+//		logger.info(url);
 
 		File xmlFile = FileOperator.createFileAutoAscending(qc.getSubFolder(),
 				qc.getNumQueries(), ".xml");
