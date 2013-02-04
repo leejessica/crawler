@@ -25,17 +25,21 @@ public class YahooLocalQuery {
 	private String query;
 	private int zip;
 	private int results;
+	private String state;
+	private int category;
 
 	public YahooLocalQuery(String subFolder, BufferedWriter queryOutput,
 			BufferedWriter resultsOutput, Envelope envelopeState, String appid,
-			int start, Circle circle, int numQueries, String query, int zip,
-			int results) {
+			String state, int category, int start, Circle circle,
+			int numQueries, String query, int zip, int results) {
 		super();
 		this.subFolder = subFolder;
 		this.queryOutput = queryOutput;
 		this.resultsOutput = resultsOutput;
 		this.envelopeState = envelopeState;
 		this.appid = appid;
+		this.state = state;
+		this.category = category;
 		this.start = start;
 		this.circle = circle;
 		this.numQueries = numQueries;
@@ -53,6 +57,12 @@ public class YahooLocalQuery {
 		if (zip > 0) {
 			sb.append("&zip=");
 			sb.append(zip);
+		}
+		sb.append("&state=");
+		sb.append(state);
+		if (category > 0) {
+			sb.append("&category=");
+			sb.append(category);
 		}
 		sb.append("&results=");
 		sb.append(results);
@@ -96,21 +106,24 @@ public class YahooLocalQuery {
 			sb.append("&zip=");
 			sb.append(zip);
 		}
+		sb.append("&state=");
+		sb.append(state);
+		if (category > 0) {
+			sb.append("&category=");
+			sb.append(category);
+		}
 		sb.append("&results=");
 		sb.append(results);
 		sb.append("&start=");
 		sb.append(start);
 		sb.append("&latitude=");
 		String latitude = new BigDecimal(circle.getCenter().y).toPlainString();
-		// sb.append(circle.getCenter().y);
 		sb.append(latitude);
 		sb.append("&longitude=");
 		String longitude = new BigDecimal(circle.getCenter().x).toPlainString();
 		sb.append(longitude);
-		// sb.append(circle.getCenter().x);
 		sb.append("&radius=");
 		String radius = new BigDecimal(circle.getRadius()).toPlainString();
-		// sb.append(circle.getRadius());
 		sb.append(radius);
 		return sb.toString();
 	}
@@ -201,6 +214,22 @@ public class YahooLocalQuery {
 
 	public void setResultsOutput(BufferedWriter resultsOutput) {
 		this.resultsOutput = resultsOutput;
+	}
+
+	public String getState() {
+		return state;
+	}
+
+	public void setState(String stateName) {
+		this.state = stateName;
+	}
+
+	public int getCategory() {
+		return category;
+	}
+
+	public void setCategory(int category) {
+		this.category = category;
 	}
 
 }

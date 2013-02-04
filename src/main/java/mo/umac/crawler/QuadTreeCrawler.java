@@ -28,14 +28,14 @@ public class QuadTreeCrawler extends CrawlerStrategy {
 	 * @param region
 	 * @return whether it is finished
 	 */
-	public IndicatorResult crawl(String appid, String subFolder,
-			Envelope aEnvelope, BufferedWriter queryOutput,
-			BufferedWriter resultsOutput) {
+	public IndicatorResult crawl(String appid, String state,
+			int category, String subFolder,
+			Envelope aEnvelope, BufferedWriter queryOutput, BufferedWriter resultsOutput) {
 		// logger.debug("crawling [" + aEnvelope.getMinX() + ","
 		// + aEnvelope.getMaxX() + "," + aEnvelope.getMinY() + ","
 		// + aEnvelope.getMaxY() + "]");
 		IndicatorResult indicatorResult = oneCrawlingProcedure(appid,
-				aEnvelope, subFolder, queryOutput, resultsOutput);
+				aEnvelope, state, category, subFolder, queryOutput, resultsOutput);
 		if (indicatorResult == IndicatorResult.OVERFLOW) {
 			ArrayList<Envelope> envelopeList = Coverage
 					.divideEnvelope(aEnvelope);
@@ -48,8 +48,8 @@ public class QuadTreeCrawler extends CrawlerStrategy {
 			// }
 			for (int i = 0; i < envelopeList.size(); i++) {
 				Envelope dividedEnvelope = envelopeList.get(i);
-				crawl(appid, subFolder, dividedEnvelope, queryOutput,
-						resultsOutput);
+				crawl(appid, state, category, subFolder,
+						dividedEnvelope, queryOutput, resultsOutput);
 			}
 		}
 		return indicatorResult;

@@ -16,7 +16,11 @@ public class CrawlerContext{
 	}
 	
 	public void callCrawling(){
-		this.crawlerStrategy.callCrawling();
+		this.crawlerStrategy.callCrawling(null);
+	}
+	
+	public void callCrawling(String category){
+		this.crawlerStrategy.callCrawling(category);
 	}
 	
 }

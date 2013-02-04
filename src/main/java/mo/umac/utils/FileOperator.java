@@ -4,14 +4,21 @@
 package mo.umac.utils;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+
 import mo.umac.crawler.CrawlerStrategy;
+
 import org.apache.log4j.Logger;
 
 /**
@@ -138,6 +145,39 @@ public class FileOperator {
 			logger.error("Error in load " + propertyFile, e);
 		}
 		return appid;
+	}
+
+	/**
+	 * Reading the category ids of Yahoo! Local
+	 * 
+	 * @param categrotyIDFile
+	 * @return
+	 */
+	public static HashMap<Integer, String> readCategoryID(String categrotyIDFile) {
+		HashMap<Integer, String> categoryID = new HashMap<Integer, String>();
+		File file = new File(categrotyIDFile);
+		if (!file.exists()) {
+			logger.error("file: " + categrotyIDFile + "does not exist");
+		}
+		BufferedReader br = null;
+		try {
+			br = new BufferedReader(new InputStreamReader(new FileInputStream(
+					categrotyIDFile)));
+			String data = null;
+			String[] split;
+			while ((data = br.readLine()) != null) {
+				data = data.trim();
+				split = data.split(",");
+//				System.out.println(Integer.parseInt(split[0]) + "=" + split[1]);
+				categoryID.put(Integer.parseInt(split[0]), split[1]);
+			}
+			br.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return categoryID;
 	}
 
 }

@@ -11,7 +11,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -20,6 +20,7 @@ import mo.umac.geo.Coverage;
 import mo.umac.geo.UScensusData;
 import mo.umac.parser.ResultSet;
 import mo.umac.parser.StaXParser;
+import mo.umac.utils.CommonUtils;
 import mo.umac.utils.FileOperator;
 
 import org.apache.http.HttpEntity;
@@ -48,6 +49,11 @@ public abstract class CrawlerStrategy {
 	public static final String APPID = "appid";
 
 	public static String PROPERTY_PATH = "./src/main/resources/crawler.properties";
+
+	/**
+	 * The path of the category ids of Yahoo! Local
+	 */
+	public static String CATEGORY_ID_PATH = "./src/main/resources/cat_id.txt";
 
 	/**
 	 * The maximum number of returned results by a query.
@@ -81,13 +87,15 @@ public abstract class CrawlerStrategy {
 	protected String query = "*";
 
 	protected int zip = 0;
-	
-	/*abbr. of the city name*/
+
+	/* abbr. of the city name */
 	// protected String state = "";
 	//
 	// protected int category = 0;
 
 	protected Envelope firstEnvelope = null;
+
+	protected HashMap<Integer, String> categoryIDMap;
 
 	/**
 	 * The maximum radius (in miles) of the query.
@@ -97,7 +105,8 @@ public abstract class CrawlerStrategy {
 	/**
 	 * Entrance of the crawler
 	 */
-	public void callCrawling() {
+
+	public void callCrawling(String categoryName) {
 		// crawl state by state
 		LinkedList<Envelope> envelopeStates = (LinkedList<Envelope>) UScensusData
 				.MBR(UScensusData.STATE_SHP_FILE_NAME);
@@ -105,8 +114,18 @@ public abstract class CrawlerStrategy {
 				.stateName(UScensusData.STATE_DBF_FILE_NAME);
 
 		FileOperator.createFolder("", DBFile.FOLDER_NAME);
-		// FileOperator.createFile(DBFile.DB_FILE_NAME);
 
+		int category = -1;
+		Object searchingResult;
+		if (categoryName != null) {
+			categoryIDMap = FileOperator.readCategoryID(CATEGORY_ID_PATH);
+			CommonUtils.ergodicAMap(categoryIDMap);
+			searchingResult = CommonUtils.getKeyByValue(categoryIDMap, categoryName); 
+			if(searchingResult != null){
+				category = (Integer)searchingResult;
+			}
+		}
+		
 		httpClient = createHttpClient();
 
 		try {
@@ -114,9 +133,9 @@ public abstract class CrawlerStrategy {
 					.readAppid(CrawlerStrategy.PROPERTY_PATH);
 			for (int i = 0; i < nameStates.size(); i++) {
 				// for (int i = nameStates.size() - 1; i >= 0; i--) {
-				String stateName = nameStates.get(i);
+				String state = nameStates.get(i);
 				String subFolder = FileOperator.createFolder(
-						DBFile.FOLDER_NAME, stateName);
+						DBFile.FOLDER_NAME, state);
 				// query file
 				String queryFile = subFolder + DBFile.QUERY_FILE_NAME;
 				FileOperator.createFile(queryFile);
@@ -131,8 +150,9 @@ public abstract class CrawlerStrategy {
 								resultsFile, true)));
 				//
 				Envelope envelopeState = envelopeStates.get(i);
-				crawl(appid, subFolder, envelopeState, queryOutput,
-						resultsOutput);
+				logger.info("Crawling " + state);
+				crawl(appid, state, category, subFolder, envelopeState,
+						queryOutput, resultsOutput);
 				//
 				queryOutput.flush();
 				resultsOutput.flush();
@@ -147,9 +167,9 @@ public abstract class CrawlerStrategy {
 		}
 	}
 
-	protected abstract IndicatorResult crawl(String appid, String subFolder,
-			Envelope envelopeState, BufferedWriter queryOutput,
-			BufferedWriter resultsOutput);
+	protected abstract IndicatorResult crawl(String appid, String state,
+			int category, String subFolder, Envelope envelopeState,
+			BufferedWriter queryOutput, BufferedWriter resultsOutput);
 
 	/**
 	 * Get next region according to the previous envelope
@@ -220,20 +240,22 @@ public abstract class CrawlerStrategy {
 	 * 
 	 * @param appid
 	 * @param aEnvelope
+	 * @param category 
 	 * @param subFolder
 	 * @param queryOutput
 	 * @param resultsOutput
+	 * @param stateName
 	 * @return an indicator of the result of this query
 	 */
 	protected IndicatorResult oneCrawlingProcedure(String appid,
-			Envelope aEnvelope, String subFolder, BufferedWriter queryOutput,
-			BufferedWriter resultsOutput) {
+			Envelope aEnvelope, String state, int category,
+			String subFolder, BufferedWriter queryOutput, BufferedWriter resultsOutput) {
 		// the first page for any query
 		int start = 1;
 		Circle circle = Coverage.computeCircle(aEnvelope);
 		YahooLocalQuery qc = new YahooLocalQuery(subFolder, queryOutput,
-				resultsOutput, aEnvelope, appid, start, circle, numQueries,
-				query, zip, MAX_RESULTS_NUM);
+				resultsOutput, aEnvelope, appid, state, category, start,
+				circle, numQueries, query, zip, MAX_RESULTS_NUM);
 		ResultSet resultSet = query(qc);
 		if (resultSet != null) {
 			// This loop represents turning over the page.
@@ -245,16 +267,16 @@ public abstract class CrawlerStrategy {
 			for (start += MAX_RESULTS_NUM; start < maxStartForThisQuery; start += MAX_RESULTS_NUM) {
 				// logger.info("strat=" + start);
 				qc = new YahooLocalQuery(subFolder, queryOutput, resultsOutput,
-						aEnvelope, appid, start, circle, numQueries, query,
-						zip, MAX_RESULTS_NUM);
+						aEnvelope, appid, state, category, start, circle,
+						numQueries, query, zip, MAX_RESULTS_NUM);
 				query(qc);
 			}
 			// the last query
 			if (maxStartForThisQuery == MAX_START) {
 				// logger.info("maxStartForThisQuery == MAX_START");
 				qc = new YahooLocalQuery(subFolder, queryOutput, resultsOutput,
-						aEnvelope, appid, maxStartForThisQuery, circle,
-						numQueries, query, zip, MAX_RESULTS_NUM);
+						aEnvelope, appid, state, category, maxStartForThisQuery,
+						circle, numQueries, query, zip, MAX_RESULTS_NUM);
 				query(qc);
 			}
 
@@ -278,8 +300,8 @@ public abstract class CrawlerStrategy {
 	protected ResultSet query(YahooLocalQuery qc) {
 		String url = qc.toUrl();
 
-		logger.debug("numQueries=" + numQueries);
-		logger.debug(url);
+		logger.info("numQueries=" + numQueries);
+		logger.info(url);
 
 		File xmlFile = FileOperator.createFileAutoAscending(qc.getSubFolder(),
 				qc.getNumQueries(), ".xml");
@@ -329,6 +351,25 @@ public abstract class CrawlerStrategy {
 	}
 
 	/**
+	 * judge whether the web-site returns random results (whether the ranking
+	 * function of the web-site is static)
+	 * 
+	 * @return
+	 */
+	private boolean isStaticRanking() {
+		// TODO isStaticRanking
+		return true;
+	}
+
+	/**
+	 * Add more restriction to the query, in order to solve the restriction on
+	 * the radius.
+	 */
+	private void fineQuery() {
+		// TODO fineQuery
+	}
+
+	/**
 	 * Issue the query, and then save the returned .xml file.
 	 * 
 	 * @param httpclient
@@ -344,7 +385,6 @@ public abstract class CrawlerStrategy {
 			HttpResponse response = httpclient.execute(httpget);
 			HttpEntity entity = response.getEntity();
 			if (entity != null) {
-				// FIXME read time out exception may cause other exceptions in
 				// parsing the xml file
 				entity.writeTo(output);
 			}
@@ -416,8 +456,7 @@ public abstract class CrawlerStrategy {
 	protected HttpClient createHttpClient() {
 		PoolingClientConnectionManager manager = new PoolingClientConnectionManager();
 		HttpParams params = new BasicHttpParams();
-		// XXX timeout = 1000 * 24 * 60 *60;
-		int timeout = 1000 * 24 * 60 *60;
+		int timeout = 1000 * 24 * 60 * 60;
 		HttpConnectionParams.setConnectionTimeout(params, timeout);
 		HttpConnectionParams.setSoTimeout(params, timeout);
 		HttpClient httpClient = new DefaultHttpClient(manager, params);
@@ -469,4 +508,5 @@ public abstract class CrawlerStrategy {
 		}
 		return sb.toString();
 	}
+
 }
