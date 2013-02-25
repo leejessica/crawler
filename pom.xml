@@ -10,6 +10,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<geotools.version>8.3</geotools.version>
 	</properties>
 
 	<dependencies>
@@ -44,17 +45,24 @@
 			<version>4.10</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-shapefile</artifactId>
-			<version>8.3</version>
-		</dependency>
+
 
 		<dependency>
 			<groupId>org.geotools</groupId>
-			<artifactId>gt-swing</artifactId>
-			<version>8.3</version>
+			<artifactId>gt-shapefile</artifactId>
+			<version>${geotools.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-epsg-hsql</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-swing</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
+
 
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -67,6 +75,13 @@
 			<artifactId>stax</artifactId>
 			<version>1.2.0</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.apache.ant</groupId>
+			<artifactId>ant</artifactId>
+			<version>1.8.4</version>
+		</dependency>
+
 
 	</dependencies>
 

@@ -16,7 +16,8 @@ public class Client {
 		DOMConfigurator.configure(Client.LOG_PROPERTY_PATH);
 		CrawlerStrategy crawlerStrategy = new QuadTreeCrawler();
 		CrawlerContext crawlerContext = new CrawlerContext(crawlerStrategy);
-//		String category = null;
+		// if you want to call all data, set category = null;
+		// String category = null;
 		String category = "Restaurants";
 		crawlerContext.callCrawling(category);
 	}

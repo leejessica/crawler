@@ -19,7 +19,7 @@ import com.vividsolutions.jts.geom.Envelope;
 public class UScensusDataTest {
 
 	public static Logger logger = Logger
-			.getLogger(UScensusData.class.getName());
+			.getLogger(UScensusDataTest.class.getName());
 
 	public static void main(String[] args) {
 		DOMConfigurator.configure(Client.LOG_PROPERTY_PATH);
