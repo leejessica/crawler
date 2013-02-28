@@ -119,13 +119,13 @@ public abstract class CrawlerStrategy {
 		Object searchingResult;
 		if (categoryName != null) {
 			categoryIDMap = FileOperator.readCategoryID(CATEGORY_ID_PATH);
-//			CommonUtils.ergodicAMap(categoryIDMap);
-			searchingResult = CommonUtils.getKeyByValue(categoryIDMap, categoryName); 
-			if(searchingResult != null){
-				category = (Integer)searchingResult;
+			searchingResult = CommonUtils.getKeyByValue(categoryIDMap,
+					categoryName);
+			if (searchingResult != null) {
+				category = (Integer) searchingResult;
 			}
 		}
-		
+
 		httpClient = createHttpClient();
 
 		try {
@@ -240,7 +240,7 @@ public abstract class CrawlerStrategy {
 	 * 
 	 * @param appid
 	 * @param aEnvelope
-	 * @param category 
+	 * @param category
 	 * @param subFolder
 	 * @param queryOutput
 	 * @param resultsOutput
@@ -248,8 +248,8 @@ public abstract class CrawlerStrategy {
 	 * @return an indicator of the result of this query
 	 */
 	protected IndicatorResult oneCrawlingProcedure(String appid,
-			Envelope aEnvelope, String state, int category,
-			String subFolder, BufferedWriter queryOutput, BufferedWriter resultsOutput) {
+			Envelope aEnvelope, String state, int category, String subFolder,
+			BufferedWriter queryOutput, BufferedWriter resultsOutput) {
 		// the first page for any query
 		int start = 1;
 		Circle circle = Coverage.computeCircle(aEnvelope);
@@ -275,8 +275,9 @@ public abstract class CrawlerStrategy {
 			if (maxStartForThisQuery == MAX_START) {
 				// logger.info("maxStartForThisQuery == MAX_START");
 				qc = new YahooLocalQuery(subFolder, queryOutput, resultsOutput,
-						aEnvelope, appid, state, category, maxStartForThisQuery,
-						circle, numQueries, query, zip, MAX_RESULTS_NUM);
+						aEnvelope, appid, state, category,
+						maxStartForThisQuery, circle, numQueries, query, zip,
+						MAX_RESULTS_NUM);
 				query(qc);
 			}
 
@@ -300,8 +301,8 @@ public abstract class CrawlerStrategy {
 	protected ResultSet query(YahooLocalQuery qc) {
 		String url = qc.toUrl();
 
-//		logger.info("numQueries=" + numQueries);
-//		logger.info(url);
+		// logger.info("numQueries=" + numQueries);
+		// logger.info(url);
 
 		File xmlFile = FileOperator.createFileAutoAscending(qc.getSubFolder(),
 				qc.getNumQueries(), ".xml");
