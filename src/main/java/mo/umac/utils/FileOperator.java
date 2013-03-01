@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import mo.umac.crawler.CrawlerStrategy;
+import mo.umac.crawler.OnlineYahooLocalCrawlerStrategy;
 
 import org.apache.log4j.Logger;
 
@@ -138,7 +138,7 @@ public class FileOperator {
 			InputStream in = new BufferedInputStream(new FileInputStream(
 					propertyFile));
 			props.load(in);
-			appid = props.getProperty(CrawlerStrategy.APPID);
+			appid = props.getProperty(OnlineYahooLocalCrawlerStrategy.APPID);
 			in.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -179,5 +179,5 @@ public class FileOperator {
 		}
 		return categoryID;
 	}
-
+	
 }

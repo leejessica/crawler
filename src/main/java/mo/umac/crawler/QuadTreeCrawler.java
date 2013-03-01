@@ -15,7 +15,7 @@ import com.vividsolutions.jts.geom.Envelope;
  * @author kate
  * 
  */
-public class QuadTreeCrawler extends CrawlerStrategy {
+public class QuadTreeCrawler extends OnlineYahooLocalCrawlerStrategy {
 	//
 	public static Logger logger = Logger.getLogger(QuadTreeCrawler.class
 			.getName());
@@ -29,13 +29,13 @@ public class QuadTreeCrawler extends CrawlerStrategy {
 	 * @return whether it is finished
 	 */
 	public IndicatorResult crawl(String appid, String state,
-			int category, String subFolder,
-			Envelope aEnvelope, BufferedWriter queryOutput, BufferedWriter resultsOutput) {
+			int category, String query,
+			String subFolder, Envelope aEnvelope, BufferedWriter queryOutput, BufferedWriter resultsOutput) {
 		// logger.debug("crawling [" + aEnvelope.getMinX() + ","
 		// + aEnvelope.getMaxX() + "," + aEnvelope.getMinY() + ","
 		// + aEnvelope.getMaxY() + "]");
 		IndicatorResult indicatorResult = oneCrawlingProcedure(appid,
-				aEnvelope, state, category, subFolder, queryOutput, resultsOutput);
+				aEnvelope, state, category, query, subFolder, queryOutput, resultsOutput);
 		if (indicatorResult == IndicatorResult.OVERFLOW) {
 			ArrayList<Envelope> envelopeList = Coverage
 					.divideEnvelope(aEnvelope);
@@ -48,8 +48,8 @@ public class QuadTreeCrawler extends CrawlerStrategy {
 			// }
 			for (int i = 0; i < envelopeList.size(); i++) {
 				Envelope dividedEnvelope = envelopeList.get(i);
-				crawl(appid, state, category, subFolder,
-						dividedEnvelope, queryOutput, resultsOutput);
+				crawl(appid, state, category, query,
+						subFolder, dividedEnvelope, queryOutput, resultsOutput);
 			}
 		}
 		return indicatorResult;

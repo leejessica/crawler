@@ -9,9 +9,9 @@ package mo.umac.crawler;
  */
 public class CrawlerContext{
 
-	private CrawlerStrategy crawlerStrategy;
+	private OnlineYahooLocalCrawlerStrategy crawlerStrategy;
 	
-	public CrawlerContext(CrawlerStrategy crawlerStrategy){
+	public CrawlerContext(OnlineYahooLocalCrawlerStrategy crawlerStrategy){
 		this.crawlerStrategy = crawlerStrategy;
 	}
 	

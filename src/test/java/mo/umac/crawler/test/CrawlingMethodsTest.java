@@ -25,7 +25,6 @@ import org.apache.log4j.xml.DOMConfigurator;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
-import mo.umac.crawler.BruteForceCrawler;
 import mo.umac.crawler.Client;
 import mo.umac.utils.FileOperator;
 
