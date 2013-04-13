@@ -17,9 +17,9 @@ public class Client {
 		OnlineYahooLocalCrawlerStrategy crawlerStrategy = new QuadTreeCrawler();
 		CrawlerContext crawlerContext = new CrawlerContext(crawlerStrategy);
 		// if you want to crawl all data, set category = null;
-		String category = null;
+		// String category = null;
 		// Or if you want to crawl specified category of data:
-		// String category = "Restaurants";
+		String category = "Hotels & Motels";
 		crawlerContext.callCrawling(category);
 	}
 

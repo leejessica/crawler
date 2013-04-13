@@ -7,6 +7,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.util.List;
 
+
+
 /**
  * ResultsSet of the xml page returned by Yahoo Local!
  * 
@@ -14,12 +16,16 @@ import java.util.List;
  * 
  */
 public class ResultSet {
+
+	// add at 2013-4-5
+	private YahooXmlType xmlType = YahooXmlType.UNKNOWN;
+
 	private String xmlFileName = "";
 
 	private File xmlFile = null;
-	
+
 	private BufferedWriter resultsOutput;
-	
+
 	private int totalResultsAvailable = 0;
 
 	private int totalResultsReturned = 0;
@@ -28,12 +34,16 @@ public class ResultSet {
 
 	private List<Result> results;
 
-	private boolean limitExceeded = false;
+	// private boolean limitExceeded = false;
 
 	private boolean UnexpectedError = false;
-	
-	public void setLimitExceeded(boolean limitExceeded) {
-		this.limitExceeded = limitExceeded;
+
+	public YahooXmlType getXmlType() {
+		return xmlType;
+	}
+
+	public void setXmlType(YahooXmlType xmlType) {
+		this.xmlType = xmlType;
 	}
 
 	public void setUnexpectedError(boolean unexpectedError) {
@@ -56,9 +66,13 @@ public class ResultSet {
 		return firstResultPosition;
 	}
 
-	public boolean isLimitExceeded() {
-		return limitExceeded;
-	}
+	// public void setLimitExceeded(boolean limitExceeded) {
+	// this.limitExceeded = limitExceeded;
+	// }
+	//
+	// public boolean isLimitExceeded() {
+	// return limitExceeded;
+	// }
 
 	public String getXmlFileName() {
 		return xmlFileName;
