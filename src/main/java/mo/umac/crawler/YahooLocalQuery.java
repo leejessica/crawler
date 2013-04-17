@@ -15,6 +15,8 @@ import com.vividsolutions.jts.geom.Envelope;
  */
 public class YahooLocalQuery {
 	private String subFolder;
+	private String queryFile;
+	private String resultsFile;
 	private BufferedWriter queryOutput;
 	private BufferedWriter resultsOutput;
 	private Envelope envelopeState;
@@ -28,13 +30,13 @@ public class YahooLocalQuery {
 	private String state;
 	private int category;
 
-	public YahooLocalQuery(String subFolder, BufferedWriter queryOutput,
-			BufferedWriter resultsOutput, Envelope envelopeState, String appid,
-			String state, int category, int start, Circle circle,
-			int numQueries, String query, int zip, int results) {
+	public YahooLocalQuery(String subFolder, String queryFile, BufferedWriter queryOutput, String resultsFile, BufferedWriter resultsOutput,
+			Envelope envelopeState, String appid, String state, int category, int start, Circle circle, int numQueries, String query, int zip, int results) {
 		super();
 		this.subFolder = subFolder;
+		this.queryFile = queryFile;
 		this.queryOutput = queryOutput;
+		this.resultsFile = resultsFile;
 		this.resultsOutput = resultsOutput;
 		this.envelopeState = envelopeState;
 		this.appid = appid;
@@ -74,6 +76,27 @@ public class YahooLocalQuery {
 		sb.append(circle.getCenter().x);
 		sb.append("&radius=");
 		sb.append(circle.getRadius());
+		return sb.toString();
+	}
+
+	public String toStringForWritting() {
+		StringBuffer sb = new StringBuffer();
+		double latitude = circle.getCenter().y;
+		double longitude = circle.getCenter().x;
+		double radius = circle.getRadius();
+		sb.append(query);
+		sb.append(";");
+		sb.append(Integer.toString(zip));
+		sb.append(";");
+		sb.append(Integer.toString(results));
+		sb.append(";");
+		sb.append(Integer.toString(start));
+		sb.append(";");
+		sb.append(Double.toString(latitude));
+		sb.append(";");
+		sb.append(Double.toString(longitude));
+		sb.append(";");
+		sb.append(Double.toString(radius));
 		return sb.toString();
 	}
 
@@ -198,6 +221,22 @@ public class YahooLocalQuery {
 
 	public void setResults(int results) {
 		this.results = results;
+	}
+
+	public String getQueryFile() {
+		return queryFile;
+	}
+
+	public void setQueryFile(String queryFile) {
+		this.queryFile = queryFile;
+	}
+
+	public String getResultsFile() {
+		return resultsFile;
+	}
+
+	public void setResultsFile(String resultsFile) {
+		this.resultsFile = resultsFile;
 	}
 
 	public BufferedWriter getQueryOutput() {

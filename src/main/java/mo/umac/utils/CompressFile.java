@@ -34,15 +34,12 @@ public class CompressFile {
 		return instance;
 	}
 
-	public synchronized void zip(String inputFilename, String zipFilename)
-			throws IOException {
+	public synchronized void zip(String inputFilename, String zipFilename) throws IOException {
 		zip(new File(inputFilename), zipFilename);
 	}
 
-	public synchronized void zip(File inputFile, String zipFilename)
-			throws IOException {
-		ZipOutputStream out = new ZipOutputStream(new FileOutputStream(
-				zipFilename));
+	public synchronized void zip(File inputFile, String zipFilename) throws IOException {
+		ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipFilename));
 
 		try {
 			zip(inputFile, out, "");
@@ -53,8 +50,7 @@ public class CompressFile {
 		}
 	}
 
-	private synchronized void zip(File inputFile, ZipOutputStream out,
-			String base) throws IOException {
+	private synchronized void zip(File inputFile, ZipOutputStream out, String base) throws IOException {
 		if (inputFile.isDirectory()) {
 			File[] inputFiles = inputFile.listFiles();
 			out.putNextEntry(new ZipEntry(base + "/"));
@@ -85,8 +81,7 @@ public class CompressFile {
 		}
 	}
 
-	private synchronized void zip(String[] inputFiles, ZipOutputStream out,
-			String base) throws IOException {
+	private synchronized void zip(String[] inputFiles, ZipOutputStream out, String base) throws IOException {
 		out.putNextEntry(new ZipEntry(base + "/"));
 		base = base.length() == 0 ? "" : base + "/";
 
@@ -100,8 +95,7 @@ public class CompressFile {
 		}
 	}
 
-	private synchronized void zipKeepFolder(String[] inputFiles,
-			ZipOutputStream out, String base, String prefix) throws IOException {
+	private synchronized void zipKeepFolder(String[] inputFiles, ZipOutputStream out, String base, String prefix) throws IOException {
 		out.putNextEntry(new ZipEntry(base + "/"));
 		base = base.length() == 0 ? "" : base + "/";
 
@@ -112,23 +106,14 @@ public class CompressFile {
 		for (int i = 0; i < inputFiles.length; i++) {
 			file = new File(inputFiles[i]);
 
-			zip(file,
-					out,
-					base
-							+ file.getParent()
-									.replaceFirst(
-											prefix.replaceFirst("\\\\",
-													"\\\\\\\\"), "")
-							+ File.separator + file.getName());
+			zip(file, out, base + file.getParent().replaceFirst(prefix.replaceFirst("\\\\", "\\\\\\\\"), "") + File.separator + file.getName());
 			// System.out.println(file.getParent().replaceFirst(prefix.replaceFirst("\\\\",
 			// "\\\\\\\\"), ""));
 		}
 	}
 
-	private synchronized void zip(String[] inputFiles, String zipFilename)
-			throws FileNotFoundException, IOException {
-		ZipOutputStream out = new ZipOutputStream(new FileOutputStream(
-				zipFilename));
+	private synchronized void zip(String[] inputFiles, String zipFilename) throws FileNotFoundException, IOException {
+		ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipFilename));
 
 		try {
 			zip(inputFiles, out, "");
@@ -139,10 +124,8 @@ public class CompressFile {
 		}
 	}
 
-	private synchronized void zip(String[] inputFiles, String zipFilename,
-			String prefixDir) throws FileNotFoundException, IOException {
-		ZipOutputStream out = new ZipOutputStream(new FileOutputStream(
-				zipFilename));
+	private synchronized void zip(String[] inputFiles, String zipFilename, String prefixDir) throws FileNotFoundException, IOException {
+		ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipFilename));
 
 		try {
 
@@ -155,11 +138,8 @@ public class CompressFile {
 		}
 	}
 
-	private synchronized void zipKeepFolder(String[] inputFiles,
-			String zipFilename, String prefixDir) throws FileNotFoundException,
-			IOException {
-		ZipOutputStream out = new ZipOutputStream(new FileOutputStream(
-				zipFilename));
+	private synchronized void zipKeepFolder(String[] inputFiles, String zipFilename, String prefixDir) throws FileNotFoundException, IOException {
+		ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipFilename));
 
 		try {
 			zipKeepFolder(inputFiles, out, "", prefixDir);
@@ -170,8 +150,7 @@ public class CompressFile {
 		}
 	}
 
-	public synchronized void unzip(String zipFilename, String outputDirectory)
-			throws IOException {
+	public synchronized void unzip(String zipFilename, String outputDirectory) throws IOException {
 		File outFile = new File(outputDirectory);
 		if (!outFile.exists()) {
 			outFile.mkdirs();
@@ -192,8 +171,7 @@ public class CompressFile {
 
 			} else {
 				// unzip file
-				File f = new File(outFile.getPath() + File.separator
-						+ zipEntry.getName());
+				File f = new File(outFile.getPath() + File.separator + zipEntry.getName());
 				f.createNewFile();
 				InputStream in = zipFile.getInputStream(zipEntry);
 				FileOutputStream out = new FileOutputStream(f);
@@ -389,20 +367,16 @@ public class CompressFile {
 																// its number
 																// exceed 1000
 				} else {
-					bean.zip(strList.toArray(new String[0]), baseDir + filename
-							+ count + ".zip");
-					System.out.println("Add " + strList.size() + " files into "
-							+ baseDir + filename + count + ".zip");
+					bean.zip(strList.toArray(new String[0]), baseDir + filename + count + ".zip");
+					System.out.println("Add " + strList.size() + " files into " + baseDir + filename + count + ".zip");
 					strList.clear();
 					count++;
 				}
 			}
 
 			if (strList.size() > 0) {
-				bean.zip(strList.toArray(new String[0]), baseDir + filename
-						+ count + ".zip");
-				System.out.println("Add " + strList.size() + " files into "
-						+ baseDir + filename + count + ".zip");
+				bean.zip(strList.toArray(new String[0]), baseDir + filename + count + ".zip");
+				System.out.println("Add " + strList.size() + " files into " + baseDir + filename + count + ".zip");
 			}
 
 		} catch (IOException e) {
@@ -410,8 +384,7 @@ public class CompressFile {
 		}
 	}
 
-	public static void zipFilesTo(String[] files, String destDir,
-			String destFile) throws FileNotFoundException, IOException {
+	public static void zipFilesTo(String[] files, String destDir, String destFile) throws FileNotFoundException, IOException {
 		CompressFile bean = new CompressFile();
 
 		File dirFile = new File(destDir);
@@ -423,8 +396,7 @@ public class CompressFile {
 		bean.zip(files, destDir + destFile + ".zip");
 	}
 
-	public static void zipFilesTo(File[] files, String destDir, String destFile)
-			throws FileNotFoundException, IOException {
+	public static void zipFilesTo(File[] files, String destDir, String destFile) throws FileNotFoundException, IOException {
 		// CompressFile bean = new CompressFile();
 
 		File dirFile = new File(destDir);
@@ -442,8 +414,7 @@ public class CompressFile {
 		CompressFile.instance.zip(strs, destDir + destFile + ".zip");
 	}
 
-	public static void zipOSM(File[] files, String destDir, String destFile)
-			throws FileNotFoundException, IOException {
+	public static void zipOSM(File[] files, String destDir, String destFile) throws FileNotFoundException, IOException {
 		// CompressFile bean = new CompressFile();
 
 		File dirFile = new File(destDir);
@@ -493,11 +464,8 @@ public class CompressFile {
 																	// exceed
 																	// 1000
 					} else {
-						bean.zip(strList.toArray(new String[0]), destDir
-								+ filename + count + ".zip");
-						System.out.println("Add " + strList.size()
-								+ " files into " + destDir + filename + count
-								+ ".zip");
+						bean.zip(strList.toArray(new String[0]), destDir + filename + count + ".zip");
+						System.out.println("Add " + strList.size() + " files into " + destDir + filename + count + ".zip");
 						totalNum += strList.size();
 						strList.clear();
 						count++;
@@ -506,10 +474,8 @@ public class CompressFile {
 				}
 
 				if (strList.size() > 0) {
-					bean.zip(strList.toArray(new String[0]), destDir + filename
-							+ count + ".zip");
-					System.out.println("Add " + strList.size() + " files into "
-							+ destDir + filename + count + ".zip");
+					bean.zip(strList.toArray(new String[0]), destDir + filename + count + ".zip");
+					System.out.println("Add " + strList.size() + " files into " + destDir + filename + count + ".zip");
 					totalNum += strList.size();
 
 				}

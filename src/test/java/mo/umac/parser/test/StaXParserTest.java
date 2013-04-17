@@ -19,12 +19,12 @@ public class StaXParserTest {
 	public static void main(String args[]) {
 		DOMConfigurator.configure(Client.LOG_PROPERTY_PATH);
 		StaXParserTest test = new StaXParserTest();
-		test.parsePage();
+		test.parseErrorPage3();
 	}
 
 	private void parsePage() {
 		StaXParser read = new StaXParser();
-		String testXmlFile = "./src/test/resources/localSearch.xml";
+		String testXmlFile = "./src/test/resources/returnedpages/demo.xml";
 		ResultSet resultSet = read.readConfig(testXmlFile);
 		System.out.println(resultSet.getTotalResultsAvailable());
 		System.out.println(resultSet.getTotalResultsReturned());
@@ -38,9 +38,24 @@ public class StaXParserTest {
 		}
 	}
 
-	private void parseErrorPage() {
+	private void parseErrorPage1() {
 		StaXParser read = new StaXParser();
-		String testXmlFile = "./src/test/resources/limitexceed.xml";
+		String testXmlFile = "./src/test/resources/returnedpages/limitexceed.xml";
+		ResultSet resultSet = read.readConfig(testXmlFile);
+		System.out.println(resultSet.getXmlType());
+	}
+	
+	private void parseErrorPage2() {
+		StaXParser read = new StaXParser();
+		String testXmlFile = "./src/test/resources/returnedpages/invalidvalue.xml";
+		ResultSet resultSet = read.readConfig(testXmlFile);
+		System.out.println(resultSet.getXmlType());
+	}
+	
+	private void parseErrorPage3() {
+		// XXX I'm not sure whether this condition will appear in Yahoo! Local.
+		StaXParser read = new StaXParser();
+		String testXmlFile = "./src/test/resources/returnedpages/empty.xml";
 		ResultSet resultSet = read.readConfig(testXmlFile);
 		System.out.println(resultSet.getXmlType());
 	}

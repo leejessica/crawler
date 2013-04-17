@@ -1,5 +1,8 @@
 package mo.umac.crawler;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import mo.umac.geo.UScensusData;
 
 import org.apache.log4j.xml.DOMConfigurator;
@@ -12,15 +15,19 @@ public class Client {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		initialResourceFolder(true);
+		initForServer(false);
 		DOMConfigurator.configure(Client.LOG_PROPERTY_PATH);
 		OnlineYahooLocalCrawlerStrategy crawlerStrategy = new QuadTreeCrawler();
 		CrawlerContext crawlerContext = new CrawlerContext(crawlerStrategy);
-		// if you want to crawl all data, set category = null;
-		// String category = null;
-		// Or if you want to crawl specified category of data:
-		String category = "Hotels & Motels";
-		crawlerContext.callCrawling(category);
+		//
+		LinkedList<String> listNameStates = new LinkedList<String>();
+		List<String> listCategoryNames = new LinkedList<String>();
+		String category1 = "Hotels & Motels";
+		String category2 = "Restaurants";
+		listCategoryNames.add(category1);
+		listCategoryNames.add(category2);
+		//
+		crawlerContext.callCrawling(listNameStates, listCategoryNames);
 	}
 
 	/**
@@ -28,7 +35,7 @@ public class Client {
 	 * 
 	 * @param packaging
 	 */
-	public static void initialResourceFolder(boolean packaging) {
+	public static void initForServer(boolean packaging) {
 		if (packaging) {
 			// for packaging, set the resources folder as
 			OnlineYahooLocalCrawlerStrategy.PROPERTY_PATH = "target/crawler.properties";

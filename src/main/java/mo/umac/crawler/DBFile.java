@@ -73,7 +73,7 @@ public class DBFile {
 			e.printStackTrace();
 		}
 	}
-
+	
 	public static void writeResultsFile(String partFileName, ResultSet resultSet) {
 		BufferedWriter resultsOutput = resultSet.getResultsOutput();
 		List<Result> results = resultSet.getResults();

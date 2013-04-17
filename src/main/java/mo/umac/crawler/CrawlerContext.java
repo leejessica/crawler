@@ -3,24 +3,24 @@
  */
 package mo.umac.crawler;
 
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  * @author kate
- *
+ * 
  */
-public class CrawlerContext{
+public class CrawlerContext {
 
 	private OnlineYahooLocalCrawlerStrategy crawlerStrategy;
-	
-	public CrawlerContext(OnlineYahooLocalCrawlerStrategy crawlerStrategy){
+
+	public CrawlerContext(OnlineYahooLocalCrawlerStrategy crawlerStrategy) {
 		this.crawlerStrategy = crawlerStrategy;
 	}
-	
-	public void callCrawling(){
-		this.crawlerStrategy.callCrawling(null);
+
+	public void callCrawling(LinkedList<String> listNameStates,
+			List<String> listCategoryNames) {
+		this.crawlerStrategy.callCrawling(listNameStates, listCategoryNames);
 	}
-	
-	public void callCrawling(String category){
-		this.crawlerStrategy.callCrawling(category);
-	}
-	
+
 }

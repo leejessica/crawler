@@ -19,7 +19,6 @@ import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.xml.DOMConfigurator;
 
 /**
  * Parse the returned xml file.
@@ -66,27 +65,23 @@ public class StaXParser {
 	@SuppressWarnings({ "unchecked", "null" })
 	public ResultSet readConfig(String configFile) {
 		ResultSet resultSet = new ResultSet();
-
 		try {
 			// First create a new XMLInputFactory
 			XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 			// Setup a new eventReader
 			InputStream in = new FileInputStream(configFile);
 			XMLEventReader eventReader = inputFactory.createXMLEventReader(in);
+			// TODO check other conditions
 			// Read the XML document
-
 			while (eventReader.hasNext()) {
 				XMLEvent event = eventReader.nextEvent();
 				if (event.isStartElement()) {
 					StartElement startElement = event.asStartElement();
-					// add at 2013-4-5
 					if (startElement.getName().getLocalPart().equals(ERROR)) {
 						resultSet = parseErrorInfo(eventReader, resultSet);
 					} else {
-						if (startElement.getName().getLocalPart()
-								.equals(RESULT_SET)) {
-							resultSet = parseResultSetInfo(eventReader,
-									resultSet, startElement);
+						if (startElement.getName().getLocalPart().equals(RESULT_SET)) {
+							resultSet = parseResultSetInfo(eventReader, resultSet, startElement);
 						}
 					}
 				}
@@ -99,8 +94,7 @@ public class StaXParser {
 		return resultSet;
 	}
 
-	private ResultSet parseErrorInfo(XMLEventReader eventReader,
-			ResultSet resultSet) throws XMLStreamException {
+	private ResultSet parseErrorInfo(XMLEventReader eventReader, ResultSet resultSet) throws XMLStreamException {
 		while (eventReader.hasNext()) {
 			XMLEvent event = eventReader.nextEvent();
 			if (event.isStartElement()) {
@@ -111,7 +105,6 @@ public class StaXParser {
 					if (message.equals(LIMIT_EXCEED)) {
 						resultSet.setXmlType(YahooXmlType.LIMIT_EXCEEDED);
 					} else {
-						// TODO parse other messages!
 						logger.error("Error Page: " + message);
 						resultSet.setXmlType(YahooXmlType.OTHER_ERROR);
 					}
@@ -128,9 +121,7 @@ public class StaXParser {
 	 * @return
 	 * @throws XMLStreamException
 	 */
-	private ResultSet parseResultSetInfo(XMLEventReader eventReader,
-			ResultSet resultSet, StartElement startElement)
-			throws XMLStreamException {
+	private ResultSet parseResultSetInfo(XMLEventReader eventReader, ResultSet resultSet, StartElement startElement) throws XMLStreamException {
 		List<Result> results = new ArrayList<Result>();
 		Result result = null;
 		Rating rating = null;
@@ -139,16 +130,13 @@ public class StaXParser {
 		while (attributes.hasNext()) {
 			Attribute attribute = attributes.next();
 			if (attribute.getName().toString().equals(TOTAL_RESULTS_AVAILABLE)) {
-				resultSet.setTotalResultsAvailable(Integer.parseInt(attribute
-						.getValue()));
+				resultSet.setTotalResultsAvailable(Integer.parseInt(attribute.getValue()));
 			}
 			if (attribute.getName().toString().equals(TOTAL_RESULTS_RETURNED)) {
-				resultSet.setTotalResultsReturned(Integer.parseInt(attribute
-						.getValue()));
+				resultSet.setTotalResultsReturned(Integer.parseInt(attribute.getValue()));
 			}
 			if (attribute.getName().toString().equals(FIRST_RESULT_POSITION)) {
-				resultSet.setFirstResultPosition(Integer.parseInt(attribute
-						.getValue()));
+				resultSet.setFirstResultPosition(Integer.parseInt(attribute.getValue()));
 			}
 		}
 		// Parse the details information
@@ -170,8 +158,7 @@ public class StaXParser {
 				} else if (startElement.getName().getLocalPart().equals(TITLE)) {
 					event = eventReader.nextEvent();
 					result.setTitle(event.toString());
-				} else if (startElement.getName().getLocalPart()
-						.equals(ADDRESS)) {
+				} else if (startElement.getName().getLocalPart().equals(ADDRESS)) {
 					event = eventReader.nextEvent();
 					result.setAddress(event.toString());
 				} else if (startElement.getName().getLocalPart().equals(CITY)) {
@@ -183,35 +170,28 @@ public class StaXParser {
 				} else if (startElement.getName().getLocalPart().equals(PHONE)) {
 					event = eventReader.nextEvent();
 					result.setPhone(event.toString());
-				} else if (startElement.getName().getLocalPart()
-						.equals(LATITUDE)) {
+				} else if (startElement.getName().getLocalPart().equals(LATITUDE)) {
 					event = eventReader.nextEvent();
 					result.setLatitude(Double.parseDouble(event.toString()));
-				} else if (startElement.getName().getLocalPart()
-						.equals(LONGITUDE)) {
+				} else if (startElement.getName().getLocalPart().equals(LONGITUDE)) {
 					event = eventReader.nextEvent();
 					result.setLongitude(Double.parseDouble(event.toString()));
 				} else if (startElement.getName().getLocalPart().equals(RATING)) {
 					rating = new Rating();
-				} else if (startElement.getName().getLocalPart()
-						.equals(AVERAGE_RATING)) {
+				} else if (startElement.getName().getLocalPart().equals(AVERAGE_RATING)) {
 					event = eventReader.nextEvent();
 					rating.setAverageRating(event.toString());
-				} else if (startElement.getName().getLocalPart()
-						.equals(TOTAL_RATINGS)) {
+				} else if (startElement.getName().getLocalPart().equals(TOTAL_RATINGS)) {
 					event = eventReader.nextEvent();
 					rating.setTotalRatings(Integer.parseInt(event.toString()));
-				} else if (startElement.getName().getLocalPart()
-						.equals(TOTAL_REVIEWS)) {
+				} else if (startElement.getName().getLocalPart().equals(TOTAL_REVIEWS)) {
 					event = eventReader.nextEvent();
 					rating.setTotalReviews(Integer.parseInt(event.toString()));
 				}
-				if (startElement.getName().getLocalPart()
-						.equals(LAST_REVIEW_DATE)) {
+				if (startElement.getName().getLocalPart().equals(LAST_REVIEW_DATE)) {
 					event = eventReader.nextEvent();
 					rating.setLastReviewDate(event.toString());
-				} else if (startElement.getName().getLocalPart()
-						.equals(LAST_REVIEW_INTRO)) {
+				} else if (startElement.getName().getLocalPart().equals(LAST_REVIEW_INTRO)) {
 					event = eventReader.nextEvent();
 					rating.setLastReviewIntro(event.toString());
 				}
@@ -230,29 +210,23 @@ public class StaXParser {
 				if (startElement.getName().getLocalPart().equals(MAP_URL)) {
 					event = eventReader.nextEvent();
 					result.setMapUrl(event.toString());
-				} else if (startElement.getName().getLocalPart()
-						.equals(BUSINESS_URL)) {
+				} else if (startElement.getName().getLocalPart().equals(BUSINESS_URL)) {
 					event = eventReader.nextEvent();
 					result.setBusinessUrl(event.toString());
-				} else if (startElement.getName().getLocalPart()
-						.equals(BUSINESS_CLICK_URL)) {
+				} else if (startElement.getName().getLocalPart().equals(BUSINESS_CLICK_URL)) {
 					event = eventReader.nextEvent();
 					result.setBusinessClickUrl(event.toString());
 				}
 				//
-				else if (startElement.getName().getLocalPart()
-						.equals(CATEGORIES)) {
+				else if (startElement.getName().getLocalPart().equals(CATEGORIES)) {
 					categories = new ArrayList<Category>();
-				} else if (startElement.getName().getLocalPart()
-						.equals(CATEGORY)) {
+				} else if (startElement.getName().getLocalPart().equals(CATEGORY)) {
 					Category category = new Category();
-					Iterator<Attribute> attrCategories = startElement
-							.getAttributes();
+					Iterator<Attribute> attrCategories = startElement.getAttributes();
 					while (attrCategories.hasNext()) {
 						Attribute attribute = attrCategories.next();
 						if (attribute.getName().toString().equals(ID)) {
-							category.setId(Integer.parseInt(attribute
-									.getValue()));
+							category.setId(Integer.parseInt(attribute.getValue()));
 						}
 					}
 					event = eventReader.nextEvent();
@@ -265,8 +239,7 @@ public class StaXParser {
 				EndElement endElement = event.asEndElement();
 				if (endElement.getName().getLocalPart().equals(RATING)) {
 					result.setRating(rating);
-				} else if (endElement.getName().getLocalPart()
-						.equals(CATEGORIES)) {
+				} else if (endElement.getName().getLocalPart().equals(CATEGORIES)) {
 					result.setCategories(categories);
 				} else if (endElement.getName().getLocalPart().equals(RESULT)) {
 					results.add(result);

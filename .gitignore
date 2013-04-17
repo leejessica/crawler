@@ -13,7 +13,7 @@
 *crawler.properties
 
 # test files
-#/src/test
+/src/test
 
 # reports files
 /reports

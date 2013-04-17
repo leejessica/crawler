@@ -18,6 +18,9 @@ import java.util.List;
 public class ResultSet {
 
 	// add at 2013-4-5
+	/**
+	 * The page returned by Yahoo! Local. There are mainly two kinds of pages: valid returned page, or an error page
+	 */
 	private YahooXmlType xmlType = YahooXmlType.UNKNOWN;
 
 	private String xmlFileName = "";

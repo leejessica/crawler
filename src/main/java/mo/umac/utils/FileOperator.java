@@ -40,8 +40,7 @@ public class FileOperator {
 	 *            which is ".xml"
 	 * @return
 	 */
-	public static File createFileAutoAscending(String folder, int number,
-			String suffix) {
+	public static File createFileAutoAscending(String folder, int number, String suffix) {
 		String filePath = folder + number + suffix;
 		File file = new File(filePath);
 		String lastNumString;
@@ -49,14 +48,11 @@ public class FileOperator {
 		while (file.exists()) {
 			if (filePath.indexOf("-") != -1) {
 				// has "-"
-				lastNumString = filePath.substring(filePath.indexOf("-") + 1,
-						filePath.indexOf(".xml"));
+				lastNumString = filePath.substring(filePath.indexOf("-") + 1, filePath.indexOf(".xml"));
 				lastNum = Integer.parseInt(lastNumString);
-				filePath = filePath.substring(0, filePath.indexOf("-")) + "-"
-						+ (lastNum + 1) + ".xml";
+				filePath = filePath.substring(0, filePath.indexOf("-")) + "-" + (lastNum + 1) + ".xml";
 			} else {
-				filePath = filePath.substring(0, filePath.indexOf(".xml"))
-						+ "-" + 0 + ".xml";
+				filePath = filePath.substring(0, filePath.indexOf(".xml")) + "-" + 0 + ".xml";
 			}
 			file = new File(filePath);
 		}
@@ -73,9 +69,12 @@ public class FileOperator {
 		if (!file.exists()) {
 			try {
 				file.createNewFile();
+				logger.info("creating file " + fileName);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		} else {
+			logger.info("file already exists: " + fileName);
 		}
 		return file;
 	}
@@ -135,8 +134,7 @@ public class FileOperator {
 		Properties props = new Properties();
 		String appid = null;
 		try {
-			InputStream in = new BufferedInputStream(new FileInputStream(
-					propertyFile));
+			InputStream in = new BufferedInputStream(new FileInputStream(propertyFile));
 			props.load(in);
 			appid = props.getProperty(OnlineYahooLocalCrawlerStrategy.APPID);
 			in.close();
@@ -161,14 +159,14 @@ public class FileOperator {
 		}
 		BufferedReader br = null;
 		try {
-			br = new BufferedReader(new InputStreamReader(new FileInputStream(
-					categrotyIDFile)));
+			br = new BufferedReader(new InputStreamReader(new FileInputStream(categrotyIDFile)));
 			String data = null;
 			String[] split;
 			while ((data = br.readLine()) != null) {
 				data = data.trim();
 				split = data.split(",");
-//				System.out.println(Integer.parseInt(split[0]) + "=" + split[1]);
+				// System.out.println(Integer.parseInt(split[0]) + "=" +
+				// split[1]);
 				categoryID.put(Integer.parseInt(split[0]), split[1]);
 			}
 			br.close();
@@ -179,5 +177,5 @@ public class FileOperator {
 		}
 		return categoryID;
 	}
-	
+
 }
