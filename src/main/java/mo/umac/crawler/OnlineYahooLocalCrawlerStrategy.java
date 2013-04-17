@@ -348,7 +348,7 @@ public abstract class OnlineYahooLocalCrawlerStrategy {
 	 *            All information need in one query
 	 * @return The parsed result set.
 	 */
-	protected ResultSet query(YahooLocalQuery qc) {
+	public ResultSet query(YahooLocalQuery qc) {
 		File xmlFile = null;
 		ResultSet resultSet;
 		StaXParser parseXml = new StaXParser();
@@ -371,6 +371,8 @@ public abstract class OnlineYahooLocalCrawlerStrategy {
 				limitedPageCount = 0;
 				logger.error("YahooXmlType.OTHER_ERROR: " + url);
 			} else {
+				// breaking point
+				// FIXME XML parse error
 				logger.error("Unexpected type error of the resultSet!");
 			}
 			try {
@@ -416,7 +418,15 @@ public abstract class OnlineYahooLocalCrawlerStrategy {
 			beginTime = System.currentTimeMillis();
 		}
 		File xmlFile = FileOperator.createFileAutoAscending(qc.getSubFolder(), qc.getNumQueries(), ".xml");
-		fetching(httpClient, xmlFile, url);
+		boolean success = false;
+		int i = 0;
+		if (!success) {
+			success = fetching(httpClient, xmlFile, url);
+			i++;
+			if (i > 1) {
+				logger.error("fetching for the " + i + "times");
+			}
+		}
 		numQueries++;
 		return xmlFile;
 	}
@@ -506,7 +516,7 @@ public abstract class OnlineYahooLocalCrawlerStrategy {
 	 * @param xmlFile
 	 * @param url
 	 */
-	protected void fetching(HttpClient httpclient, File xmlFile, String url) {
+	protected boolean fetching(HttpClient httpclient, File xmlFile, String url) {
 		OutputStream output;
 		try {
 			output = new BufferedOutputStream(new FileOutputStream(xmlFile));
@@ -515,8 +525,13 @@ public abstract class OnlineYahooLocalCrawlerStrategy {
 			HttpResponse response = httpclient.execute(httpget);
 			HttpEntity entity = response.getEntity();
 			if (entity != null) {
-				// parsing the xml file
 				entity.writeTo(output);
+				// release the resources
+				httpget.abort();
+			} else {
+				logger.error("fetching an empty entity!");
+				// TODO re-fetching
+				return false;
 			}
 			output.close();
 		} catch (FileNotFoundException e) {
@@ -526,6 +541,7 @@ public abstract class OnlineYahooLocalCrawlerStrategy {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		return true;
 	}
 
 	/**
