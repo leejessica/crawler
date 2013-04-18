@@ -16,9 +16,7 @@ public class CommonUtils {
 
 	public static <T, E> T getKeyByValue(Map<T, E> map, E value) {
 		for (Entry<T, E> entry : map.entrySet()) {
-			System.out.println(entry.getValue());
 			if (value.equals(entry.getValue())) {
-//				System.out.println(entry.getKey());
 				return entry.getKey();
 			}
 		}

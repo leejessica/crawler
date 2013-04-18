@@ -297,16 +297,17 @@ public abstract class OnlineYahooLocalCrawlerStrategy {
 		// logger.debug("totalResultsAvailable=" +
 		// resultSet.getTotalResultsAvailable());
 		// logger.debug("maxStartForThisQuery=" + maxStartForThisQuery);
-		for (start += MAX_RESULTS_NUM; start < maxStartForThisQuery; start += MAX_RESULTS_NUM) {
+		// TODO check the last page
+		for (start += MAX_RESULTS_NUM; start <= maxStartForThisQuery; start += MAX_RESULTS_NUM) {
 			qc = new YahooLocalQuery(subFolder, queryFile, queryOutput, resultsFile, resultsOutput, aEnvelope, appid, state, category, start, circle,
 					numQueries, query, zip, MAX_RESULTS_NUM);
 			query(qc);
 		}
 		// the last query
 		if (maxStartForThisQuery == MAX_START) {
-			// logger.info("maxStartForThisQuery == MAX_START");
-			qc = new YahooLocalQuery(subFolder, queryFile, queryOutput, resultsFile, resultsOutput, aEnvelope, appid, state, category, maxStartForThisQuery,
-					circle, numQueries, query, zip, MAX_RESULTS_NUM);
+			start = maxStartForThisQuery;
+			qc = new YahooLocalQuery(subFolder, queryFile, queryOutput, resultsFile, resultsOutput, aEnvelope, appid, state, category, start, circle,
+					numQueries, query, zip, MAX_RESULTS_NUM);
 			query(qc);
 		}
 		if (resultSet.getTotalResultsAvailable() > MAX_TOTAL_RESULTS_RETURNED) {
@@ -353,27 +354,19 @@ public abstract class OnlineYahooLocalCrawlerStrategy {
 		ResultSet resultSet;
 		StaXParser parseXml = new StaXParser();
 		String url = qc.toUrl();
-		xmlFile = issueToWeb(qc);
+		xmlFile = issueToWeb(qc, null);
 		resultSet = parseXml.readConfig(xmlFile.getPath());
-		if (resultSet.getXmlType() == YahooXmlType.VALID) {
-			resultSet.setResultsOutput(qc.getResultsOutput());
-			DBFile.writeQueryFile(xmlFile.getName(), qc, resultSet);
-			if (resultSet.getTotalResultsReturned() > 0) {
-				DBFile.writeResultsFile(xmlFile.getName(), resultSet);
-			}
-			limitedPageCount = 0;
-		} else { // for error pages
-			logger.error(xmlFile.getName() + ":" + url);
+		// continues issuing to the web as long as there is an access
+		// restriction.
+		while (resultSet.getXmlType() != YahooXmlType.VALID) {
+			logger.info(xmlFile.getName() + ":" + url);
+			logger.info(resultSet.getXmlType());
 			if (resultSet.getXmlType() == YahooXmlType.LIMIT_EXCEEDED) {
 				limitedPageCount++;
 				sleeping(limitedPageCount);
-			} else if (resultSet.getXmlType() == YahooXmlType.OTHER_ERROR) {
-				limitedPageCount = 0;
-				logger.error("YahooXmlType.OTHER_ERROR: " + url);
-			} else {
-				// breaking point
-				// FIXME XML parse error
-				logger.error("Unexpected type error of the resultSet!");
+				// re-issue to the web
+				xmlFile = issueToWeb(qc, xmlFile);
+				resultSet = parseXml.readConfig(xmlFile.getPath());
 			}
 			try {
 				qc.getQueryOutput().flush();
@@ -382,17 +375,30 @@ public abstract class OnlineYahooLocalCrawlerStrategy {
 				e.printStackTrace();
 			}
 		}
+		if (resultSet.getXmlType() == YahooXmlType.VALID) {
+			resultSet.setResultsOutput(qc.getResultsOutput());
+			DBFile.writeQueryFile(xmlFile.getName(), qc, resultSet);
+			if (resultSet.getTotalResultsReturned() > 0) {
+				DBFile.writeResultsFile(xmlFile.getName(), resultSet);
+			}
+		}
+		limitedPageCount = 0;
 		return resultSet;
 	}
 
-	private File issueToWeb(YahooLocalQuery qc) {
+	/**
+	 * 
+	 * @param qc
+	 * @param xmlFile
+	 *            if it is not null, then write the content to this file
+	 * @return
+	 */
+	private File issueToWeb(YahooLocalQuery qc, File xmlFile) {
 		// This is a new query which will be issued to the website.
 		String url = qc.toUrl();
 		url = url.replaceAll(" ", "%20");
-
 		// logger.info("numQueries=" + numQueries);
 		// logger.info(url);
-
 		if (!firstCrawl) {
 			firstCrawl = true;
 			beginTime = System.currentTimeMillis();
@@ -417,7 +423,17 @@ public abstract class OnlineYahooLocalCrawlerStrategy {
 			sleepForIPRestriction(beginTime);
 			beginTime = System.currentTimeMillis();
 		}
-		File xmlFile = FileOperator.createFileAutoAscending(qc.getSubFolder(), qc.getNumQueries(), ".xml");
+		if (xmlFile == null) {
+			xmlFile = FileOperator.createFileAutoAscending(qc.getSubFolder(), qc.getNumQueries(), ".xml");
+		} else {
+			xmlFile.delete();
+			try {
+				xmlFile.createNewFile();
+			} catch (IOException e) {
+				logger.error("creating file failed " + xmlFile.getAbsolutePath());
+				e.printStackTrace();
+			}
+		}
 		boolean success = false;
 		int i = 0;
 		if (!success) {
@@ -556,6 +572,8 @@ public abstract class OnlineYahooLocalCrawlerStrategy {
 		long diff = (now - beginTime);
 		if (diff < DAY_TIME) {
 			try {
+				long interval = (DAY_TIME - diff) / 1000 / 60;
+				logger.info("Sleeping " + interval + "minutes.");
 				Thread.currentThread().sleep(DAY_TIME - diff);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
@@ -574,9 +592,15 @@ public abstract class OnlineYahooLocalCrawlerStrategy {
 		// Set 5 minutes as the unit
 		long unit = 5 * 60 * 1000;
 		long interval = 0;
-		for (int i = 0; i < limitedPageCount; i++) {
-			interval += unit;
+		// for (int i = 0; i < limitedPageCount; i++) {
+		// interval *= unit;
+		// }
+		// XXX is it ok?
+		long base = 1;
+		for (int i = 0; i < limitedPageCount - 1; i++) {
+			base *= 2;
 		}
+		interval = unit * base;
 		logger.info("Sleeping " + limitedPageCount * 5 + " minutes.");
 		try {
 			Thread.currentThread().sleep(interval);
@@ -596,7 +620,12 @@ public abstract class OnlineYahooLocalCrawlerStrategy {
 		if (totalResultAvailable > MAX_START + MAX_RESULTS_NUM) {
 			return MAX_START;
 		}
-		return (int) (Math.floor(1.0 * totalResultAvailable / MAX_RESULTS_NUM) * 20);
+		int idealNum = (int) (Math.floor(1.0 * totalResultAvailable / MAX_RESULTS_NUM) * 20);
+		if (idealNum > MAX_START) {
+			return MAX_START;
+		} else {
+			return idealNum;
+		}
 	}
 
 	protected List<Envelope> divideARectangle() {
