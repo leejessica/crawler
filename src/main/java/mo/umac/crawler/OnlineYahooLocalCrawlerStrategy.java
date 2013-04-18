@@ -584,7 +584,7 @@ public abstract class OnlineYahooLocalCrawlerStrategy {
 	}
 
 	/**
-	 * Force sleep if there are unexpected access limitations.
+	 * Force sleep if there are access limitations.
 	 * 
 	 * @param limitedPageCount
 	 */
@@ -592,18 +592,20 @@ public abstract class OnlineYahooLocalCrawlerStrategy {
 		// Set 5 minutes as the unit
 		long unit = 5 * 60 * 1000;
 		long interval = 0;
-		// for (int i = 0; i < limitedPageCount; i++) {
-		// interval *= unit;
-		// }
-		// XXX is it ok?
 		long base = 1;
 		for (int i = 0; i < limitedPageCount - 1; i++) {
 			base *= 2;
 		}
 		interval = unit * base;
-		logger.info("Sleeping " + limitedPageCount * 5 + " minutes.");
+		long aDay = 24 * 60 * 60 * 1000;
 		try {
-			Thread.currentThread().sleep(interval);
+			if (interval > aDay) {
+				logger.info("Sleeping a day");
+				Thread.currentThread().sleep(aDay);
+			} else {
+				logger.info("Sleeping " + interval / 1000 + " minutes.");
+				Thread.currentThread().sleep(interval);
+			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
