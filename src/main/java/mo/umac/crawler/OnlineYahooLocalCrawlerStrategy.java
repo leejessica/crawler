@@ -125,11 +125,23 @@ public abstract class OnlineYahooLocalCrawlerStrategy {
 		LinkedList<Envelope> allEnvelopeStates = (LinkedList<Envelope>) UScensusData.MBR(UScensusData.STATE_SHP_FILE_NAME);
 		LinkedList<String> allNameStates = (LinkedList<String>) UScensusData.stateName(UScensusData.STATE_DBF_FILE_NAME);
 
-		// TODO select the specified states according to the listNameStates
 		LinkedList<Envelope> listEnvelopeStates = new LinkedList<Envelope>();
-		listEnvelopeStates = allEnvelopeStates;
-		listNameStates = allNameStates;
 
+		// crawl all states
+		// listEnvelopeStates = allEnvelopeStates;
+		// listNameStates = allNameStates;
+
+		// select the specified states according to the listNameStates
+		for (int i = 0; i < listNameStates.size(); i++) {
+			String specifiedName = listNameStates.get(i);
+			for (int j = 0; j < allNameStates.size(); j++) {
+				String name = allNameStates.get(j);
+				if (name.equals(specifiedName)) {
+					listEnvelopeStates.add(allEnvelopeStates.get(j));
+				}
+			}
+		}
+		
 		// Create the parent folder for all data
 		FileOperator.createFolder("", DBFile.FOLDER_NAME);
 		httpClient = createHttpClient();
@@ -350,6 +362,11 @@ public abstract class OnlineYahooLocalCrawlerStrategy {
 	 * @return The parsed result set.
 	 */
 	public ResultSet query(YahooLocalQuery qc) {
+		// FIXME add continue crawling from the interrupt
+		// First search from the query file
+		
+		
+		
 		File xmlFile = null;
 		ResultSet resultSet;
 		StaXParser parseXml = new StaXParser();
@@ -359,14 +376,24 @@ public abstract class OnlineYahooLocalCrawlerStrategy {
 		// continues issuing to the web as long as there is an access
 		// restriction.
 		while (resultSet.getXmlType() != YahooXmlType.VALID) {
-			logger.info(xmlFile.getName() + ":" + url);
-			logger.info(resultSet.getXmlType());
+			logger.error(xmlFile.getName() + ":" + url);
+			logger.error(resultSet.getXmlType());
 			if (resultSet.getXmlType() == YahooXmlType.LIMIT_EXCEEDED) {
 				limitedPageCount++;
 				sleeping(limitedPageCount);
 				// re-issue to the web
 				xmlFile = issueToWeb(qc, xmlFile);
 				resultSet = parseXml.readConfig(xmlFile.getPath());
+			} else if (resultSet.getXmlType() == YahooXmlType.UNKNOWN) {
+				sleeping(0);
+				xmlFile = issueToWeb(qc, xmlFile);
+				resultSet = parseXml.readConfig(xmlFile.getPath());
+			} else {
+				// try one more time
+				sleeping(0);
+				xmlFile = issueToWeb(qc, xmlFile);
+				resultSet = parseXml.readConfig(xmlFile.getPath());
+				break;
 			}
 			try {
 				qc.getQueryOutput().flush();
@@ -603,7 +630,7 @@ public abstract class OnlineYahooLocalCrawlerStrategy {
 				logger.info("Sleeping a day");
 				Thread.currentThread().sleep(aDay);
 			} else {
-				logger.info("Sleeping " + interval / 1000 + " minutes.");
+				logger.info("Sleeping " + interval / 1000 / 60 + " minutes.");
 				Thread.currentThread().sleep(interval);
 			}
 		} catch (InterruptedException e) {

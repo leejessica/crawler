@@ -15,12 +15,15 @@ public class Client {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		initForServer(true);
+		initForServer(false);
 		DOMConfigurator.configure(Client.LOG_PROPERTY_PATH);
 		OnlineYahooLocalCrawlerStrategy crawlerStrategy = new QuadTreeCrawler();
 		CrawlerContext crawlerContext = new CrawlerContext(crawlerStrategy);
 		//
 		LinkedList<String> listNameStates = new LinkedList<String>();
+		String city1 = "NY";
+		listNameStates.add(city1);
+		
 		List<String> listCategoryNames = new LinkedList<String>();
 		String category1 = "Hotels & Motels";
 		String category2 = "Restaurants";
