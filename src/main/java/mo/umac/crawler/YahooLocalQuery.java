@@ -79,7 +79,10 @@ public class YahooLocalQuery {
 		return sb.toString();
 	}
 
-	public String toStringForWritting() {
+	/**
+	 * @return
+	 */
+	public String queryInfo() {
 		StringBuffer sb = new StringBuffer();
 		double latitude = circle.getCenter().y;
 		double longitude = circle.getCenter().x;

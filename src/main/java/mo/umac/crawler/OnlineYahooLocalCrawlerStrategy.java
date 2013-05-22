@@ -343,7 +343,7 @@ public abstract class OnlineYahooLocalCrawlerStrategy {
 			String data = null;
 			String[] split;
 			// TODO Look the query from queryFile
-			String query = qc.toStringForWritting();
+			String query = qc.queryInfo();
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -404,7 +404,9 @@ public abstract class OnlineYahooLocalCrawlerStrategy {
 		}
 		if (resultSet.getXmlType() == YahooXmlType.VALID) {
 			resultSet.setResultsOutput(qc.getResultsOutput());
-			DBFile.writeQueryFile(xmlFile.getName(), qc, resultSet);
+			// revised at 2013-5-22
+//			DBFile.writeQueryFile(xmlFile.getName(), qc, resultSet);
+			DBFile.writeQueryFile(xmlFile.getName(), qc.getQueryOutput(), qc.queryInfo(), resultSet);
 			if (resultSet.getTotalResultsReturned() > 0) {
 				DBFile.writeResultsFile(xmlFile.getName(), resultSet);
 			}

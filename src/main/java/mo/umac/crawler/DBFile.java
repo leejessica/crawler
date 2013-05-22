@@ -30,12 +30,35 @@ public class DBFile {
 
 	/**
 	 * @param partFileName
+	 * @param dbOutput
+	 * @param queryInfo
+	 * @param resultSet
+	 */
+	public static void writeQueryFile(String partFileName, BufferedWriter dbOutput, String queryInfo, ResultSet resultSet) {
+		try {
+			dbOutput.write(partFileName);
+			dbOutput.write(";");
+			dbOutput.write(queryInfo);
+			dbOutput.write(";");
+			dbOutput.write(Integer.toString(resultSet.getTotalResultsAvailable()));
+			dbOutput.write(";");
+			dbOutput.write(Integer.toString(resultSet.getTotalResultsReturned()));
+			dbOutput.write(";");
+			dbOutput.write(Integer.toString(resultSet.getFirstResultPosition()));
+			dbOutput.newLine();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * @param partFileName
 	 * @param qc
 	 * @param resultSet
 	 *            basic information of the query.
+	 * @deprecated
 	 */
-	public static void writeQueryFile(String partFileName, YahooLocalQuery qc,
-			ResultSet resultSet) {
+	public static void writeQueryFile(String partFileName, YahooLocalQuery qc, ResultSet resultSet) {
 		BufferedWriter dbOutput = qc.getQueryOutput();
 		String query = qc.getQuery();
 		int zip = qc.getZip();
@@ -73,7 +96,7 @@ public class DBFile {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public static void writeResultsFile(String partFileName, ResultSet resultSet) {
 		BufferedWriter resultsOutput = resultSet.getResultsOutput();
 		List<Result> results = resultSet.getResults();
