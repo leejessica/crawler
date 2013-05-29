@@ -15,7 +15,7 @@ public class Client {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		initForServer(false);
+		initForServer(true);
 		DOMConfigurator.configure(Client.LOG_PROPERTY_PATH);
 		OnlineYahooLocalCrawlerStrategy crawlerStrategy = new QuadTreeCrawler();
 		CrawlerContext crawlerContext = new CrawlerContext(crawlerStrategy);

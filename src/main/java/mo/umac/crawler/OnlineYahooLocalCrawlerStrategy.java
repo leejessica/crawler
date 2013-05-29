@@ -141,7 +141,7 @@ public abstract class OnlineYahooLocalCrawlerStrategy {
 				}
 			}
 		}
-		
+
 		// Create the parent folder for all data
 		FileOperator.createFolder("", DBFile.FOLDER_NAME);
 		httpClient = createHttpClient();
@@ -364,9 +364,12 @@ public abstract class OnlineYahooLocalCrawlerStrategy {
 	public ResultSet query(YahooLocalQuery qc) {
 		// FIXME add continue crawling from the interrupt
 		// First search from the query file
+		// compare the query info with existing records
+		// qc.queryInfo();
+		// How to get file Name from BufferedWriter???
 		
 		
-		
+
 		File xmlFile = null;
 		ResultSet resultSet;
 		StaXParser parseXml = new StaXParser();
@@ -405,7 +408,7 @@ public abstract class OnlineYahooLocalCrawlerStrategy {
 		if (resultSet.getXmlType() == YahooXmlType.VALID) {
 			resultSet.setResultsOutput(qc.getResultsOutput());
 			// revised at 2013-5-22
-//			DBFile.writeQueryFile(xmlFile.getName(), qc, resultSet);
+			// DBFile.writeQueryFile(xmlFile.getName(), qc, resultSet);
 			DBFile.writeQueryFile(xmlFile.getName(), qc.getQueryOutput(), qc.queryInfo(), resultSet);
 			if (resultSet.getTotalResultsReturned() > 0) {
 				DBFile.writeResultsFile(xmlFile.getName(), resultSet);

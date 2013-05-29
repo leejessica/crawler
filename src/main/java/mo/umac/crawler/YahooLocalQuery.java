@@ -84,9 +84,12 @@ public class YahooLocalQuery {
 	 */
 	public String queryInfo() {
 		StringBuffer sb = new StringBuffer();
-		double latitude = circle.getCenter().y;
-		double longitude = circle.getCenter().x;
-		double radius = circle.getRadius();
+		// double latitude = circle.getCenter().y;
+		// double longitude = circle.getCenter().x;
+		// double radius = circle.getRadius();
+		String latitude = new BigDecimal(circle.getCenter().y).toPlainString();
+		String longitude = new BigDecimal(circle.getCenter().x).toPlainString();
+		String radius = new BigDecimal(circle.getRadius()).toPlainString();
 		sb.append(query);
 		sb.append(";");
 		sb.append(Integer.toString(zip));
@@ -95,17 +98,16 @@ public class YahooLocalQuery {
 		sb.append(";");
 		sb.append(Integer.toString(start));
 		sb.append(";");
-		sb.append(Double.toString(latitude));
+		sb.append(latitude);
 		sb.append(";");
-		sb.append(Double.toString(longitude));
+		sb.append(longitude);
 		sb.append(";");
-		sb.append(Double.toString(radius));
+		sb.append(radius);
 		return sb.toString();
 	}
 
 	/**
-	 * Construct the query url according to the Yahoo Local API {@link http
-	 * ://developer.yahoo.com/search/local/V3/localSearch.html}.
+	 * Construct the query url according to the Yahoo Local API {@link http://developer.yahoo.com/search/local/V3/localSearch.html}.
 	 * 
 	 * @param appid
 	 *            Yahoo application id
