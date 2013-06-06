@@ -2,6 +2,7 @@ package mo.umac.crawler;
 
 import java.io.BufferedWriter;
 import java.math.BigDecimal;
+import java.sql.Connection;
 import java.util.List;
 
 import mo.umac.geo.Circle;
@@ -19,6 +20,8 @@ public class YahooLocalQuery {
 	private String resultsFile;
 	private BufferedWriter queryOutput;
 	private BufferedWriter resultsOutput;
+	//add at 2013-06-05
+	private Connection con;
 	private Envelope envelopeState;
 	private String appid;
 	private int start;
@@ -274,6 +277,14 @@ public class YahooLocalQuery {
 
 	public void setCategory(int category) {
 		this.category = category;
+	}
+
+	public Connection getCon() {
+		return con;
+	}
+
+	public void setCon(Connection con) {
+		this.con = con;
 	}
 
 }
