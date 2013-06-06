@@ -65,6 +65,9 @@ public class H2DB extends DataSet {
 		    prepCategory.addBatch();
 		}
 		// table 4
+		prepRelationship.setInt(1, result.getId());
+		prepRelationship.setInt(2, queryID);
+		prepRelationship.setInt(3, i+1);
 	    }
 	    // table 3
 	    prepQuery.setInt(1, queryID);
