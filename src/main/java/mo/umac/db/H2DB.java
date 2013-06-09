@@ -241,7 +241,13 @@ public class H2DB extends DataSet {
 		    setPrepQuery(queryID, query, zip, results, start, latitude,
 			    longitude, radius, level, parentID, prepQuery);
 		    prepQuery.addBatch();
-
+		    //
+		    PreparedStatement prepItem = conn.prepareStatement(sqlPrepItem);
+		    setPrepItem(result, prepItem);
+		    
+		    
+		    PreparedStatement prepCategory;
+		    PreparedStatement prepRelationship;
 		} catch (SQLException e) {
 		    e.printStackTrace();
 		}
