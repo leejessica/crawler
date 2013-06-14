@@ -1,63 +1,66 @@
 package mo.umac.parser;
 
 public class Rating {
-	/**
-	 * Average rating may be NaN, cannot be converted to Integer directly
-	 */
-	private String AverageRating;
-	private int TotalRatings;
-	private int TotalReviews;
-	private String LastReviewDate;
-	private String LastReviewIntro;
+    /**
+     * Average rating may be NaN, cannot be converted to Integer directly
+     */
+    private double AverageRating;
+    private int TotalRatings;
+    private int TotalReviews;
+    private String LastReviewDate;
+    private String LastReviewIntro;
 
-	@Override
-	public String toString() {
-		StringBuffer sb = new StringBuffer();
-		sb.append("Rating [AverageRating=" + AverageRating + ", TotalRatings="
-				+ TotalRatings + ", TotalReviews=" + TotalReviews
-				+ ", LastReviewDate=" + LastReviewDate + ", LastReviewIntro="
-				+ LastReviewIntro + "]");
-		return sb.toString();
-	}
+    public static final String NO_AVERAGE_RATING_FLAG = "NaN";
+    public static double noAverageRatingValue = -1;
 
-	public String getAverageRating() {
-		return AverageRating;
-	}
+    @Override
+    public String toString() {
+	StringBuffer sb = new StringBuffer();
+	sb.append("Rating [AverageRating=" + AverageRating + ", TotalRatings="
+		+ TotalRatings + ", TotalReviews=" + TotalReviews
+		+ ", LastReviewDate=" + LastReviewDate + ", LastReviewIntro="
+		+ LastReviewIntro + "]");
+	return sb.toString();
+    }
 
-	public void setAverageRating(String averageRating) {
-		AverageRating = averageRating;
-	}
+    public double getAverageRating() {
+	return AverageRating;
+    }
 
-	public int getTotalRatings() {
-		return TotalRatings;
-	}
+    public void setAverageRating(double averageRating) {
+	AverageRating = averageRating;
+    }
 
-	public void setTotalRatings(int totalRatings) {
-		TotalRatings = totalRatings;
-	}
+    public int getTotalRatings() {
+	return TotalRatings;
+    }
 
-	public int getTotalReviews() {
-		return TotalReviews;
-	}
+    public void setTotalRatings(int totalRatings) {
+	TotalRatings = totalRatings;
+    }
 
-	public void setTotalReviews(int totalReviews) {
-		TotalReviews = totalReviews;
-	}
+    public int getTotalReviews() {
+	return TotalReviews;
+    }
 
-	public String getLastReviewDate() {
-		return LastReviewDate;
-	}
+    public void setTotalReviews(int totalReviews) {
+	TotalReviews = totalReviews;
+    }
 
-	public void setLastReviewDate(String lastReviewDate) {
-		LastReviewDate = lastReviewDate;
-	}
+    public String getLastReviewDate() {
+	return LastReviewDate;
+    }
 
-	public String getLastReviewIntro() {
-		return LastReviewIntro;
-	}
+    public void setLastReviewDate(String lastReviewDate) {
+	LastReviewDate = lastReviewDate;
+    }
 
-	public void setLastReviewIntro(String lastReviewIntro) {
-		LastReviewIntro = lastReviewIntro;
-	}
+    public String getLastReviewIntro() {
+	return LastReviewIntro;
+    }
+
+    public void setLastReviewIntro(String lastReviewIntro) {
+	LastReviewIntro = lastReviewIntro;
+    }
 
 }

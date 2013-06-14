@@ -25,7 +25,7 @@ import org.apache.log4j.xml.DOMConfigurator;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
-import mo.umac.crawler.Client;
+import mo.umac.crawler.Main;
 import mo.umac.utils.FileOperator;
 
 /**
@@ -47,7 +47,7 @@ public class CrawlingMethodsTest {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		DOMConfigurator.configure(Client.LOG_PROPERTY_PATH);
+		DOMConfigurator.configure(Main.LOG_PROPERTY_PATH);
 		CrawlingMethodsTest ct = new CrawlingMethodsTest();
 		// ct.testCrawler();
 		// ct.testSaveUrl();

@@ -10,162 +10,190 @@ import java.util.List;
  * 
  */
 public class Result {
-	private int id;
-	private String title;
-	private String address;
-	private String city;
-	private String state;
-	private String phone;
-	private Double longitude;
-	private Double latitude;
+    private int id;
+    private String title;
+    private String address;
+    private String city;
+    private String state;
+    private String phone;
+    private Double longitude;
+    private Double latitude;
 
-	private Rating rating;
+    private Rating rating;
 
-	private double distance;
-	private String url;
-	private String clickUrl;
-	private String mapUrl;
-	private String businessUrl;
-	private String businessClickUrl;
+    private double distance;
+    private String url;
+    private String clickUrl;
+    private String mapUrl;
+    private String businessUrl;
+    private String businessClickUrl;
 
-	private List<Category> categories;
+    private List<Category> categories;
 
-	@Override
-	public String toString() {
-		StringBuffer sb = new StringBuffer();
-		sb.append("Result [id=" + id + ", title=" + title + ", address="
-				+ address + ", city=" + city + ", state=" + state + ", phone="
-				+ phone + ", longitude=" + longitude + ", latitude=" + latitude
-				+ ", distance=" + distance + "]");
-		return sb.toString();
-	}
+    public Result() {
 
-	public int getId() {
-		return id;
-	}
+    }
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    public Result(int id, String title, String address, String city,
+	    String state, String phone, Double longitude, Double latitude,
+	    Rating rating, double distance, String url, String clickUrl,
+	    String mapUrl, String businessUrl, String businessClickUrl,
+	    List<Category> categories) {
+	super();
+	this.id = id;
+	this.title = title;
+	this.address = address;
+	this.city = city;
+	this.state = state;
+	this.phone = phone;
+	this.longitude = longitude;
+	this.latitude = latitude;
+	this.rating = rating;
+	this.distance = distance;
+	this.url = url;
+	this.clickUrl = clickUrl;
+	this.mapUrl = mapUrl;
+	this.businessUrl = businessUrl;
+	this.businessClickUrl = businessClickUrl;
+	this.categories = categories;
+    }
 
-	public String getTitle() {
-		return title;
-	}
+    @Override
+    public String toString() {
+	StringBuffer sb = new StringBuffer();
+	sb.append("Result [id=" + id + ", title=" + title + ", address="
+		+ address + ", city=" + city + ", state=" + state + ", phone="
+		+ phone + ", longitude=" + longitude + ", latitude=" + latitude
+		+ ", distance=" + distance + "]");
+	return sb.toString();
+    }
 
-	public void setTitle(String title) {
-		this.title = title;
-	}
+    public int getId() {
+	return id;
+    }
 
-	public String getAddress() {
-		return address;
-	}
+    public void setId(int id) {
+	this.id = id;
+    }
 
-	public void setAddress(String address) {
-		this.address = address;
-	}
+    public String getTitle() {
+	return title;
+    }
 
-	public String getCity() {
-		return city;
-	}
+    public void setTitle(String title) {
+	this.title = title;
+    }
 
-	public void setCity(String city) {
-		this.city = city;
-	}
+    public String getAddress() {
+	return address;
+    }
 
-	public String getState() {
-		return state;
-	}
+    public void setAddress(String address) {
+	this.address = address;
+    }
 
-	public void setState(String state) {
-		this.state = state;
-	}
+    public String getCity() {
+	return city;
+    }
 
-	public String getPhone() {
-		return phone;
-	}
+    public void setCity(String city) {
+	this.city = city;
+    }
 
-	public void setPhone(String phone) {
-		this.phone = phone;
-	}
+    public String getState() {
+	return state;
+    }
 
-	public Double getLongitude() {
-		return longitude;
-	}
+    public void setState(String state) {
+	this.state = state;
+    }
 
-	public void setLongitude(Double longitude) {
-		this.longitude = longitude;
-	}
+    public String getPhone() {
+	return phone;
+    }
 
-	public Double getLatitude() {
-		return latitude;
-	}
+    public void setPhone(String phone) {
+	this.phone = phone;
+    }
 
-	public void setLatitude(Double latitude) {
-		this.latitude = latitude;
-	}
+    public Double getLongitude() {
+	return longitude;
+    }
 
-	public Rating getRating() {
-		return rating;
-	}
+    public void setLongitude(Double longitude) {
+	this.longitude = longitude;
+    }
 
-	public void setRating(Rating rating) {
-		this.rating = rating;
-	}
+    public Double getLatitude() {
+	return latitude;
+    }
 
-	public double getDistance() {
-		return distance;
-	}
+    public void setLatitude(Double latitude) {
+	this.latitude = latitude;
+    }
 
-	public void setDistance(double distance) {
-		this.distance = distance;
-	}
+    public Rating getRating() {
+	return rating;
+    }
 
-	public String getUrl() {
-		return url;
-	}
+    public void setRating(Rating rating) {
+	this.rating = rating;
+    }
 
-	public void setUrl(String url) {
-		this.url = url;
-	}
+    public double getDistance() {
+	return distance;
+    }
 
-	public String getClickUrl() {
-		return clickUrl;
-	}
+    public void setDistance(double distance) {
+	this.distance = distance;
+    }
 
-	public void setClickUrl(String clickUrl) {
-		this.clickUrl = clickUrl;
-	}
+    public String getUrl() {
+	return url;
+    }
 
-	public String getMapUrl() {
-		return mapUrl;
-	}
+    public void setUrl(String url) {
+	this.url = url;
+    }
 
-	public void setMapUrl(String mapUrl) {
-		this.mapUrl = mapUrl;
-	}
+    public String getClickUrl() {
+	return clickUrl;
+    }
 
-	public String getBusinessUrl() {
-		return businessUrl;
-	}
+    public void setClickUrl(String clickUrl) {
+	this.clickUrl = clickUrl;
+    }
 
-	public void setBusinessUrl(String businessUrl) {
-		this.businessUrl = businessUrl;
-	}
+    public String getMapUrl() {
+	return mapUrl;
+    }
 
-	public String getBusinessClickUrl() {
-		return businessClickUrl;
-	}
+    public void setMapUrl(String mapUrl) {
+	this.mapUrl = mapUrl;
+    }
 
-	public void setBusinessClickUrl(String businessClickUrl) {
-		this.businessClickUrl = businessClickUrl;
-	}
+    public String getBusinessUrl() {
+	return businessUrl;
+    }
 
-	public List<Category> getCategories() {
-		return categories;
-	}
+    public void setBusinessUrl(String businessUrl) {
+	this.businessUrl = businessUrl;
+    }
 
-	public void setCategories(List<Category> categories) {
-		this.categories = categories;
-	}
+    public String getBusinessClickUrl() {
+	return businessClickUrl;
+    }
+
+    public void setBusinessClickUrl(String businessClickUrl) {
+	this.businessClickUrl = businessClickUrl;
+    }
+
+    public List<Category> getCategories() {
+	return categories;
+    }
+
+    public void setCategories(List<Category> categories) {
+	this.categories = categories;
+    }
 
 }
