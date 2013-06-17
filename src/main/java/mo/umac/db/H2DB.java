@@ -11,7 +11,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import mo.umac.crawler.YahooLocalQuery;
@@ -34,18 +33,18 @@ public class H2DB extends DataSet {
     private final String RELATIONSHIP = "RELATIONSHIP";
 
     // sqls for creating table
-    private String sqlCreateItemTable = "CREATE TABLE IF NOT EXISTS ITEM (ITEMID INT PRIMARY KEY, TITLE VARCHAR(200), CITY VARCHAR(200), STATE VARCHAR(10), LATITUDE DOUBLE, LONGITUDE DOUBLE, DISTANCE DOUBLE, AVERAGERATING DOUBLE, TOTALRATINGS DOUBLE, TOTALREVIEWS DOUBLE)";
-    private String sqlCreateCategoryTable = "CREATE TABLE IF NOT EXISTS CATEGORY (ITEMID INT, CATEGORYID INT, CATEGORYNAME VARCHAR(200))";
     /**
      * level: the divided level radius: the radius of the circle want to covered
      */
     private String sqlCreateQueryTable = "CREATE TABLE IF NOT EXISTS QUERY (QUERYID INT PRIMARY KEY, QUERY VARCHAR(100), ZIP INT, RESULTS INT, START INT, LATITUDE DOUBLE, LONGITUDE DOUBLE, RADIUS DOUBLE, LEVEL INT, PARENTID INT, TOTALRESULTSAVAILABLE INT, TOTALRESULTSRETURNED INT, FIRSTRESULTPOSITION INT)";
+    private String sqlCreateItemTable = "CREATE TABLE IF NOT EXISTS ITEM (ITEMID INT PRIMARY KEY, TITLE VARCHAR(200), CITY VARCHAR(200), STATE VARCHAR(10), LATITUDE DOUBLE, LONGITUDE DOUBLE, DISTANCE DOUBLE, AVERAGERATING DOUBLE, TOTALRATINGS DOUBLE, TOTALREVIEWS DOUBLE)";
+    private String sqlCreateCategoryTable = "CREATE TABLE IF NOT EXISTS CATEGORY (ITEMID INT, CATEGORYID INT, CATEGORYNAME VARCHAR(200))";
 
     /**
      * This table records that the item is returned by which query in which
      * position.
      */
-    private String sqlCreateQRR = "CREATE TABLE IF NOT EXISTS RELATIONSHIP (ITEMID INT, QEURYID INT, POSITION INT)";
+    private String sqlCreateRelationshipTable = "CREATE TABLE IF NOT EXISTS RELATIONSHIP (ITEMID INT, QEURYID INT, POSITION INT)";
 
     // sqls preparation for insertion
     private String sqlPrepInsertItem = "INSERT INTO ITEM (ITEMID, TITLE, CITY, STATE, LATITUDE, LONGITUDE, DISTANCE, AVERAGERATING, TOTALRATINGS, TOTALREVIEWS) VALUES (?,?,?,?,?,?,?,?,?,?)";
@@ -60,6 +59,8 @@ public class H2DB extends DataSet {
      * sql for select all data from a table. Need concatenate the table's names.
      */
     private String sqlSelectStar = "SELECT * FROM ";
+
+    private String sqlSelectCountStar = "SELECT COUNT(*) FROM ";
 
     @Override
     public void record(int queryID, int level, int parentID,
@@ -89,7 +90,7 @@ public class H2DB extends DataSet {
 		    prepCategory.addBatch();
 		}
 		// table 4
-		setPrepRelationship(result.getId(), queryID, i,
+		setPrepRelationship(result.getId(), queryID, i + 1,
 			prepRelationship);
 		prepRelationship.addBatch();
 	    }
@@ -110,10 +111,16 @@ public class H2DB extends DataSet {
      * Exam whether data has been successfully inserted to the database
      */
     public void examData() {
-	printQueryTable();
-	String sqlSelectItem = sqlSelectStar + ITEM;
-	String sqlSelectCategory = sqlSelectStar + CATEGORY;
-	String sqlSelectRelationship = sqlSelectStar + RELATIONSHIP;
+	// print
+	// printQueryTable();
+	// printItemTable();
+	// printCategoryTable();
+	// printRelationshipTable();
+	// count
+	// int c1 = count(QUERY);
+	// System.out.println(c1);
+	int c2 = count(ITEM);
+	System.out.println(c2);
     }
 
     private void printQueryTable() {
@@ -141,7 +148,7 @@ public class H2DB extends DataSet {
 		    int totalResultsAvailable = rs.getInt(11);
 		    int totalResultsReturned = rs.getInt(12);
 		    int firstResultPosition = rs.getInt(13);
-		    
+
 		    // print query result to console
 		    System.out.println("queryID: " + queryID);
 		    System.out.println("query: " + query);
@@ -153,16 +160,18 @@ public class H2DB extends DataSet {
 		    System.out.println("radius: " + radius);
 		    System.out.println("level: " + level);
 		    System.out.println("parentID: " + parentID);
-		    System.out.println("totalResultsAvailable: " + totalResultsAvailable);
-		    System.out.println("totalResultsReturned: " + totalResultsReturned);
-		    System.out.println("firstResultPosition: " + firstResultPosition);
+		    System.out.println("totalResultsAvailable: "
+			    + totalResultsAvailable);
+		    System.out.println("totalResultsReturned: "
+			    + totalResultsReturned);
+		    System.out.println("firstResultPosition: "
+			    + firstResultPosition);
 		    System.out.println("--------------------------");
 		}
 		rs.close();
 	    } catch (SQLException e) {
 		e.printStackTrace();
 	    }
-	    stat.execute(sqlSelectQuery);
 	    stat.close();
 	    conn.close();
 	} catch (ClassNotFoundException e) {
@@ -170,6 +179,157 @@ public class H2DB extends DataSet {
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
+    }
+
+    private void printItemTable() {
+	String sqlSelectItem = sqlSelectStar + ITEM;
+	try {
+	    Class.forName("org.h2.Driver");
+	    Connection conn = DriverManager.getConnection(
+		    "jdbc:h2:file:../yahoolocal-h2/datasets;AUTO_SERVER=TRUE",
+		    "sa", "");
+	    Statement stat = conn.createStatement();
+	    try {
+		java.sql.ResultSet rs = stat.executeQuery(sqlSelectItem);
+		while (rs.next()) {
+
+		    int itemID = rs.getInt(1);
+		    String title = rs.getString(2);
+		    String city = rs.getString(3);
+		    String state = rs.getString(4);
+
+		    double latitude = rs.getDouble(5);
+		    double longitude = rs.getDouble(6);
+		    double distance = rs.getDouble(7);
+
+		    double averageRating = rs.getDouble(8);
+		    double totalRating = rs.getDouble(9);
+		    double totalReviews = rs.getDouble(10);
+
+		    // print query result to console
+		    System.out.println("itemID: " + itemID);
+		    System.out.println("title: " + title);
+		    System.out.println("city: " + city);
+		    System.out.println("state: " + state);
+		    System.out.println("latitude: " + latitude);
+		    System.out.println("longitude: " + longitude);
+		    System.out.println("distance: " + distance);
+		    System.out.println("averageRating: " + averageRating);
+		    System.out.println("totalRating: " + totalRating);
+		    System.out.println("totalReviews: " + totalReviews);
+		    System.out.println("--------------------------");
+		}
+		rs.close();
+	    } catch (SQLException e) {
+		e.printStackTrace();
+	    }
+	    stat.close();
+	    conn.close();
+	} catch (ClassNotFoundException e) {
+	    e.printStackTrace();
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+    }
+
+    private void printCategoryTable() {
+	String sqlSelectCategory = sqlSelectStar + CATEGORY;
+	try {
+	    Class.forName("org.h2.Driver");
+	    Connection conn = DriverManager.getConnection(
+		    "jdbc:h2:file:../yahoolocal-h2/datasets;AUTO_SERVER=TRUE",
+		    "sa", "");
+	    Statement stat = conn.createStatement();
+	    try {
+		java.sql.ResultSet rs = stat.executeQuery(sqlSelectCategory);
+		while (rs.next()) {
+
+		    int itemID = rs.getInt(1);
+		    int categoryID = rs.getInt(2);
+		    String categoryName = rs.getString(3);
+
+		    // print query result to console
+		    System.out.println("itemID: " + itemID);
+		    System.out.println("categoryID: " + categoryID);
+		    System.out.println("categoryName: " + categoryName);
+		    System.out.println("--------------------------");
+		}
+		rs.close();
+	    } catch (SQLException e) {
+		e.printStackTrace();
+	    }
+	    stat.close();
+	    conn.close();
+	} catch (ClassNotFoundException e) {
+	    e.printStackTrace();
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+    }
+
+    private void printRelationshipTable() {
+	String sqlSelectRelationship = sqlSelectStar + RELATIONSHIP;
+	try {
+	    Class.forName("org.h2.Driver");
+	    Connection conn = DriverManager.getConnection(
+		    "jdbc:h2:file:../yahoolocal-h2/datasets;AUTO_SERVER=TRUE",
+		    "sa", "");
+	    Statement stat = conn.createStatement();
+	    try {
+		java.sql.ResultSet rs = stat
+			.executeQuery(sqlSelectRelationship);
+		while (rs.next()) {
+
+		    int itemID = rs.getInt(1);
+		    int queryID = rs.getInt(2);
+		    int position = rs.getInt(3);
+
+		    // print query result to console
+		    System.out.println("itemID: " + itemID);
+		    System.out.println("queryID: " + queryID);
+		    System.out.println("position: " + position);
+		    System.out.println("--------------------------");
+		}
+		rs.close();
+	    } catch (SQLException e) {
+		e.printStackTrace();
+	    }
+	    stat.close();
+	    conn.close();
+	} catch (ClassNotFoundException e) {
+	    e.printStackTrace();
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+    }
+
+    private int count(String tableName) {
+	int count = 0;
+	String sql = sqlSelectCountStar + tableName + " WHERE STATE='NY'";
+	try {
+	    Class.forName("org.h2.Driver");
+	    Connection conn = DriverManager.getConnection(
+		    "jdbc:h2:file:../yahoolocal-h2/datasets;AUTO_SERVER=TRUE",
+		    "sa", "");
+	    Statement stat = conn.createStatement();
+	    try {
+		java.sql.ResultSet rs = stat.executeQuery(sql);
+		while (rs.next()) {
+
+		    count = rs.getInt(1);
+		}
+		rs.close();
+	    } catch (SQLException e) {
+		e.printStackTrace();
+	    }
+	    stat.close();
+	    conn.close();
+	} catch (ClassNotFoundException e) {
+	    e.printStackTrace();
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+	return count;
     }
 
     private PreparedStatement setPrepItem(Result result,
@@ -252,7 +412,7 @@ public class H2DB extends DataSet {
 	try {
 	    prepRelationship.setInt(1, resultID);
 	    prepRelationship.setInt(2, queryID);
-	    prepRelationship.setInt(3, position + 1);
+	    prepRelationship.setInt(3, position);
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
@@ -269,7 +429,7 @@ public class H2DB extends DataSet {
 	    stat.execute(sqlCreateQueryTable);
 	    stat.execute(sqlCreateItemTable);
 	    stat.execute(sqlCreateCategoryTable);
-	    stat.execute(sqlCreateQRR);
+	    stat.execute(sqlCreateRelationshipTable);
 	    stat.close();
 	    conn.close();
 	} catch (ClassNotFoundException e) {
@@ -301,7 +461,6 @@ public class H2DB extends DataSet {
 	    Connection conn = DriverManager.getConnection(
 		    "jdbc:h2:file:../yahoolocal-h2/datasets;AUTO_SERVER=TRUE",
 		    "sa", "");
-	    conn.setAutoCommit(false);
 	    brQuery = new BufferedReader(new InputStreamReader(
 		    new FileInputStream(queryFile)));
 	    String data = null;
@@ -339,6 +498,7 @@ public class H2DB extends DataSet {
 	    }
 	    prepQuery.executeBatch();
 	    brQuery.close();
+	    conn.close();
 	} catch (FileNotFoundException e) {
 	    e.printStackTrace();
 	} catch (IOException e) {
@@ -358,12 +518,11 @@ public class H2DB extends DataSet {
 	    Connection conn = DriverManager.getConnection(
 		    "jdbc:h2:file:../yahoolocal-h2/datasets;AUTO_SERVER=TRUE",
 		    "sa", "");
-	    conn.setAutoCommit(false);
 	    brResult = new BufferedReader(new InputStreamReader(
 		    new FileInputStream(resultsFile)));
 	    String data = null;
 	    String[] split;
-	    int position = 0;
+	    int position = 1;
 	    PreparedStatement prepCategory = conn
 		    .prepareStatement(sqlPrepInsertCategory);
 	    PreparedStatement prepItem = conn
@@ -371,45 +530,72 @@ public class H2DB extends DataSet {
 	    PreparedStatement prepRelationship = conn
 		    .prepareStatement(sqlPrepInsertRelationship);
 	    while ((data = brResult.readLine()) != null) {
-		data = data.trim();
-		split = data.split(";");
-		int queryID = parseID(split[0]);
-		int id = Integer.parseInt(split[1]);
-		String title = split[2];
-		String city = split[3];
-		String state = split[4];
-		double latitude = Double.parseDouble(split[5]);
-		double longitude = Double.parseDouble(split[6]);
-		double distance = Double.parseDouble(split[7]);
-		List<Category> categories = new ArrayList<Category>();
-		for (int i = 8; i < split.length; i = i + 2) {
-		    // prepare category
-		    Category category = new Category(
-			    Integer.parseInt(split[i]), split[i + 1]);
-		    categories.add(category);
+		try {
+		    data = data.trim();
+		    split = data.split(";");
+		    int queryID = parseID(split[0]);
+		    int itemID = Integer.parseInt(split[1]);
+		    String title = split[2];
+		    // for Dominos#39;s
+		    if (title.equals("Dominos#39")) {
+			title = "Dominos#39;s";
+			String city = split[4];
+			String state = split[5];
+			double latitude = Double.parseDouble(split[6]);
+			double longitude = Double.parseDouble(split[7]);
+			double distance = Double.parseDouble(split[8]);
+			List<Category> categories = new ArrayList<Category>();
+			for (int i = 9; i < split.length; i = i + 2) {
+			    // prepare category
+			    Category category = new Category(
+				    Integer.parseInt(split[i]), split[i + 1]);
+			    categories.add(category);
 
-		    setPrepCategory(id, category, prepCategory);
-		    prepCategory.addBatch();
+			    setPrepCategory(itemID, category, prepCategory);
+			    prepCategory.addBatch();
+			}
+			Result result = new Result(itemID, title, "", city,
+				state, "", longitude, latitude, null, distance,
+				"", "", "", "", "", categories);
+			setPrepItem(result, prepItem);
+			prepItem.addBatch();
+		    } else {
+			String city = split[3];
+			String state = split[4];
+			double latitude = Double.parseDouble(split[5]);
+			double longitude = Double.parseDouble(split[6]);
+			double distance = Double.parseDouble(split[7]);
+			List<Category> categories = new ArrayList<Category>();
+			for (int i = 8; i < split.length; i = i + 2) {
+			    // prepare category
+			    Category category = new Category(
+				    Integer.parseInt(split[i]), split[i + 1]);
+			    categories.add(category);
+
+			    setPrepCategory(itemID, category, prepCategory);
+			    prepCategory.addBatch();
+			}
+			Result result = new Result(itemID, title, "", city,
+				state, "", longitude, latitude, null, distance,
+				"", "", "", "", "", categories);
+			setPrepItem(result, prepItem);
+			prepItem.addBatch();
+		    }
+		    //
+		    setPrepRelationship(itemID, queryID, position++,
+			    prepRelationship);
+		    prepRelationship.addBatch();
+		} catch (Exception e) {
+		    System.out.println(data);
 		}
-
-		Result result = new Result(id, title, "", city, state, "",
-			longitude, latitude, null, distance, "", "", "", "",
-			"", categories);
-
-		setPrepItem(result, prepItem);
-		prepItem.addBatch();
-		//
-
-		setPrepRelationship(id, queryID, position, prepRelationship);
-		prepRelationship.addBatch();
 	    }
 	    // execute prepare statements...
 	    prepCategory.executeBatch();
 	    prepItem.executeBatch();
 	    prepRelationship.executeBatch();
-	    conn.setAutoCommit(true);
 
 	    brResult.close();
+	    conn.close();
 	} catch (FileNotFoundException e) {
 	    e.printStackTrace();
 	} catch (IOException e) {

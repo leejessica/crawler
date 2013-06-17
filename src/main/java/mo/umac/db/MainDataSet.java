@@ -11,10 +11,8 @@ public class MainDataSet {
 	String h2Name = "";
 	// String folderPath2 = "../yahoolocal/96926236+Restaurants/NY/";
 	// String h2Name = ;
-//	h2.convertFileDBToH2DB(folderPath, h2Name);
+	// h2.convertFileDBToH2DB(folderPath, h2Name);
 	h2.examData();
     }
-    
-    
 
 }
