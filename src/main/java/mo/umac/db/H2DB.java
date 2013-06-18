@@ -26,6 +26,9 @@ import mo.umac.parser.ResultSet;
  * 
  */
 public class H2DB extends DataSet {
+	
+	public final String databaseName = "../yahoolocal-h2/datasets";
+	
     // table names
     private final String QUERY = "QUERY";
     private final String ITEM = "ITEM";
