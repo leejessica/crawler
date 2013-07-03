@@ -57,6 +57,8 @@ public abstract class YahooLocalCrawlerStrategy {
     protected int limitedPageCount = 0;
 
     
+    public abstract ResultSet query(YahooLocalQuery qc);
+    
     /**
      * Check whether it still follows the query limitation
      * 

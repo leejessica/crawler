@@ -4,7 +4,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import mo.umac.db.DataSet;
+import mo.umac.db.H2DB;
 import mo.umac.geo.UScensusData;
+import mo.umac.parser.ResultSet;
 import mo.umac.utils.CommonUtils;
 import mo.umac.utils.FileOperator;
 
@@ -26,6 +29,11 @@ public abstract class OfflineYahooLocalCrawlerStrategy extends
      */
     public abstract void crawl(String state, int category, String query, Envelope envelopeState);
 
+    public ResultSet query(YahooLocalQuery qc){
+    	DataSet dataset = new H2DB();
+    	return dataset.query(qc);
+    }
+    
     /**
      * Entrance of the crawler
      * 
@@ -33,6 +41,7 @@ public abstract class OfflineYahooLocalCrawlerStrategy extends
      * @param listCategoryNames
      */
     public void callCrawling(LinkedList<String> listNameStates,
+    		
 	    List<String> listCategoryNames) {
 	// TODO temporary, should be merged with online algorithm
 

@@ -25,4 +25,5 @@ public abstract class DataSet {
 
 	public abstract void record(int queryID, int level, int parentID, YahooLocalQuery qc, ResultSet resultSet);
 
+	public abstract ResultSet query(YahooLocalQuery qc);
 }

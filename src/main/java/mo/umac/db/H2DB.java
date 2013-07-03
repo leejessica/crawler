@@ -625,4 +625,10 @@ public class H2DB extends DataSet {
 	}
 	return queryID;
     }
+
+	@Override
+	public ResultSet query(YahooLocalQuery qc) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

@@ -161,4 +161,10 @@ public class FileDB extends DataSet {
 	}
     }
 
+	@Override
+	public ResultSet query(YahooLocalQuery qc) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
