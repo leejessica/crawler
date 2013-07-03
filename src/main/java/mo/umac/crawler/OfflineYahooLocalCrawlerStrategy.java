@@ -7,7 +7,7 @@ import java.util.List;
 import mo.umac.db.DataSet;
 import mo.umac.db.H2DB;
 import mo.umac.geo.UScensusData;
-import mo.umac.parser.ResultSet;
+import mo.umac.parser.YahooResultSet;
 import mo.umac.utils.CommonUtils;
 import mo.umac.utils.FileOperator;
 
@@ -29,7 +29,7 @@ public abstract class OfflineYahooLocalCrawlerStrategy extends
      */
     public abstract void crawl(String state, int category, String query, Envelope envelopeState);
 
-    public ResultSet query(YahooLocalQuery qc){
+    public YahooResultSet query(YahooLocalQuery qc){
     	DataSet dataset = new H2DB();
     	return dataset.query(qc);
     }

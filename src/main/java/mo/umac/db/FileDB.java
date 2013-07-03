@@ -10,8 +10,8 @@ import java.util.List;
 import mo.umac.crawler.YahooLocalQuery;
 import mo.umac.parser.Category;
 import mo.umac.parser.Rating;
-import mo.umac.parser.Result;
-import mo.umac.parser.ResultSet;
+import mo.umac.parser.POI;
+import mo.umac.parser.YahooResultSet;
 
 /**
  * @author kate
@@ -21,7 +21,7 @@ public class FileDB extends DataSet {
 
     @Override
     public void record(int queryID, int level, int parentID,
-	    YahooLocalQuery qc, ResultSet resultSet) {
+	    YahooLocalQuery qc, YahooResultSet resultSet) {
 	writeQueryFile(Integer.toString(queryID), qc.getQueryOutput(),
 		qc.queryInfo(), resultSet);
 	if (resultSet.getTotalResultsReturned() > 0) {
@@ -36,7 +36,7 @@ public class FileDB extends DataSet {
      * @param resultSet
      */
     private void writeQueryFile(String partFileName, BufferedWriter dbOutput,
-	    String queryInfo, ResultSet resultSet) {
+	    String queryInfo, YahooResultSet resultSet) {
 	try {
 	    dbOutput.write(partFileName);
 	    dbOutput.write(";");
@@ -62,7 +62,7 @@ public class FileDB extends DataSet {
      * @deprecated
      */
     private void writeQueryFile(String partFileName, YahooLocalQuery qc,
-	    ResultSet resultSet) {
+	    YahooResultSet resultSet) {
 	BufferedWriter dbOutput = qc.getQueryOutput();
 	String query = qc.getQuery();
 	int zip = qc.getZip();
@@ -102,11 +102,11 @@ public class FileDB extends DataSet {
 	}
     }
 
-    private void writeResultsFile(String partFileName, ResultSet resultSet) {
+    private void writeResultsFile(String partFileName, YahooResultSet resultSet) {
 	BufferedWriter resultsOutput = resultSet.getResultsOutput();
-	List<Result> results = resultSet.getResults();
+	List<POI> results = resultSet.getPOIs();
 	for (int i = 0; i < results.size(); i++) {
-	    Result result = results.get(i);
+	    POI result = results.get(i);
 	    int id = result.getId();
 	    String title = result.getTitle();
 	    String address = result.getAddress();
@@ -162,7 +162,7 @@ public class FileDB extends DataSet {
     }
 
 	@Override
-	public ResultSet query(YahooLocalQuery qc) {
+	public YahooResultSet query(YahooLocalQuery qc) {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -1,6 +1,6 @@
 package mo.umac.crawler;
 
-import mo.umac.parser.ResultSet;
+import mo.umac.parser.YahooResultSet;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -57,7 +57,7 @@ public abstract class YahooLocalCrawlerStrategy {
     protected int limitedPageCount = 0;
 
     
-    public abstract ResultSet query(YahooLocalQuery qc);
+    public abstract YahooResultSet query(YahooLocalQuery qc);
     
     /**
      * Check whether it still follows the query limitation
@@ -116,7 +116,7 @@ public abstract class YahooLocalCrawlerStrategy {
      * @param resultSet
      * @return the max start value in constructing a query.
      */
-    protected int maxStartForThisQuery(ResultSet resultSet) {
+    protected int maxStartForThisQuery(YahooResultSet resultSet) {
 	int totalResultAvailable = resultSet.getTotalResultsAvailable();
 	if (totalResultAvailable > MAX_START + MAX_RESULTS_NUM) {
 	    return MAX_START;

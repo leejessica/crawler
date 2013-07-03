@@ -63,8 +63,8 @@ public class StaXParser {
     static final String CATEGORY = "Category";
 
     @SuppressWarnings({ "unchecked", "null" })
-    public ResultSet readConfig(String configFile) {
-	ResultSet resultSet = new ResultSet();
+    public YahooResultSet readConfig(String configFile) {
+	YahooResultSet resultSet = new YahooResultSet();
 	try {
 	    // First create a new XMLInputFactory
 	    XMLInputFactory inputFactory = XMLInputFactory.newInstance();
@@ -96,8 +96,8 @@ public class StaXParser {
 	return resultSet;
     }
 
-    private ResultSet parseErrorInfo(XMLEventReader eventReader,
-	    ResultSet resultSet) throws XMLStreamException {
+    private YahooResultSet parseErrorInfo(XMLEventReader eventReader,
+	    YahooResultSet resultSet) throws XMLStreamException {
 	while (eventReader.hasNext()) {
 	    XMLEvent event = eventReader.nextEvent();
 	    if (event.isStartElement()) {
@@ -124,11 +124,11 @@ public class StaXParser {
      * @return
      * @throws XMLStreamException
      */
-    private ResultSet parseResultSetInfo(XMLEventReader eventReader,
-	    ResultSet resultSet, StartElement startElement)
+    private YahooResultSet parseResultSetInfo(XMLEventReader eventReader,
+	    YahooResultSet resultSet, StartElement startElement)
 	    throws XMLStreamException {
-	List<Result> results = new ArrayList<Result>();
-	Result result = null;
+	List<POI> results = new ArrayList<POI>();
+	POI result = null;
 	Rating rating = null;
 	List<Category> categories = new ArrayList<Category>();
 	Iterator<Attribute> attributes = startElement.getAttributes();
@@ -154,7 +154,7 @@ public class StaXParser {
 		startElement = event.asStartElement();
 
 		if (startElement.getName().getLocalPart().equals(RESULT)) {
-		    result = new Result();
+		    result = new POI();
 		    attributes = startElement.getAttributes();
 		    while (attributes.hasNext()) {
 			Attribute attribute = attributes.next();
@@ -274,7 +274,7 @@ public class StaXParser {
 		}
 	    }
 	    resultSet.setXmlType(YahooXmlType.VALID);
-	    resultSet.setResults(results);
+	    resultSet.setPOIs(results);
 	}
 	return resultSet;
     }

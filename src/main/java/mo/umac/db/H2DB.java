@@ -16,8 +16,8 @@ import java.util.List;
 import mo.umac.crawler.YahooLocalQuery;
 import mo.umac.parser.Category;
 import mo.umac.parser.Rating;
-import mo.umac.parser.Result;
-import mo.umac.parser.ResultSet;
+import mo.umac.parser.POI;
+import mo.umac.parser.YahooResultSet;
 
 /**
  * Operators of the database
@@ -67,7 +67,7 @@ public class H2DB extends DataSet {
 
     @Override
     public void record(int queryID, int level, int parentID,
-	    YahooLocalQuery qc, ResultSet resultSet) {
+	    YahooLocalQuery qc, YahooResultSet resultSet) {
 	Connection con = qc.getCon();
 	// prepared statement
 	PreparedStatement prepItem;
@@ -79,9 +79,9 @@ public class H2DB extends DataSet {
 	    prepCategory = con.prepareStatement(sqlPrepInsertCategory);
 	    prepQuery = con.prepareStatement(sqlPrepInsertQuery);
 	    prepRelationship = con.prepareStatement(sqlPrepInsertRelationship);
-	    List<Result> results = resultSet.getResults();
+	    List<POI> results = resultSet.getPOIs();
 	    for (int i = 0; i < results.size(); i++) {
-		Result result = results.get(i);
+		POI result = results.get(i);
 		// table 1
 		setPrepItem(result, prepItem);
 		prepItem.addBatch();
@@ -335,7 +335,7 @@ public class H2DB extends DataSet {
 	return count;
     }
 
-    private PreparedStatement setPrepItem(Result result,
+    private PreparedStatement setPrepItem(POI result,
 	    PreparedStatement prepItem) {
 	try {
 	    prepItem.setInt(1, result.getId());
@@ -557,7 +557,7 @@ public class H2DB extends DataSet {
 			    setPrepCategory(itemID, category, prepCategory);
 			    prepCategory.addBatch();
 			}
-			Result result = new Result(itemID, title, "", city,
+			POI result = new POI(itemID, title, "", city,
 				state, "", longitude, latitude, null, distance,
 				"", "", "", "", "", categories);
 			setPrepItem(result, prepItem);
@@ -578,7 +578,7 @@ public class H2DB extends DataSet {
 			    setPrepCategory(itemID, category, prepCategory);
 			    prepCategory.addBatch();
 			}
-			Result result = new Result(itemID, title, "", city,
+			POI result = new POI(itemID, title, "", city,
 				state, "", longitude, latitude, null, distance,
 				"", "", "", "", "", categories);
 			setPrepItem(result, prepItem);
@@ -627,7 +627,7 @@ public class H2DB extends DataSet {
     }
 
 	@Override
-	public ResultSet query(YahooLocalQuery qc) {
+	public YahooResultSet query(YahooLocalQuery qc) {
 		// TODO Auto-generated method stub
 		return null;
 	}

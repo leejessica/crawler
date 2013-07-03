@@ -5,7 +5,7 @@ package mo.umac.crawler;
 
 import com.vividsolutions.jts.geom.Envelope;
 
-import mo.umac.parser.ResultSet;
+import mo.umac.parser.YahooResultSet;
 
 /**
  * The one dimensional crawler.
@@ -20,7 +20,7 @@ public class OneDimensionalCrawler {
 	 * 
 	 * @deprecated
 	 */
-	private ResultSet strictOneDimensional() {
+	private YahooResultSet strictOneDimensional() {
 		return null;
 	}
 
@@ -30,12 +30,12 @@ public class OneDimensionalCrawler {
 	 * 
 	 * @return a set of issued points
 	 */
-	public static ResultSet extendOneDimensional(double longitude) {
+	public static YahooResultSet extendOneDimensional(double longitude) {
 		// TODO extendOneDimensional
 		return null;
 	}
 
-	public static ResultSet extendOneDimensional(String state, int category,
+	public static YahooResultSet extendOneDimensional(String state, int category,
 			String query, Envelope envelopeState, double middleLine) {
 
 		return null;
