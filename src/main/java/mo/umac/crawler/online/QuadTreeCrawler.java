@@ -39,7 +39,7 @@ public class QuadTreeCrawler extends OnlineYahooLocalCrawlerStrategy {
 		// that page. (Avoid re-crawling from beginning)
 		IndicatorResult indicatorResult = oneCrawlingProcedure(appid,
 				aEnvelope, state, category, query, subFolder, queryFile,
-				queryOutput, resultsFile, resultsOutput);
+				queryOutput, resultsFile, resultsOutput, null);
 		if (indicatorResult == IndicatorResult.OVERFLOW) {
 			ArrayList<Envelope> envelopeList = Coverage
 					.divideEnvelope(aEnvelope);
