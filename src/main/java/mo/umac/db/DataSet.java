@@ -1,7 +1,7 @@
 package mo.umac.db;
 
 
-import mo.umac.crawler.YahooLocalQuery;
+import mo.umac.crawler.online.YahooLocalQuery;
 import mo.umac.parser.YahooResultSet;
 
 public abstract class DataSet {

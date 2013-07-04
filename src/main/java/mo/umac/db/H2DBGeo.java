@@ -3,7 +3,13 @@ package mo.umac.db;
 import mo.umac.crawler.online.YahooLocalQuery;
 import mo.umac.parser.YahooResultSet;
 
-public class Website extends DataSet {
+/**
+ * H2 dataset with spatial index
+ * 
+ * @author kate
+ *
+ */
+public class H2DBGeo extends DataSet{
 
     @Override
     public void record(int queryID, int level, int parentID,

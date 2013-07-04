@@ -1,5 +1,6 @@
 package mo.umac.crawler;
 
+import mo.umac.crawler.online.YahooLocalQuery;
 import mo.umac.parser.YahooResultSet;
 
 import org.apache.http.client.HttpClient;
@@ -17,12 +18,12 @@ public abstract class YahooLocalCrawlerStrategy {
 
     public static final String APPID = "appid";
 
-    protected static String PROPERTY_PATH = "./src/main/resources/crawler.properties";
+    public static String PROPERTY_PATH = "./src/main/resources/crawler.properties";
 
     /**
      * The path of the category ids of Yahoo! Local
      */
-    protected static String CATEGORY_ID_PATH = "./src/main/resources/cat_id.txt";
+    public static String CATEGORY_ID_PATH = "./src/main/resources/cat_id.txt";
 
     /**
      * The maximum number of returned results by a query.

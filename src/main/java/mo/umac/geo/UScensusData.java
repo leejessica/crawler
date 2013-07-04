@@ -11,7 +11,7 @@ import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 
-import mo.umac.crawler.OnlineYahooLocalCrawlerStrategy;
+import mo.umac.crawler.online.OnlineYahooLocalCrawlerStrategy;
 
 import org.apache.log4j.Logger;
 import org.geotools.data.shapefile.ShpFiles;

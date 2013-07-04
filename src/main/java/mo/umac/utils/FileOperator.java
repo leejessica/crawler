@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import mo.umac.crawler.OnlineYahooLocalCrawlerStrategy;
+import mo.umac.crawler.online.OnlineYahooLocalCrawlerStrategy;
 
 import org.apache.log4j.Logger;
 

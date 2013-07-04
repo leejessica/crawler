@@ -7,7 +7,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.List;
 
-import mo.umac.crawler.YahooLocalQuery;
+import mo.umac.crawler.online.YahooLocalQuery;
 import mo.umac.parser.Category;
 import mo.umac.parser.Rating;
 import mo.umac.parser.POI;

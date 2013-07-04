@@ -2,8 +2,8 @@ package mo.umac.crawler.test;
 
 import java.io.File;
 
-import mo.umac.crawler.OnlineYahooLocalCrawlerStrategy;
-import mo.umac.crawler.QuadTreeCrawler;
+import mo.umac.crawler.online.OnlineYahooLocalCrawlerStrategy;
+import mo.umac.crawler.online.QuadTreeCrawler;
 import mo.umac.parser.YahooResultSet;
 import mo.umac.parser.StaXParser;
 
