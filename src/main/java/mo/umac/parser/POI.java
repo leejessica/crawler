@@ -5,6 +5,8 @@ package mo.umac.parser;
 
 import java.util.List;
 
+import com.vividsolutions.jts.geom.Coordinate;
+
 /**
  * @author kate
  * 
@@ -16,8 +18,10 @@ public class POI {
     private String city;
     private String state;
     private String phone;
-    private Double longitude;
-    private Double latitude;
+    // change at 05-07-2013
+    // private Double longitude;
+    // private Double latitude;
+    private Coordinate coordinate;
 
     private Rating rating;
 
@@ -34,10 +38,10 @@ public class POI {
 
     }
 
-    public POI(int id, String title, String address, String city,
-	    String state, String phone, Double longitude, Double latitude,
-	    Rating rating, double distance, String url, String clickUrl,
-	    String mapUrl, String businessUrl, String businessClickUrl,
+    public POI(int id, String title, String address, String city, String state,
+	    String phone, Coordinate coordinate, Rating rating,
+	    double distance, String url, String clickUrl, String mapUrl,
+	    String businessUrl, String businessClickUrl,
 	    List<Category> categories) {
 	super();
 	this.id = id;
@@ -46,8 +50,31 @@ public class POI {
 	this.city = city;
 	this.state = state;
 	this.phone = phone;
-	this.longitude = longitude;
-	this.latitude = latitude;
+	this.coordinate = coordinate;
+	this.rating = rating;
+	this.distance = distance;
+	this.url = url;
+	this.clickUrl = clickUrl;
+	this.mapUrl = mapUrl;
+	this.businessUrl = businessUrl;
+	this.businessClickUrl = businessClickUrl;
+	this.categories = categories;
+    }
+
+    public POI(int id, String title, String address, String city, String state,
+	    String phone, Double longitude, Double latitude, Rating rating,
+	    double distance, String url, String clickUrl, String mapUrl,
+	    String businessUrl, String businessClickUrl,
+	    List<Category> categories) {
+	super();
+	this.id = id;
+	this.title = title;
+	this.address = address;
+	this.city = city;
+	this.state = state;
+	this.phone = phone;
+	this.coordinate.x = longitude;
+	this.coordinate.y = latitude;
 	this.rating = rating;
 	this.distance = distance;
 	this.url = url;
@@ -63,8 +90,8 @@ public class POI {
 	StringBuffer sb = new StringBuffer();
 	sb.append("Result [id=" + id + ", title=" + title + ", address="
 		+ address + ", city=" + city + ", state=" + state + ", phone="
-		+ phone + ", longitude=" + longitude + ", latitude=" + latitude
-		+ ", distance=" + distance + "]");
+		+ phone + ", longitude=" + coordinate.x + ", latitude="
+		+ coordinate.y + ", distance=" + distance + "]");
 	return sb.toString();
     }
 
@@ -117,19 +144,27 @@ public class POI {
     }
 
     public Double getLongitude() {
-	return longitude;
+	return coordinate.x;
     }
 
     public void setLongitude(Double longitude) {
-	this.longitude = longitude;
+	this.coordinate.x = longitude;
     }
 
     public Double getLatitude() {
-	return latitude;
+	return coordinate.y;
     }
 
     public void setLatitude(Double latitude) {
-	this.latitude = latitude;
+	this.coordinate.y = latitude;
+    }
+
+    public Coordinate getCoordinate() {
+	return coordinate;
+    }
+
+    public void setCoordinate(Coordinate coordinate) {
+	this.coordinate = coordinate;
     }
 
     public Rating getRating() {
