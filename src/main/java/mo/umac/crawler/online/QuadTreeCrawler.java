@@ -60,4 +60,5 @@ public class QuadTreeCrawler extends OnlineYahooLocalCrawlerStrategy {
 		return indicatorResult;
 	}
 
+	
 }

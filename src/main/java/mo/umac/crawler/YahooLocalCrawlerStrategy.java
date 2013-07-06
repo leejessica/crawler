@@ -1,12 +1,18 @@
 package mo.umac.crawler;
 
 import java.io.BufferedWriter;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 
 import mo.umac.crawler.online.IndicatorResult;
 import mo.umac.crawler.online.YahooLocalQueryFileDB;
+import mo.umac.db.DataSet;
 import mo.umac.geo.Circle;
 import mo.umac.geo.Coverage;
+import mo.umac.geo.UScensusData;
 import mo.umac.parser.YahooResultSet;
+import mo.umac.utils.FileOperator;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -72,147 +78,65 @@ public abstract class YahooLocalCrawlerStrategy {
     }
 
     /**
-     * Check whether it still follows the query limitation
+     * Entrance of the crawler
      * 
-     * @param countNumQueries
-     * @param beginTime
+     * @param listNameStates
+     * @param listCategoryNames
      */
-    protected void sleepForIPRestriction(long beginTime) {
-	// sleep to satisfy the ip restriction: 5000 accesses per day
-	long now = System.currentTimeMillis();
-	long diff = (now - beginTime);
-	if (diff < DAY_TIME) {
-	    try {
-		long interval = (DAY_TIME - diff) / 1000 / 60;
-		logger.info("Sleeping " + interval + "minutes.");
-		Thread.currentThread().sleep(DAY_TIME - diff);
-	    } catch (InterruptedException e) {
-		e.printStackTrace();
+    public void callCrawling(LinkedList<String> listNameStates,
+	    List<String> listCategoryNames) {
+	LinkedList<Envelope> listEnvelopeStates = selectEnvelopes(
+		listNameStates, listCategoryNames);
+	HashMap<Integer, String> categoryIDMap = FileOperator
+		.readCategoryID(CATEGORY_ID_PATH);
+
+	initData();
+
+	crawlByCategoriesStates(listEnvelopeStates, listCategoryNames,
+		listNameStates, categoryIDMap);
+
+	httpClient.getConnectionManager().shutdown();
+
+    }
+
+    /**
+     * Initializations for storing the data
+     */
+    protected abstract void initData();
+
+    protected abstract void crawlByCategoriesStates(
+	    LinkedList<Envelope> listEnvelopeStates,
+	    List<String> listCategoryNames, LinkedList<String> listNameStates,
+	    HashMap<Integer, String> categoryIDMap);
+
+    /**
+     * Select the envelope information from UScensus data
+     * 
+     * @param listNameStates
+     * @param listCategoryNames
+     * @return
+     */
+    private LinkedList<Envelope> selectEnvelopes(
+	    LinkedList<String> listNameStates, List<String> listCategoryNames) {
+	// State's information provided by UScensus
+	LinkedList<Envelope> allEnvelopeStates = (LinkedList<Envelope>) UScensusData
+		.MBR(UScensusData.STATE_SHP_FILE_NAME);
+	LinkedList<String> allNameStates = (LinkedList<String>) UScensusData
+		.stateName(UScensusData.STATE_DBF_FILE_NAME);
+
+	LinkedList<Envelope> listEnvelopeStates = new LinkedList<Envelope>();
+
+	// select the specified states according to the listNameStates
+	for (int i = 0; i < listNameStates.size(); i++) {
+	    String specifiedName = listNameStates.get(i);
+	    for (int j = 0; j < allNameStates.size(); j++) {
+		String name = allNameStates.get(j);
+		if (name.equals(specifiedName)) {
+		    listEnvelopeStates.add(allEnvelopeStates.get(j));
+		}
 	    }
 	}
-	// How can I made this mistake!!!
-	// beginTime = System.currentTimeMillis();
+	return listEnvelopeStates;
     }
 
-    /**
-     * Force sleep if there are access limitations.
-     * 
-     * @param limitedPageCount
-     */
-    protected void sleeping(int limitedPageCount) {
-	// Set 5 minutes as the unit
-	long unit = 5 * 60 * 1000;
-	long interval = 0;
-	long base = 1;
-	for (int i = 0; i < limitedPageCount - 1; i++) {
-	    base *= 2;
-	}
-	interval = unit * base;
-	long aDay = 24 * 60 * 60 * 1000;
-	try {
-	    if (interval > aDay) {
-		logger.info("Sleeping a day");
-		Thread.currentThread().sleep(aDay);
-	    } else {
-		logger.info("Sleeping " + interval / 1000 / 60 + " minutes.");
-		Thread.currentThread().sleep(interval);
-	    }
-	} catch (InterruptedException e) {
-	    e.printStackTrace();
-	}
-    }
-
-    /**
-     * Calculate the maximum start number of a query
-     * 
-     * @param resultSet
-     * @return the max start value in constructing a query.
-     */
-    protected int maxStartForThisQuery(YahooResultSet resultSet) {
-	int totalResultAvailable = resultSet.getTotalResultsAvailable();
-	if (totalResultAvailable > MAX_START + MAX_RESULTS_NUM) {
-	    return MAX_START;
-	}
-	int idealNum = (int) (Math.floor(1.0 * totalResultAvailable
-		/ MAX_RESULTS_NUM) * 20);
-	if (idealNum > MAX_START) {
-	    return MAX_START;
-	} else {
-	    return idealNum;
-	}
-    }
-
-    protected HttpClient createHttpClient() {
-	PoolingClientConnectionManager manager = new PoolingClientConnectionManager();
-	HttpParams params = new BasicHttpParams();
-	int timeout = 1000 * 24 * 60 * 60;
-	HttpConnectionParams.setConnectionTimeout(params, timeout);
-	HttpConnectionParams.setSoTimeout(params, timeout);
-	HttpClient httpClient = new DefaultHttpClient(manager, params);
-	return httpClient;
-    }
-
-    /**
-     * Common steps in one crawling procedure, crawl in the center point
-     * 
-     * @param appid
-     * @param aEnvelope
-     * @param category
-     * @param query
-     * @param subFolder
-     * @param queryFile
-     * @param queryOutput
-     * @param resultsFile
-     * @param resultsOutput
-     * @param resultSet
-     *            return all POIs got in this query procedure
-     * @param stateName
-     * @return an indicator of the result of this query
-     */
-    protected IndicatorResult oneCrawlingProcedure(String appid,
-	    Envelope aEnvelope, String state, int category, String query,
-	    String subFolder, String queryFile, BufferedWriter queryOutput,
-	    String resultsFile, BufferedWriter resultsOutput,
-	    YahooResultSet resultSet) {
-	YahooResultSet tempResultSet;
-	// the first page for any query
-	int start = 1;
-	Circle circle = Coverage.computeCircle(aEnvelope);
-	YahooLocalQueryFileDB qc = new YahooLocalQueryFileDB(subFolder,
-		queryFile, queryOutput, resultsFile, resultsOutput, aEnvelope,
-		appid, state, category, start, circle, countNumQueries, query,
-		zip, MAX_RESULTS_NUM);
-	resultSet = query(qc);
-	//
-	// This loop represents turning over the page.
-	int maxStartForThisQuery = maxStartForThisQuery(resultSet);
-	// logger.debug("totalResultsAvailable=" +
-	// resultSet.getTotalResultsAvailable());
-	// logger.debug("maxStartForThisQuery=" + maxStartForThisQuery);
-	// TODO check the last page
-	for (start += MAX_RESULTS_NUM; start <= maxStartForThisQuery; start += MAX_RESULTS_NUM) {
-	    qc = new YahooLocalQueryFileDB(subFolder, queryFile, queryOutput,
-		    resultsFile, resultsOutput, aEnvelope, appid, state,
-		    category, start, circle, countNumQueries, query, zip,
-		    MAX_RESULTS_NUM);
-	    tempResultSet = query(qc);
-	    // TODO check add at 5-7-2013
-	    resultSet.getPOIs().addAll(tempResultSet.getPOIs());
-	}
-	// the last query
-	if (maxStartForThisQuery == MAX_START) {
-	    start = maxStartForThisQuery;
-	    qc = new YahooLocalQueryFileDB(subFolder, queryFile, queryOutput,
-		    resultsFile, resultsOutput, aEnvelope, appid, state,
-		    category, start, circle, countNumQueries, query, zip,
-		    MAX_RESULTS_NUM);
-	    tempResultSet = query(qc);
-	    // TODO check add at 5-7-2013
-	    resultSet.getPOIs().addAll(tempResultSet.getPOIs());
-	}
-	if (resultSet.getTotalResultsAvailable() > MAX_TOTAL_RESULTS_RETURNED) {
-	    return IndicatorResult.OVERFLOW;
-	}
-	return IndicatorResult.NONOVERFLOW;
-    }
 }

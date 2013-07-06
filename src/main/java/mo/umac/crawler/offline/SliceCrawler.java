@@ -51,10 +51,11 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
 	    return;
 	}
 
-	// TODO find the gaps, and then cover the gaps
-	fillGaps(envelopeState, middleLine, leftRightNearestEnvelope.get(0), oneDimensionalResultSet);
-	
-	
+	fillGaps(envelopeState, middleLine, leftRightNearestEnvelope.get(0),
+		oneDimensionalResultSet);
+	fillGaps(envelopeState, middleLine, leftRightNearestEnvelope.get(1),
+		oneDimensionalResultSet);
+
 	List<Envelope> leftRightRemainedEnvelope = remainedRegion(
 		envelopeState, leftRightNearestEnvelope);
 	Envelope envelopeLeft = leftRightRemainedEnvelope.get(0);
@@ -62,6 +63,20 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
 
 	Envelope envelopeRight = leftRightRemainedEnvelope.get(1);
 	crawl(state, category, query, envelopeRight);
+    }
+
+    /**
+     * find the gaps, and then cover the gaps
+     * 
+     * @param envelopeState
+     * @param middleLine
+     * @param envelope
+     * @param oneDimensionalResultSet
+     */
+    private void fillGaps(Envelope envelopeState, LineSegment middleLine,
+	    Envelope envelope, OneDimensionalResultSet oneDimensionalResultSet) {
+	// FIXME 1. fillGaps
+
     }
 
     /**
@@ -76,7 +91,7 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
     private boolean judgeCovered(Envelope envelopeState,
 	    LineSegment middleLine,
 	    OneDimensionalResultSet oneDimensionalResultSet) {
-	// TODO Auto-generated method stub
+	// FIXME 2 judgeCovered
 	return false;
     }
 

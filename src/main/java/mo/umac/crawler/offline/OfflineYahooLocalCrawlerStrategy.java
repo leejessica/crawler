@@ -37,54 +37,21 @@ public abstract class OfflineYahooLocalCrawlerStrategy extends
 	return dataset.query(aQuery);
     }
 
-    /**
-     * Entrance of the crawler
-     * 
-     * @param listNameStates
-     * @param listCategoryNames
-     */
-    public void callCrawling(LinkedList<String> listNameStates,
-
-    List<String> listCategoryNames) {
-	// TODO temporary, should be merged with online algorithm
-
-	// State's information provided by UScensus
-	LinkedList<Envelope> allEnvelopeStates = (LinkedList<Envelope>) UScensusData
-		.MBR(UScensusData.STATE_SHP_FILE_NAME);
-	LinkedList<String> allNameStates = (LinkedList<String>) UScensusData
-		.stateName(UScensusData.STATE_DBF_FILE_NAME);
-
-	LinkedList<Envelope> listEnvelopeStates = new LinkedList<Envelope>();
-
-	// select the specified states according to the listNameStates
-	for (int i = 0; i < listNameStates.size(); i++) {
-	    String specifiedName = listNameStates.get(i);
-	    for (int j = 0; j < allNameStates.size(); j++) {
-		String name = allNameStates.get(j);
-		if (name.equals(specifiedName)) {
-		    listEnvelopeStates.add(allEnvelopeStates.get(j));
-		}
-	    }
-	}
-
-	HashMap<Integer, String> categoryIDMap = FileOperator
-		.readCategoryID(CATEGORY_ID_PATH);
-
-	crawlByCategoriesStates(listEnvelopeStates, listCategoryNames,
-		listNameStates, categoryIDMap);
-
-	httpClient.getConnectionManager().shutdown();
+    @Override
+    protected void initData() {
+	// TODO connect to the local dataset
 
     }
 
-    /**
+    /*
+     * (non-Javadoc)
      * 
-     * @param listEnvelopeStates
-     * @param listCategoryName
-     * @param nameStates
-     * @param categoryIDMap
+     * @see
+     * mo.umac.crawler.YahooLocalCrawlerStrategy#crawlByCategoriesStates(java
+     * .util.LinkedList, java.util.List, java.util.LinkedList,
+     * java.util.HashMap)
      */
-    private void crawlByCategoriesStates(
+    protected void crawlByCategoriesStates(
 	    LinkedList<Envelope> listEnvelopeStates,
 	    List<String> listCategoryNames, LinkedList<String> nameStates,
 	    HashMap<Integer, String> categoryIDMap) {

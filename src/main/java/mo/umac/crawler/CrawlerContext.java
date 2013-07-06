@@ -1,7 +1,7 @@
 /**
  * 
  */
-package mo.umac.crawler.online;
+package mo.umac.crawler;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -9,13 +9,12 @@ import java.util.List;
 
 /**
  * @author kate
- * 
+ *
  */
 public class CrawlerContext {
+    private YahooLocalCrawlerStrategy crawlerStrategy;
 
-	private OnlineYahooLocalCrawlerStrategy crawlerStrategy;
-
-	public CrawlerContext(OnlineYahooLocalCrawlerStrategy crawlerStrategy) {
+	public CrawlerContext(YahooLocalCrawlerStrategy crawlerStrategy) {
 		this.crawlerStrategy = crawlerStrategy;
 	}
 
@@ -23,5 +22,4 @@ public class CrawlerContext {
 			List<String> listCategoryNames) {
 		this.crawlerStrategy.callCrawling(listNameStates, listCategoryNames);
 	}
-
 }

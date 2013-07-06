@@ -7,7 +7,7 @@ import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 
-import mo.umac.crawler.online.Main;
+import mo.umac.crawler.Main;
 import mo.umac.geo.UScensusData;
 
 import org.apache.log4j.Logger;

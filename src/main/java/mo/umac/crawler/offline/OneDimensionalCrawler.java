@@ -3,8 +3,6 @@
  */
 package mo.umac.crawler.offline;
 
-import java.util.ArrayList;
-import java.util.List;
 
 import mo.umac.crawler.AQuery;
 import mo.umac.parser.POI;
@@ -45,6 +43,7 @@ public class OneDimensionalCrawler extends OfflineYahooLocalCrawlerStrategy {
 		state, category, query);
 	// add to finalResultSet
 	finalResultSet.addAll(resultSet.getPOIs());
+	// TODO revise the value of circles, add to the YahooResultSet, and fill the value in oneCrawling...OneDe... method
 
 	// find the top and bottom boundary
 	Coordinate farthestPoint = farthestPOI(resultSet);
@@ -61,12 +60,14 @@ public class OneDimensionalCrawler extends OfflineYahooLocalCrawlerStrategy {
 	OneDimensionalResultSet newLeftResultSet = extendOneDimensional(state,
 		category, query, leftLine);
 	finalResultSet.addAll(newLeftResultSet.getPois());
-
+	// TODO revise the value of circles
+	
 	Coordinate newLeft = middleLine.pointAlongOffset(0.5, radius);
 	LineSegment rightLine = new LineSegment(newLeft, right);
 	OneDimensionalResultSet newRightResultSet = extendOneDimensional(state,
 		category, query, rightLine);
 	finalResultSet.addAll(newRightResultSet.getPois());
+	// TODO revise the value of circles
 	
 	return finalResultSet;
     }
