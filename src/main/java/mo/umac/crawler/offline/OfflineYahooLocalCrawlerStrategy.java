@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import mo.umac.crawler.AQuery;
 import mo.umac.crawler.YahooLocalCrawlerStrategy;
-import mo.umac.crawler.online.YahooLocalQuery;
 import mo.umac.db.DataSet;
 import mo.umac.db.H2DBGeo;
 import mo.umac.geo.UScensusData;
@@ -29,13 +29,14 @@ public abstract class OfflineYahooLocalCrawlerStrategy extends
     /**
      * This is the crawling algorithm
      */
-    public abstract void crawl(String state, int category, String query, Envelope envelopeState);
+    public abstract void crawl(String state, int category, String query,
+	    Envelope envelopeState);
 
-    public YahooResultSet query(YahooLocalQuery qc){
-    	DataSet dataset = new H2DBGeo();
-    	return dataset.query(qc);
+    public YahooResultSet query(AQuery aQuery) {
+	DataSet dataset = new H2DBGeo();
+	return dataset.query(aQuery);
     }
-    
+
     /**
      * Entrance of the crawler
      * 
@@ -43,8 +44,8 @@ public abstract class OfflineYahooLocalCrawlerStrategy extends
      * @param listCategoryNames
      */
     public void callCrawling(LinkedList<String> listNameStates,
-    		
-	    List<String> listCategoryNames) {
+
+    List<String> listCategoryNames) {
 	// TODO temporary, should be merged with online algorithm
 
 	// State's information provided by UScensus

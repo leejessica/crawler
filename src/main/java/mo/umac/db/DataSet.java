@@ -1,7 +1,8 @@
 package mo.umac.db;
 
 
-import mo.umac.crawler.online.YahooLocalQuery;
+import mo.umac.crawler.AQuery;
+import mo.umac.crawler.online.YahooLocalQueryFileDB;
 import mo.umac.parser.YahooResultSet;
 
 public abstract class DataSet {
@@ -23,7 +24,7 @@ public abstract class DataSet {
 	 */
 	public static final String RESULT_FILE_NAME = "results";
 
-	public abstract void record(int queryID, int level, int parentID, YahooLocalQuery qc, YahooResultSet resultSet);
+	public abstract void record(int queryID, int level, int parentID, YahooLocalQueryFileDB qc, YahooResultSet resultSet);
 
-	public abstract YahooResultSet query(YahooLocalQuery qc);
+	public abstract YahooResultSet query(AQuery qc);
 }

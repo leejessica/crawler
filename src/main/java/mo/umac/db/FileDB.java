@@ -7,10 +7,11 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.List;
 
-import mo.umac.crawler.online.YahooLocalQuery;
+import mo.umac.crawler.AQuery;
+import mo.umac.crawler.online.YahooLocalQueryFileDB;
 import mo.umac.parser.Category;
-import mo.umac.parser.Rating;
 import mo.umac.parser.POI;
+import mo.umac.parser.Rating;
 import mo.umac.parser.YahooResultSet;
 
 /**
@@ -21,7 +22,7 @@ public class FileDB extends DataSet {
 
     @Override
     public void record(int queryID, int level, int parentID,
-	    YahooLocalQuery qc, YahooResultSet resultSet) {
+	    YahooLocalQueryFileDB qc, YahooResultSet resultSet) {
 	writeQueryFile(Integer.toString(queryID), qc.getQueryOutput(),
 		qc.queryInfo(), resultSet);
 	if (resultSet.getTotalResultsReturned() > 0) {
@@ -61,7 +62,7 @@ public class FileDB extends DataSet {
      *            basic information of the query.
      * @deprecated
      */
-    private void writeQueryFile(String partFileName, YahooLocalQuery qc,
+    private void writeQueryFile(String partFileName, YahooLocalQueryFileDB qc,
 	    YahooResultSet resultSet) {
 	BufferedWriter dbOutput = qc.getQueryOutput();
 	String query = qc.getQuery();
@@ -162,7 +163,7 @@ public class FileDB extends DataSet {
     }
 
 	@Override
-	public YahooResultSet query(YahooLocalQuery qc) {
+	public YahooResultSet query(AQuery qc) {
 		// TODO Auto-generated method stub
 		return null;
 	}

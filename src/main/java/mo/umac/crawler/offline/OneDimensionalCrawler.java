@@ -3,16 +3,16 @@
  */
 package mo.umac.crawler.offline;
 
-import java.io.BufferedWriter;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
+import mo.umac.crawler.AQuery;
 import mo.umac.parser.POI;
 import mo.umac.parser.YahooResultSet;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.LineSegment;
 
 /**
  * The one dimensional crawler.
@@ -22,73 +22,101 @@ import com.vividsolutions.jts.geom.Envelope;
  */
 public class OneDimensionalCrawler extends OfflineYahooLocalCrawlerStrategy {
 
-	/**
-	 * Begin at the center of the line
-	 * 
-	 * 
-	 * @param state
-	 * @param category
-	 * @param query
-	 * @param envelopeState
-	 * @param middleLine
-	 * @return
-	 */
-	public OneDimensionalResultSet extendOneDimensional(String state,
-			int category, String query, Envelope aEnvelope, double middleLine) {
+    /**
+     * Begin at the center of the line
+     * 
+     * 
+     * @param state
+     * @param category
+     * @param query
+     * @param envelopeState
+     * @param middleLine
+     * @return
+     */
+    public OneDimensionalResultSet extendOneDimensional(String state,
+	    int category, String query, LineSegment middleLine) {
+	OneDimensionalResultSet finalResultSet = new OneDimensionalResultSet();
+	Coordinate left = middleLine.p0;
+	Coordinate right = middleLine.p1;
+	Coordinate center = middleLine.midPoint();
 
-		String queryFile = null;
-		String subFolder = null;
-		BufferedWriter resultsOutput = null;
-		BufferedWriter queryOutput = null;
-		String resultsFile = null;
+	
+	YahooResultSet resultSet = oneCrawlingProcedureForOneDimension(center,
+		state, category, query);
+	// add to finalResultSet
+	finalResultSet.addAll(resultSet.getPOIs());
 
-		Coordinate center = aEnvelope.centre();
+	// find the top and bottom boundary
+	Coordinate farthestPoint = farthestPOI(resultSet);
+	double radius = center.distance(farthestPoint);
 
-		List resultSetList = new ArrayList<YahooResultSet>();
-		// indicate whether this line has been fully covered
-		boolean stop = false;
-		while (!stop) {
-			YahooResultSet resultSet = new YahooResultSet();
-			oneCrawlingProcedure(APPID, aEnvelope, state, category, query,
-					subFolder, queryFile, queryOutput, resultsFile,
-					resultsOutput, resultSet);
-			resultSetList.add(resultSet);
-			// TODO looking for the circle of this query procedure
-//			POI farthest 
-		}
-		POI nearestPOI = nearestPOI(resultSetList, middleLine);
-		Coordinate poi = nearestPOI.getCoordinate();
-		return null;
+	if (radius >= middleLine.getLength() / 2) {
+	    // finished crawling
+	    return finalResultSet;
 	}
 
-	/**
-	 * Find the nearest poi to the middle line among all queries.
-	 * 
-	 * @param resultSet
-	 * @param middleLine
-	 * @return
-	 */
-	private POI nearestPOI(List resultSetList, double middleLine) {
-		POI nearest = null;
+	// recursively crawl
+	Coordinate newRight = middleLine.pointAlongOffset(0.5, -radius);
+	LineSegment leftLine = new LineSegment(left, newRight);
+	OneDimensionalResultSet newLeftResultSet = extendOneDimensional(state,
+		category, query, leftLine);
+	finalResultSet.addAll(newLeftResultSet.getPois());
 
-		return nearest;
+	Coordinate newLeft = middleLine.pointAlongOffset(0.5, radius);
+	LineSegment rightLine = new LineSegment(newLeft, right);
+	OneDimensionalResultSet newRightResultSet = extendOneDimensional(state,
+		category, query, rightLine);
+	finalResultSet.addAll(newRightResultSet.getPois());
+	
+	return finalResultSet;
+    }
+
+    /**
+     * find the farthest POI in one query
+     * 
+     * @param resultSet
+     * @return
+     */
+    private Coordinate farthestPOI(YahooResultSet resultSet) {
+	int size = resultSet.getPOIs().size();
+	if (size == 0) {
+	    return null;
+	} else {
+	    POI farthestPOI = resultSet.getPOIs().get(size - 1);
+	    return farthestPOI.getCoordinate();
 	}
+    }
 
-	/**
-	 * find the farthest POI in one query
-	 * 
-	 * @param resultSet
-	 * @return
-	 */
-	private POI farthestPOI(YahooResultSet resultSet) {
-		return null;
-	}
+    @Override
+    public void crawl(String state, int category, String query,
+	    Envelope envelopeState) {
+	// TODO Auto-generated method stub
 
-	@Override
-	public void crawl(String state, int category, String query,
-			Envelope envelopeState) {
-		// TODO Auto-generated method stub
+    }
 
-	}
+    /**
+     * Common steps in one crawling procedure, crawl in the center point
+     * 
+     * @param appid
+     * @param aEnvelope
+     * @param category
+     * @param query
+     * @param subFolder
+     * @param queryFile
+     * @param queryOutput
+     * @param resultsFile
+     * @param resultsOutput
+     * @param resultSet
+     *            return all POIs got in this query procedure
+     * @param stateName
+     * @return an indicator of the result of this query
+     */
+    protected YahooResultSet oneCrawlingProcedureForOneDimension(
+	    Coordinate point, String state, int category, String query) {
+	AQuery aQuery = new AQuery(query, MAX_TOTAL_RESULTS_RETURNED, state,
+		category, point);
+	YahooResultSet resultSet = query(aQuery);
+	return resultSet;
+    }
 
 }

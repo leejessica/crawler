@@ -13,10 +13,11 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import mo.umac.crawler.online.YahooLocalQuery;
+import mo.umac.crawler.AQuery;
+import mo.umac.crawler.online.YahooLocalQueryFileDB;
 import mo.umac.parser.Category;
-import mo.umac.parser.Rating;
 import mo.umac.parser.POI;
+import mo.umac.parser.Rating;
 import mo.umac.parser.YahooResultSet;
 
 /**
@@ -67,7 +68,7 @@ public class H2DB extends DataSet {
 
     @Override
     public void record(int queryID, int level, int parentID,
-	    YahooLocalQuery qc, YahooResultSet resultSet) {
+	    YahooLocalQueryFileDB qc, YahooResultSet resultSet) {
 	Connection con = qc.getCon();
 	// prepared statement
 	PreparedStatement prepItem;
@@ -373,7 +374,7 @@ public class H2DB extends DataSet {
 	return prepCategory;
     }
 
-    private PreparedStatement setPrepQuery(int queryID, YahooLocalQuery qc,
+    private PreparedStatement setPrepQuery(int queryID, YahooLocalQueryFileDB qc,
 	    int level, int parentID, int totalResultsAvailable,
 	    int totalResultsReturned, int firstResultPosition,
 	    PreparedStatement prepQuery) {
@@ -627,7 +628,7 @@ public class H2DB extends DataSet {
     }
 
 	@Override
-	public YahooResultSet query(YahooLocalQuery qc) {
+	public YahooResultSet query(AQuery qc) {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -1,9 +1,14 @@
 package mo.umac.crawler.offline;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import mo.umac.parser.POI;
+
 import org.apache.log4j.Logger;
-import com.vividsolutions.jts.geom.Coordinate;
+
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.LineSegment;
 
 public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
 
@@ -25,40 +30,101 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
 
 	// first fine the middle line, and then use the 1 dimensional method to
 	// issue queries on this line.
-	double middleLine = middleLine(envelopeState);
+	LineSegment middleLine = middleLine(envelopeState);
 	OneDimensionalCrawler oneDimensionalCrawler = new OneDimensionalCrawler();
-	OneDimensionalResultSet resultSet = oneDimensionalCrawler
-		.extendOneDimensional(state, category, query, envelopeState,
-			middleLine);
+	OneDimensionalResultSet oneDimensionalResultSet = oneDimensionalCrawler
+		.extendOneDimensional(state, category, query, middleLine);
 
 	// For all returned points, find the left and the right nearest point to
 	// the middle line.
-	List<Envelope> leftRight = nearestBoundary(envelopeState, middleLine,
-		resultSet);
+	List<POI> leftRightNearestPOIs = nearestPOIs(envelopeState, middleLine,
+		oneDimensionalResultSet);
+	// TODO compute that should be covered regions (left/right)
+	List<Envelope> leftRightNearestEnvelope = nearestCoveredRegion(
+		envelopeState, middleLine, leftRightNearestPOIs);
+
 	// stop criteria
-	boolean[] coveredLeftRight = { false, false };
-	coveredLeftRight = judgeCovered(envelopeState, middleLine, leftRight);
+	boolean covered = false;
+	covered = judgeCovered(envelopeState, middleLine,
+		oneDimensionalResultSet);
+	if (covered) {
+	    return;
+	}
 
-	if (coveredLeftRight[0] == false) {
-	    Envelope envelopeLeft = leftRight.get(0);
-	    crawl(state, category, query, envelopeLeft);
-	}
-	if (coveredLeftRight[1] == false) {
-	    Envelope envelopeRight = leftRight.get(1);
-	    crawl(state, category, query, envelopeRight);
-	}
+	// TODO find the gaps, and then cover the gaps
+	fillGaps(envelopeState, middleLine, leftRightNearestEnvelope.get(0), oneDimensionalResultSet);
+	
+	
+	List<Envelope> leftRightRemainedEnvelope = remainedRegion(
+		envelopeState, leftRightNearestEnvelope);
+	Envelope envelopeLeft = leftRightRemainedEnvelope.get(0);
+	crawl(state, category, query, envelopeLeft);
+
+	Envelope envelopeRight = leftRightRemainedEnvelope.get(1);
+	crawl(state, category, query, envelopeRight);
     }
 
-    private boolean[] judgeCovered(Envelope envelopeState, double middleLine,
-	    List<Envelope> leftRight) {
+    /**
+     * Judge whether this envelope has been covered by this one dimensional
+     * crawling method
+     * 
+     * @param envelopeState
+     * @param middleLine
+     * @param oneDimensionalResultSet
+     * @return
+     */
+    private boolean judgeCovered(Envelope envelopeState,
+	    LineSegment middleLine,
+	    OneDimensionalResultSet oneDimensionalResultSet) {
 	// TODO Auto-generated method stub
+	return false;
+    }
+
+    /**
+     * Find the remained envelope need be crawled later
+     * 
+     * @param envelopeState
+     * @param leftRightNearestEnvelope
+     * @return
+     */
+    private List<Envelope> remainedRegion(Envelope envelopeState,
+	    List<Envelope> leftRightNearestEnvelope) {
+	// TODO
 	return null;
     }
 
-    private List<Envelope> nearestBoundary(Envelope envelopeState,
-	    double middleLine, OneDimensionalResultSet resultSet) {
-	// TODO Auto-generated method stub
-	return null;
+    /**
+     * Compute the left region and the right region based on the left/right
+     * nearest points.
+     * 
+     * @param envelopeState
+     * @param middleLine
+     * @param leftRightPOIs
+     * @return
+     */
+    private List<Envelope> nearestCoveredRegion(Envelope envelopeState,
+	    LineSegment middleLine, List<POI> leftRightNearestPOIs) {
+	List<Envelope> leftRightNearestEnvelope = new ArrayList<Envelope>();
+	// TODO
+	// cannot exceed the boundary of the envelopeState
+	return leftRightNearestEnvelope;
+    }
+
+    /**
+     * Find the nearest left and right POIs to the middle line. But not in the
+     * middle line
+     * 
+     * @param envelopeState
+     * @param middleLine
+     * @param oneDimensionalResultSet
+     * @return the left & the right nearest point
+     */
+    private List<POI> nearestPOIs(Envelope envelopeState,
+	    LineSegment middleLine,
+	    OneDimensionalResultSet oneDimensionalResultSet) {
+	List<POI> leftRight = new ArrayList<POI>();
+	// TODO nearestPOIs
+	return leftRight;
     }
 
     /**
@@ -67,10 +133,11 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
      * @param envelopeState
      * @return the longitude of the middle line
      */
-    private double middleLine(Envelope envelopeState) {
-	// TODO check
-	Coordinate center = envelopeState.centre();
-	return center.x;
+    private LineSegment middleLine(Envelope envelopeState) {
+	// Coordinate center = envelopeState.centre();
+	// return center.x;
+	// TODO
+	return null;
     }
 
 }

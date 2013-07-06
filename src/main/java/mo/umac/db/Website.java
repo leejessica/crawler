@@ -1,19 +1,20 @@
 package mo.umac.db;
 
-import mo.umac.crawler.online.YahooLocalQuery;
+import mo.umac.crawler.AQuery;
+import mo.umac.crawler.online.YahooLocalQueryFileDB;
 import mo.umac.parser.YahooResultSet;
 
 public class Website extends DataSet {
 
     @Override
     public void record(int queryID, int level, int parentID,
-	    YahooLocalQuery qc, YahooResultSet resultSet) {
+	    YahooLocalQueryFileDB qc, YahooResultSet resultSet) {
 	// TODO Auto-generated method stub
 	
     }
 
     @Override
-    public YahooResultSet query(YahooLocalQuery qc) {
+    public YahooResultSet query(AQuery qc) {
 	// TODO Auto-generated method stub
 	return null;
     }
