@@ -3,14 +3,17 @@
  */
 package mo.umac.crawler.offline;
 
+import java.util.List;
 
 import mo.umac.crawler.AQuery;
+import mo.umac.geo.Circle;
+import mo.umac.geo.GeoOperator;
 import mo.umac.parser.POI;
 import mo.umac.parser.YahooResultSet;
-
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.LineSegment;
+import com.vividsolutions.jts.geomgraph.Position;
 
 /**
  * The one dimensional crawler.
@@ -38,12 +41,9 @@ public class OneDimensionalCrawler extends OfflineYahooLocalCrawlerStrategy {
 	Coordinate right = middleLine.p1;
 	Coordinate center = middleLine.midPoint();
 
-	
 	YahooResultSet resultSet = oneCrawlingProcedureForOneDimension(center,
 		state, category, query);
-	// add to finalResultSet
-	finalResultSet.addAll(resultSet.getPOIs());
-	// TODO revise the value of circles, add to the YahooResultSet, and fill the value in oneCrawling...OneDe... method
+	addResults(center, middleLine, finalResultSet, resultSet);
 
 	// find the top and bottom boundary
 	Coordinate farthestPoint = farthestPOI(resultSet);
@@ -59,17 +59,49 @@ public class OneDimensionalCrawler extends OfflineYahooLocalCrawlerStrategy {
 	LineSegment leftLine = new LineSegment(left, newRight);
 	OneDimensionalResultSet newLeftResultSet = extendOneDimensional(state,
 		category, query, leftLine);
-	finalResultSet.addAll(newLeftResultSet.getPois());
-	// TODO revise the value of circles
-	
+	addResults(finalResultSet, newLeftResultSet);
+
 	Coordinate newLeft = middleLine.pointAlongOffset(0.5, radius);
 	LineSegment rightLine = new LineSegment(newLeft, right);
 	OneDimensionalResultSet newRightResultSet = extendOneDimensional(state,
 		category, query, rightLine);
-	finalResultSet.addAll(newRightResultSet.getPois());
-	// TODO revise the value of circles
-	
+	addResults(finalResultSet, newRightResultSet);
+
 	return finalResultSet;
+    }
+
+    private void addResults(Coordinate center, LineSegment line,
+	    OneDimensionalResultSet finalResultSet, YahooResultSet resultSet) {
+	List<POI> pois = resultSet.getPOIs();
+	for (int i = 0; i < pois.size(); i++) {
+	    POI poi = pois.get(i);
+	    int position = GeoOperator.findPosition(line, poi.getCoordinate());
+	    switch (position) {
+	    case Position.LEFT:
+		finalResultSet.getLeftPOIs().add(poi);
+		break;
+	    case Position.RIGHT:
+		finalResultSet.getRightPOIs().add(poi);
+		break;
+	    case Position.ON:
+		finalResultSet.getOnPOIs().add(poi);
+		break;
+	    }
+	}
+	double radius = resultSet.getRadius();
+	Circle circle = new Circle(center, radius);
+	finalResultSet.addACircle(circle);
+
+    }
+
+    private void addResults(OneDimensionalResultSet finalResultSet,
+	    OneDimensionalResultSet newResultSet) {
+	finalResultSet.addAll(finalResultSet.getLeftPOIs(),
+		newResultSet.getLeftPOIs());
+	finalResultSet.addAll(finalResultSet.getRightPOIs(),
+		newResultSet.getRightPOIs());
+	finalResultSet.addAll(finalResultSet.getCircles(),
+		newResultSet.getCircles());
     }
 
     /**

@@ -25,7 +25,11 @@ public class POI {
 
     private Rating rating;
 
-    private double distance;
+    /**
+     * The distance parsed by the returned web pages. The unit is mile.
+     */
+    private double distanceInMiles;
+
     private String url;
     private String clickUrl;
     private String mapUrl;
@@ -40,7 +44,7 @@ public class POI {
 
     public POI(int id, String title, String address, String city, String state,
 	    String phone, Coordinate coordinate, Rating rating,
-	    double distance, String url, String clickUrl, String mapUrl,
+	    double distanceInMiles, String url, String clickUrl, String mapUrl,
 	    String businessUrl, String businessClickUrl,
 	    List<Category> categories) {
 	super();
@@ -52,7 +56,7 @@ public class POI {
 	this.phone = phone;
 	this.coordinate = coordinate;
 	this.rating = rating;
-	this.distance = distance;
+	this.distanceInMiles = distanceInMiles;
 	this.url = url;
 	this.clickUrl = clickUrl;
 	this.mapUrl = mapUrl;
@@ -76,7 +80,7 @@ public class POI {
 	this.coordinate.x = longitude;
 	this.coordinate.y = latitude;
 	this.rating = rating;
-	this.distance = distance;
+	this.distanceInMiles = distance;
 	this.url = url;
 	this.clickUrl = clickUrl;
 	this.mapUrl = mapUrl;
@@ -91,7 +95,7 @@ public class POI {
 	sb.append("Result [id=" + id + ", title=" + title + ", address="
 		+ address + ", city=" + city + ", state=" + state + ", phone="
 		+ phone + ", longitude=" + coordinate.x + ", latitude="
-		+ coordinate.y + ", distance=" + distance + "]");
+		+ coordinate.y + ", distance=" + distanceInMiles + "]");
 	return sb.toString();
     }
 
@@ -176,11 +180,11 @@ public class POI {
     }
 
     public double getDistance() {
-	return distance;
+	return distanceInMiles;
     }
 
     public void setDistance(double distance) {
-	this.distance = distance;
+	this.distanceInMiles = distance;
     }
 
     public String getUrl() {

@@ -1,4 +1,6 @@
-package mo.umac.crawler;
+package mo.umac.crawler.online;
+
+import mo.umac.crawler.AQuery;
 
 import com.vividsolutions.jts.geom.Coordinate;
 

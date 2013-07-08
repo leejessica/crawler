@@ -58,6 +58,8 @@ public abstract class OnlineYahooLocalCrawlerStrategy extends
     protected static Logger logger = Logger
 	    .getLogger(OnlineYahooLocalCrawlerStrategy.class.getName());
 
+    public static final String APPID = "appid";
+    
     protected boolean firstCrawl = false;
 
     // protected String query = "restaurants";
@@ -73,6 +75,22 @@ public abstract class OnlineYahooLocalCrawlerStrategy extends
      * @deprecated The maximum radius (in miles) of the query.
      */
     protected final double MAX_R = 0.0;
+
+    protected HttpClient httpClient;
+
+    protected final long DAY_TIME = 24 * 60 * 60 * 1000;
+
+    /**
+     * Record the time, because of the restriction of 5000 queries per day
+     */
+    protected long beginTime = 0;
+
+    /**
+     * Count the number of continuous limited pages
+     */
+    protected int limitedPageCount = 0;
+
+    public static String PROPERTY_PATH = "./src/main/resources/crawler.properties";
 
     /**
      * @param appid
@@ -153,10 +171,17 @@ public abstract class OnlineYahooLocalCrawlerStrategy extends
     // }
 
     @Override
-    protected void initData() {
+    protected void prepareData() {
 	FileOperator.createFolder("", DataSet.FOLDER_NAME);
 	httpClient = createHttpClient();
 
+    }
+    
+    /* (non-Javadoc)
+     * @see mo.umac.crawler.YahooLocalCrawlerStrategy#endData()
+     */
+    protected void endData(){
+	httpClient.getConnectionManager().shutdown();
     }
 
     /*

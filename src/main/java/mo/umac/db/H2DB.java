@@ -27,9 +27,9 @@ import mo.umac.parser.YahooResultSet;
  * 
  */
 public class H2DB extends DataSet {
-	
-	public final String databaseName = "../yahoolocal-h2/datasets";
-	
+
+    public final String DB_NAME = "../yahoolocal-h2/datasets";
+
     // table names
     private final String QUERY = "QUERY";
     private final String ITEM = "ITEM";
@@ -336,8 +336,7 @@ public class H2DB extends DataSet {
 	return count;
     }
 
-    private PreparedStatement setPrepItem(POI result,
-	    PreparedStatement prepItem) {
+    private PreparedStatement setPrepItem(POI result, PreparedStatement prepItem) {
 	try {
 	    prepItem.setInt(1, result.getId());
 	    prepItem.setString(2, result.getTitle());
@@ -374,10 +373,10 @@ public class H2DB extends DataSet {
 	return prepCategory;
     }
 
-    private PreparedStatement setPrepQuery(int queryID, YahooLocalQueryFileDB qc,
-	    int level, int parentID, int totalResultsAvailable,
-	    int totalResultsReturned, int firstResultPosition,
-	    PreparedStatement prepQuery) {
+    private PreparedStatement setPrepQuery(int queryID,
+	    YahooLocalQueryFileDB qc, int level, int parentID,
+	    int totalResultsAvailable, int totalResultsReturned,
+	    int firstResultPosition, PreparedStatement prepQuery) {
 	setPrepQuery(queryID, qc.getQuery(), qc.getZip(), qc.getResults(),
 		qc.getStart(), qc.getCircle().getCenter().y, qc.getCircle()
 			.getCenter().x, qc.getCircle().getRadius(), level,
@@ -558,9 +557,9 @@ public class H2DB extends DataSet {
 			    setPrepCategory(itemID, category, prepCategory);
 			    prepCategory.addBatch();
 			}
-			POI result = new POI(itemID, title, "", city,
-				state, "", longitude, latitude, null, distance,
-				"", "", "", "", "", categories);
+			POI result = new POI(itemID, title, "", city, state,
+				"", longitude, latitude, null, distance, "",
+				"", "", "", "", categories);
 			setPrepItem(result, prepItem);
 			prepItem.addBatch();
 		    } else {
@@ -579,9 +578,9 @@ public class H2DB extends DataSet {
 			    setPrepCategory(itemID, category, prepCategory);
 			    prepCategory.addBatch();
 			}
-			POI result = new POI(itemID, title, "", city,
-				state, "", longitude, latitude, null, distance,
-				"", "", "", "", "", categories);
+			POI result = new POI(itemID, title, "", city, state,
+				"", longitude, latitude, null, distance, "",
+				"", "", "", "", categories);
 			setPrepItem(result, prepItem);
 			prepItem.addBatch();
 		    }
@@ -627,9 +626,9 @@ public class H2DB extends DataSet {
 	return queryID;
     }
 
-	@Override
-	public YahooResultSet query(AQuery qc) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public YahooResultSet query(AQuery qc) {
+	// TODO Auto-generated method stub
+	return null;
+    }
 }

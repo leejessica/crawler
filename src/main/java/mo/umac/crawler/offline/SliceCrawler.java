@@ -28,9 +28,10 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
     public void crawl(String state, int category, String query,
 	    Envelope envelopeState) {
 
-	// first fine the middle line, and then use the 1 dimensional method to
+	// first find the middle line, and then use the 1 dimensional method to
 	// issue queries on this line.
 	LineSegment middleLine = middleLine(envelopeState);
+	
 	OneDimensionalCrawler oneDimensionalCrawler = new OneDimensionalCrawler();
 	OneDimensionalResultSet oneDimensionalResultSet = oneDimensionalCrawler
 		.extendOneDimensional(state, category, query, middleLine);
@@ -51,10 +52,11 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
 	    return;
 	}
 
+	boolean left = true;
 	fillGaps(envelopeState, middleLine, leftRightNearestEnvelope.get(0),
-		oneDimensionalResultSet);
+		oneDimensionalResultSet, left);
 	fillGaps(envelopeState, middleLine, leftRightNearestEnvelope.get(1),
-		oneDimensionalResultSet);
+		oneDimensionalResultSet, !left);
 
 	List<Envelope> leftRightRemainedEnvelope = remainedRegion(
 		envelopeState, leftRightNearestEnvelope);
@@ -72,10 +74,18 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
      * @param middleLine
      * @param envelope
      * @param oneDimensionalResultSet
+     * @param left
      */
     private void fillGaps(Envelope envelopeState, LineSegment middleLine,
-	    Envelope envelope, OneDimensionalResultSet oneDimensionalResultSet) {
+	    Envelope envelope, OneDimensionalResultSet oneDimensionalResultSet,
+	    boolean left) {
 	// FIXME 1. fillGaps
+	List<POI> relatedPOIs;
+	if (left) {
+	    relatedPOIs = oneDimensionalResultSet.getLeftPOIs();
+	} else {
+	    relatedPOIs = oneDimensionalResultSet.getRightPOIs();
+	}
 
     }
 

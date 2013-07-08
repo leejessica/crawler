@@ -15,113 +15,126 @@ import java.util.List;
  */
 public class YahooResultSet {
 
-	// add at 2013-4-5
-	/**
-	 * The page returned by Yahoo! Local. There are mainly two kinds of pages:
-	 * valid returned page, or an error page
-	 */
-	private YahooXmlType xmlType = YahooXmlType.UNKNOWN;
+    // add at 2013-4-5
+    /**
+     * The page returned by Yahoo! Local. There are mainly two kinds of pages:
+     * valid returned page, or an error page
+     */
+    private YahooXmlType xmlType = YahooXmlType.UNKNOWN;
 
-	private String xmlFileName = "";
+    private String xmlFileName = "";
 
-	private File xmlFile = null;
+    private File xmlFile = null;
 
-	private BufferedWriter resultsOutput;
+    private BufferedWriter resultsOutput;
 
-	private int totalResultsAvailable = 0;
+    private int totalResultsAvailable = 0;
 
-	private int totalResultsReturned = 0;
+    private int totalResultsReturned = 0;
 
-	private int firstResultPosition = 0;
+    private int firstResultPosition = 0;
 
-	private List<POI> pois;
+    private List<POI> pois;
 
-	// private boolean limitExceeded = false;
+    /**
+     * TODO The radius of this query circle
+     */
+    private double radius = 0.0;
 
-	private boolean UnexpectedError = false;
+    // private boolean limitExceeded = false;
 
-	public YahooResultSet() {
-		
-	}
+    private boolean UnexpectedError = false;
 
-	public YahooXmlType getXmlType() {
-		return xmlType;
-	}
+    public YahooResultSet() {
 
-	public void setXmlType(YahooXmlType xmlType) {
-		this.xmlType = xmlType;
-	}
+    }
 
-	public void setUnexpectedError(boolean unexpectedError) {
-		UnexpectedError = unexpectedError;
-	}
+    public YahooXmlType getXmlType() {
+	return xmlType;
+    }
 
-	public boolean isUnexpectedError() {
-		return UnexpectedError;
-	}
+    public void setXmlType(YahooXmlType xmlType) {
+	this.xmlType = xmlType;
+    }
 
-	public int getTotalResultsAvailable() {
-		return totalResultsAvailable;
-	}
+    public void setUnexpectedError(boolean unexpectedError) {
+	UnexpectedError = unexpectedError;
+    }
 
-	public int getTotalResultsReturned() {
-		return totalResultsReturned;
-	}
+    public boolean isUnexpectedError() {
+	return UnexpectedError;
+    }
 
-	public int getFirstResultPosition() {
-		return firstResultPosition;
-	}
+    public int getTotalResultsAvailable() {
+	return totalResultsAvailable;
+    }
 
-	// public void setLimitExceeded(boolean limitExceeded) {
-	// this.limitExceeded = limitExceeded;
-	// }
-	//
-	// public boolean isLimitExceeded() {
-	// return limitExceeded;
-	// }
+    public int getTotalResultsReturned() {
+	return totalResultsReturned;
+    }
 
-	public String getXmlFileName() {
-		return xmlFileName;
-	}
+    public int getFirstResultPosition() {
+	return firstResultPosition;
+    }
 
-	public void setXmlFileName(String xmlFileName) {
-		this.xmlFileName = xmlFileName;
-	}
+    // public void setLimitExceeded(boolean limitExceeded) {
+    // this.limitExceeded = limitExceeded;
+    // }
+    //
+    // public boolean isLimitExceeded() {
+    // return limitExceeded;
+    // }
 
-	public File getXmlFile() {
-		return xmlFile;
-	}
+    public String getXmlFileName() {
+	return xmlFileName;
+    }
 
-	public void setXmlFile(File xmlFile) {
-		this.xmlFile = xmlFile;
-	}
+    public void setXmlFileName(String xmlFileName) {
+	this.xmlFileName = xmlFileName;
+    }
 
-	public List<POI> getPOIs() {
-		return pois;
-	}
+    public File getXmlFile() {
+	return xmlFile;
+    }
 
-	public void setPOIs(List<POI> pois) {
-		this.pois = pois;
-	}
+    public void setXmlFile(File xmlFile) {
+	this.xmlFile = xmlFile;
+    }
 
-	public void setTotalResultsAvailable(int totalResultsAvailable) {
-		this.totalResultsAvailable = totalResultsAvailable;
-	}
+    public List<POI> getPOIs() {
+	return pois;
+    }
 
-	public void setTotalResultsReturned(int totalResultsReturned) {
-		this.totalResultsReturned = totalResultsReturned;
-	}
+    public void setPOIs(List<POI> pois) {
+	this.pois = pois;
+    }
 
-	public void setFirstResultPosition(int firstResultPosition) {
-		this.firstResultPosition = firstResultPosition;
-	}
+    public void setTotalResultsAvailable(int totalResultsAvailable) {
+	this.totalResultsAvailable = totalResultsAvailable;
+    }
 
-	public BufferedWriter getResultsOutput() {
-		return resultsOutput;
-	}
+    public void setTotalResultsReturned(int totalResultsReturned) {
+	this.totalResultsReturned = totalResultsReturned;
+    }
 
-	public void setResultsOutput(BufferedWriter resultsOutput) {
-		this.resultsOutput = resultsOutput;
-	}
+    public void setFirstResultPosition(int firstResultPosition) {
+	this.firstResultPosition = firstResultPosition;
+    }
+
+    public BufferedWriter getResultsOutput() {
+	return resultsOutput;
+    }
+
+    public void setResultsOutput(BufferedWriter resultsOutput) {
+	this.resultsOutput = resultsOutput;
+    }
+
+    public double getRadius() {
+	return radius;
+    }
+
+    public void setRadius(double radius) {
+	this.radius = radius;
+    }
 
 }

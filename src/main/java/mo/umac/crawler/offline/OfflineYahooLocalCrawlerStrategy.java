@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import mo.umac.crawler.AQuery;
 import mo.umac.crawler.YahooLocalCrawlerStrategy;
 import mo.umac.db.DataSet;
@@ -24,8 +26,8 @@ import com.vividsolutions.jts.geom.Envelope;
  */
 public abstract class OfflineYahooLocalCrawlerStrategy extends
 	YahooLocalCrawlerStrategy {
-    // TODO OfflineYahooLocalCrawlerStrategy
-
+    protected static Logger logger = Logger
+	    .getLogger(OfflineYahooLocalCrawlerStrategy.class.getName());
     /**
      * This is the crawling algorithm
      */
@@ -37,10 +39,20 @@ public abstract class OfflineYahooLocalCrawlerStrategy extends
 	return dataset.query(aQuery);
     }
 
+    /* (non-Javadoc)
+     * @see mo.umac.crawler.YahooLocalCrawlerStrategy#prepareData()
+     */
     @Override
-    protected void initData() {
+    protected void prepareData() {
 	// TODO connect to the local dataset
-
+	
+    }
+    
+    /* (non-Javadoc)
+     * @see mo.umac.crawler.YahooLocalCrawlerStrategy#endData()
+     */
+    protected void endData(){
+	// TODO shut down the connection
     }
 
     /*
