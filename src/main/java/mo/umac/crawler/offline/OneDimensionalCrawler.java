@@ -55,6 +55,7 @@ public class OneDimensionalCrawler extends OfflineYahooLocalCrawlerStrategy {
 	}
 
 	// recursively crawl
+	// TODO check
 	Coordinate newRight = middleLine.pointAlongOffset(0.5, -radius);
 	LineSegment leftLine = new LineSegment(left, newRight);
 	OneDimensionalResultSet newLeftResultSet = extendOneDimensional(state,

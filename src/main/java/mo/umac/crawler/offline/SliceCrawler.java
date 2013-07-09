@@ -3,6 +3,7 @@ package mo.umac.crawler.offline;
 import java.util.ArrayList;
 import java.util.List;
 
+import mo.umac.geo.Circle;
 import mo.umac.parser.POI;
 
 import org.apache.log4j.Logger;
@@ -31,10 +32,11 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
 	// first find the middle line, and then use the 1 dimensional method to
 	// issue queries on this line.
 	LineSegment middleLine = middleLine(envelopeState);
-	
+
 	OneDimensionalCrawler oneDimensionalCrawler = new OneDimensionalCrawler();
 	OneDimensionalResultSet oneDimensionalResultSet = oneDimensionalCrawler
 		.extendOneDimensional(state, category, query, middleLine);
+	oneDimensionalResultSet.setLine(middleLine);
 
 	// For all returned points, find the left and the right nearest point to
 	// the middle line.
@@ -53,6 +55,8 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
 	}
 
 	boolean left = true;
+	// sort all circles
+	oneDimensionalResultSet.sortCircles();
 	fillGaps(envelopeState, middleLine, leftRightNearestEnvelope.get(0),
 		oneDimensionalResultSet, left);
 	fillGaps(envelopeState, middleLine, leftRightNearestEnvelope.get(1),
@@ -76,11 +80,13 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
      * @param oneDimensionalResultSet
      * @param left
      */
-    private void fillGaps(Envelope envelopeState, LineSegment middleLine,
-	    Envelope envelope, OneDimensionalResultSet oneDimensionalResultSet,
-	    boolean left) {
-	// FIXME 1. fillGaps
+    private void fillGaps(Envelope bigEnvelope, LineSegment middleLine,
+	    Envelope fillingEnvelope,
+	    OneDimensionalResultSet oneDimensionalResultSet, boolean left) {
+	// FIXME fillGaps
 	List<POI> relatedPOIs;
+	List<Circle> circles = oneDimensionalResultSet.getCircles();
+	LineSegment line = oneDimensionalResultSet.getLine();//?
 	if (left) {
 	    relatedPOIs = oneDimensionalResultSet.getLeftPOIs();
 	} else {
@@ -101,7 +107,7 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
     private boolean judgeCovered(Envelope envelopeState,
 	    LineSegment middleLine,
 	    OneDimensionalResultSet oneDimensionalResultSet) {
-	// FIXME 2 judgeCovered
+	// FIXME judgeCovered
 	return false;
     }
 
@@ -114,7 +120,7 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
      */
     private List<Envelope> remainedRegion(Envelope envelopeState,
 	    List<Envelope> leftRightNearestEnvelope) {
-	// TODO
+	// FIXME remainedRegion
 	return null;
     }
 
@@ -130,7 +136,7 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
     private List<Envelope> nearestCoveredRegion(Envelope envelopeState,
 	    LineSegment middleLine, List<POI> leftRightNearestPOIs) {
 	List<Envelope> leftRightNearestEnvelope = new ArrayList<Envelope>();
-	// TODO
+	// FIXME nearestCoveredRegion
 	// cannot exceed the boundary of the envelopeState
 	return leftRightNearestEnvelope;
     }
@@ -148,7 +154,7 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
 	    LineSegment middleLine,
 	    OneDimensionalResultSet oneDimensionalResultSet) {
 	List<POI> leftRight = new ArrayList<POI>();
-	// TODO nearestPOIs
+	// FIXME nearestPOIs
 	return leftRight;
     }
 

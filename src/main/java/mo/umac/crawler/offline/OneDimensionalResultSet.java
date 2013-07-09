@@ -3,10 +3,15 @@
  */
 package mo.umac.crawler.offline;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import mo.umac.geo.Circle;
 import mo.umac.parser.POI;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.LineSegment;
 
 /**
  * @author kate
@@ -14,6 +19,7 @@ import mo.umac.parser.POI;
  */
 public class OneDimensionalResultSet {
 
+    private LineSegment line;
     private List<POI> pois;
     private List<POI> leftPOIs;
     private List<POI> rightPOIs;
@@ -32,7 +38,30 @@ public class OneDimensionalResultSet {
     public void addACircle(Circle aCircle) {
 	circles.add(aCircle);
     }
-    
+
+    /**
+     * Sorting all circles in the line
+     */
+    public void sortCircles() {
+	Collections.sort(circles, new Comparator<Circle>() {
+
+	    public int compare(Circle circle1, Circle circle2) {
+		// return
+		// o2.getScores().get(0).compareTo(o1.getScores().get(0));
+//		return o2.getCenter().compareTo(o1.getCenter());
+		Coordinate center1 = circle1.getCenter();
+		Coordinate center2 = circle2.getCenter();
+		
+	    }
+	});
+
+    }
+
+    // I don't know why this isn't in Long...
+    private static int compare(long a, long b) {
+	return a < b ? -1 : a > b ? 1 : 0;
+    }
+
     public int getNumQueries() {
 	return numQueries;
     }
@@ -79,6 +108,14 @@ public class OneDimensionalResultSet {
 
     public void setOnPOIs(List<POI> onLinePOI) {
 	this.onPOIs = onLinePOI;
+    }
+
+    public LineSegment getLine() {
+	return line;
+    }
+
+    public void setLine(LineSegment line) {
+	this.line = line;
     }
 
 }

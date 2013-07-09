@@ -37,7 +37,8 @@ public class TestH2Geo {
 	    SQLException, ParseException {
 	// createTable();
 	// insert();
-	query();
+	// query();
+	queryGeo();
 
     }
 
@@ -117,6 +118,26 @@ public class TestH2Geo {
 	    System.out.println(name);
 	    System.out.println(reader.read(bytes));
 
+	}
+	rs.close();
+	stmt.close();
+	conn.close();
+    }
+
+    public static void queryGeo() throws ClassNotFoundException, SQLException,
+	    ParseException {
+	Class.forName("org.h2.Driver");
+	Connection conn = DriverManager.getConnection(
+		"jdbc:h2:C:/Data/hatbox;AUTO_SERVER=TRUE", null, null);
+	Statement stmt = conn.createStatement();
+	WKBReader reader = new WKBReader();
+	ResultSet rs = stmt
+		.executeQuery("select ID, GEOM from T1 as t inner join "
+			+ "HATBOX_MBR_INTERSECTS_ENV('PUBLIC','T1',145.05,145.25,-37.25,-37.05) as i "
+			+ "on t.ID = i.HATBOX_JOIN_ID");
+	while (rs.next()) {
+	    System.out
+		    .println(rs.getInt(1) + ":" + reader.read(rs.getBytes(2)));
 	}
 	rs.close();
 	stmt.close();
