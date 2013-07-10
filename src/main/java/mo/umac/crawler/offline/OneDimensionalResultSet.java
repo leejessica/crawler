@@ -39,23 +39,6 @@ public class OneDimensionalResultSet {
 	circles.add(aCircle);
     }
 
-    /**
-     * Sorting all circles in the line
-     */
-    public void sortCircles() {
-	Collections.sort(circles, new Comparator<Circle>() {
-
-	    public int compare(Circle circle1, Circle circle2) {
-		// return
-		// o2.getScores().get(0).compareTo(o1.getScores().get(0));
-//		return o2.getCenter().compareTo(o1.getCenter());
-		Coordinate center1 = circle1.getCenter();
-		Coordinate center2 = circle2.getCenter();
-		
-	    }
-	});
-
-    }
 
     // I don't know why this isn't in Long...
     private static int compare(long a, long b) {

@@ -1,6 +1,8 @@
 package mo.umac.crawler.offline;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import mo.umac.geo.Circle;
@@ -8,6 +10,7 @@ import mo.umac.parser.POI;
 
 import org.apache.log4j.Logger;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.LineSegment;
 
@@ -42,6 +45,8 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
 	// the middle line.
 	List<POI> leftRightNearestPOIs = nearestPOIs(envelopeState, middleLine,
 		oneDimensionalResultSet);
+	List<LineSegment> leftRightBoarderLine = borarderLine(envelopeState,
+		middleLine, leftRightNearestPOIs);
 	// TODO compute that should be covered regions (left/right)
 	List<Envelope> leftRightNearestEnvelope = nearestCoveredRegion(
 		envelopeState, middleLine, leftRightNearestPOIs);
@@ -55,12 +60,14 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
 	}
 
 	boolean left = true;
-	// sort all circles
-	oneDimensionalResultSet.sortCircles();
-	fillGaps(envelopeState, middleLine, leftRightNearestEnvelope.get(0),
-		oneDimensionalResultSet, left);
-	fillGaps(envelopeState, middleLine, leftRightNearestEnvelope.get(1),
-		oneDimensionalResultSet, !left);
+	// sort all circles in the middle line
+	Collections.sort(oneDimensionalResultSet.getCircles(),
+		new CircleComparable());
+
+	fillGaps(envelopeState, middleLine, leftRightBoarderLine.get(0),
+		leftRightNearestEnvelope.get(0), oneDimensionalResultSet, left);
+	fillGaps(envelopeState, middleLine, leftRightBoarderLine.get(1),
+		leftRightNearestEnvelope.get(1), oneDimensionalResultSet, !left);
 
 	List<Envelope> leftRightRemainedEnvelope = remainedRegion(
 		envelopeState, leftRightNearestEnvelope);
@@ -69,6 +76,29 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
 
 	Envelope envelopeRight = leftRightRemainedEnvelope.get(1);
 	crawl(state, category, query, envelopeRight);
+    }
+
+    /**
+     * The board line of the should be covered smaller envelope
+     * 
+     * @param envelopeState
+     * @param middleLine
+     * @param leftRightNearestPOIs
+     * @return
+     */
+    private List<LineSegment> borarderLine(Envelope envelopeState,
+	    LineSegment middleLine, List<POI> leftRightNearestPOIs) {
+	// FIXME borarderLine
+	return null;
+    }
+
+    public class CircleComparable implements Comparator<Circle> {
+	@Override
+	public int compare(Circle circle1, Circle circle2) {
+	    Coordinate center1 = circle1.getCenter();
+	    Coordinate center2 = circle2.getCenter();
+	    return center1.compareTo(center2);
+	}
     }
 
     /**
@@ -81,12 +111,13 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
      * @param left
      */
     private void fillGaps(Envelope bigEnvelope, LineSegment middleLine,
-	    Envelope fillingEnvelope,
+	    LineSegment boardLine, Envelope fillingEnvelope,
 	    OneDimensionalResultSet oneDimensionalResultSet, boolean left) {
 	// FIXME fillGaps
 	List<POI> relatedPOIs;
+	// All of these circles are sorted in the line.
 	List<Circle> circles = oneDimensionalResultSet.getCircles();
-	LineSegment line = oneDimensionalResultSet.getLine();//?
+	
 	if (left) {
 	    relatedPOIs = oneDimensionalResultSet.getLeftPOIs();
 	} else {
