@@ -1,7 +1,7 @@
 /**
  * 
  */
-package mo.umac.geo;
+package mo.umac.spatial;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;

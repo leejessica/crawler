@@ -10,8 +10,8 @@ import mo.umac.crawler.AQuery;
 import mo.umac.crawler.YahooLocalCrawlerStrategy;
 import mo.umac.db.DataSet;
 import mo.umac.db.H2DBGeo;
-import mo.umac.geo.UScensusData;
 import mo.umac.parser.YahooResultSet;
+import mo.umac.spatial.UScensusData;
 import mo.umac.utils.CommonUtils;
 import mo.umac.utils.FileOperator;
 

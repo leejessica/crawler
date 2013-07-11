@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 
 import mo.umac.crawler.AQuery;
-import mo.umac.geo.Circle;
+import mo.umac.spatial.Circle;
 
 import com.vividsolutions.jts.geom.Envelope;
 

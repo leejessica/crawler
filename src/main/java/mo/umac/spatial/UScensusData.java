@@ -1,7 +1,7 @@
 /**
  * 
  */
-package mo.umac.geo;
+package mo.umac.spatial;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

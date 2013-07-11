@@ -6,10 +6,11 @@ package mo.umac.crawler.offline;
 import java.util.List;
 
 import mo.umac.crawler.AQuery;
-import mo.umac.geo.Circle;
-import mo.umac.geo.GeoOperator;
 import mo.umac.parser.POI;
 import mo.umac.parser.YahooResultSet;
+import mo.umac.spatial.Circle;
+import mo.umac.spatial.GeoOperator;
+
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.LineSegment;

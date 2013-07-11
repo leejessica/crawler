@@ -23,12 +23,12 @@ import java.util.Map;
 import mo.umac.crawler.YahooLocalCrawlerStrategy;
 import mo.umac.db.DataSet;
 import mo.umac.db.H2DB;
-import mo.umac.geo.Circle;
-import mo.umac.geo.Coverage;
-import mo.umac.geo.UScensusData;
 import mo.umac.parser.StaXParser;
 import mo.umac.parser.YahooResultSet;
 import mo.umac.parser.YahooXmlType;
+import mo.umac.spatial.Circle;
+import mo.umac.spatial.Coverage;
+import mo.umac.spatial.UScensusData;
 import mo.umac.utils.CommonUtils;
 import mo.umac.utils.FileOperator;
 

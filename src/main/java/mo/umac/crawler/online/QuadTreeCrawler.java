@@ -6,7 +6,7 @@ package mo.umac.crawler.online;
 import java.io.BufferedWriter;
 import java.util.ArrayList;
 
-import mo.umac.geo.Coverage;
+import mo.umac.spatial.Coverage;
 
 import org.apache.log4j.Logger;
 import com.vividsolutions.jts.geom.Envelope;

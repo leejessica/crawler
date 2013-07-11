@@ -6,7 +6,7 @@ import java.util.List;
 import mo.umac.crawler.offline.SliceCrawler;
 import mo.umac.crawler.online.OnlineYahooLocalCrawlerStrategy;
 import mo.umac.crawler.online.QuadTreeCrawler;
-import mo.umac.geo.UScensusData;
+import mo.umac.spatial.UScensusData;
 
 import org.apache.log4j.xml.DOMConfigurator;
 

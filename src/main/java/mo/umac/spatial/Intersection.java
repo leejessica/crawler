@@ -1,4 +1,4 @@
-package mo.umac.geo;
+package mo.umac.spatial;
 
 /**
  * 

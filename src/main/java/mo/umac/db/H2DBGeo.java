@@ -21,11 +21,11 @@ import com.vividsolutions.jts.io.WKBWriter;
 
 import mo.umac.crawler.AQuery;
 import mo.umac.crawler.online.YahooLocalQueryFileDB;
-import mo.umac.geo.GeoOperator;
 import mo.umac.parser.Category;
 import mo.umac.parser.POI;
 import mo.umac.parser.Rating;
 import mo.umac.parser.YahooResultSet;
+import mo.umac.spatial.GeoOperator;
 
 /**
  * H2 dataset with spatial index

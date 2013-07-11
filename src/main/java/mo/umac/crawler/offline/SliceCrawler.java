@@ -5,8 +5,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import mo.umac.geo.Circle;
 import mo.umac.parser.POI;
+import mo.umac.spatial.Circle;
 
 import org.apache.log4j.Logger;
 
