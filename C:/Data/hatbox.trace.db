@@ -1,3 +1,0 @@
-07-09 10:16:03 jdbc[2]: exception
-org.h2.jdbc.JdbcSQLException: Table "T1" not found; SQL statement:
-select ID, GEOM from T1 as t inner join HATBOX_MBR_INTERSECTS_ENV('PUBLIC','T1',145.05,145.25,-37.25,-37.05) as i on t.ID = i.HATBOX_JOIN_ID [42102-172]
