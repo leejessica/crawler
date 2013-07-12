@@ -1,4 +1,4 @@
-package mo.umac.geo.test;
+package mo.umac.spatial.test;
 
 import org.geotools.geometry.jts.JTSFactoryFinder;
 

@@ -54,7 +54,17 @@
 		</dependency>
 		<dependency>
 			<groupId>org.geotools</groupId>
+			<artifactId>gt-referencing</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.geotools</groupId>
 			<artifactId>gt-epsg-hsql</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-epsg-extension</artifactId>
 			<version>${geotools.version}</version>
 		</dependency>
 		<dependency>
@@ -68,7 +78,6 @@
 			<artifactId>gt-jdbc-h2</artifactId>
 			<version>${geotools.version}</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-compress</artifactId>
@@ -97,6 +106,15 @@
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<version>1.3.172</version>
+		</dependency>
+
+		<!-- Local jars -->
+		<dependency>
+			<groupId>net.sourceforge.hatbox</groupId>
+			<artifactId>hatbox</artifactId>
+			<version>1.0.b9</version>
+			<!-- <scope>system</scope> -->
+			<!-- <systemPath>/services/lib/hatbox-1.0.b9.jar</systemPath> -->
 		</dependency>
 
 	</dependencies>

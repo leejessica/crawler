@@ -1,4 +1,4 @@
-package mo.umac.geo.test;
+package mo.umac.spatial.test;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

@@ -15,41 +15,61 @@
  */
 package mo.umac.db.test;
 
+/*
+ *    HatBox : A user-space spatial add-on for the Java databases
+ *    
+ *    Copyright (C) 2007 - 2009 Peter Yuill
+ *
+ *    This library is free software; you can redistribute it and/or
+ *    modify it under the terms of the GNU Lesser General Public
+ *    License as published by the Free Software Foundation;
+ *    version 2.1 of the License.
+ *
+ *    This library is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *    Lesser General Public License for more details.
+ */
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.Serializable;
-import java.sql.Connection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.List;
 import java.sql.Date;
 import java.sql.DriverManager;
+import java.sql.Connection;
 import java.sql.Statement;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 
-import net.sourceforge.hatbox.jts.Proc;
-
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFactorySpi;
 import org.geotools.data.DataStoreFinder;
-import org.geotools.data.DefaultTransaction;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.FeatureStore;
 import org.geotools.data.Transaction;
+import org.geotools.data.DefaultTransaction;
+import org.geotools.data.hatbox.HatBoxDerbyDataStoreFactory;
+import org.geotools.data.hatbox.HatBoxH2DataStoreFactory;
+
 import org.geotools.data.memory.MemoryFeatureCollection;
+import org.geotools.factory.GeoTools;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.filter.IsLessThenOrEqualToImpl;
 import org.geotools.filter.LengthFunction;
 import org.geotools.filter.LiteralExpressionImpl;
+
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
-import org.opengis.feature.type.AttributeType;
 import org.opengis.feature.type.GeometryDescriptor;
+import org.opengis.feature.type.AttributeType;
 import org.opengis.filter.Filter;
+
+import net.sourceforge.hatbox.jts.Proc;
 
 public class Shp2Hatbox {
 
