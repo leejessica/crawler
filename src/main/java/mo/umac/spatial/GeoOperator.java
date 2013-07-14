@@ -1,5 +1,7 @@
 package mo.umac.spatial;
 
+import java.util.List;
+
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.LineSegment;
 import com.vividsolutions.jts.geomgraph.Position;
@@ -13,6 +15,11 @@ public class GeoOperator {
 	// http://stackoverflow.com/questions/3461453/determine-which-side-of-a-line-a-point-lies
 	// FIXME findPosition
 	return Position.LEFT;
+    }
+    
+    public List intersection(){
+	// FIXME intersection
+	return null;
     }
     
 }
