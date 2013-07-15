@@ -147,19 +147,19 @@ public class POI {
 	this.phone = phone;
     }
 
-    public Double getLongitude() {
+    public double getLongitude() {
 	return coordinate.x;
     }
 
-    public void setLongitude(Double longitude) {
+    public void setLongitude(double longitude) {
 	this.coordinate.x = longitude;
     }
 
-    public Double getLatitude() {
+    public double getLatitude() {
 	return coordinate.y;
     }
 
-    public void setLatitude(Double latitude) {
+    public void setLatitude(double latitude) {
 	this.coordinate.y = latitude;
     }
 

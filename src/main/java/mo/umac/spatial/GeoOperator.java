@@ -8,7 +8,7 @@ import com.vividsolutions.jts.geomgraph.Position;
 
 public class GeoOperator {
 
-    public static int findPosition(LineSegment line, Coordinate point){
+    public static int findPosition(LineSegment line, Coordinate point) {
 	Coordinate p0 = line.p0;
 	Coordinate p1 = line.p1;
 	// http://stackoverflow.com/questions/1560492/how-to-tell-whether-a-point-is-to-the-right-or-left-of-a-line
@@ -16,10 +16,24 @@ public class GeoOperator {
 	// FIXME findPosition
 	return Position.LEFT;
     }
-    
-    public List intersection(){
-	// FIXME intersection
+
+    public List intersection() {
+
 	return null;
     }
-    
+
+    public List knnQuery() {
+	// FIXME knnQuery
+
+	return null;
+    }
+
+    public void geoPoint() {
+
+    }
+
+    public double distance() {
+	return 0.0;
+    }
+
 }

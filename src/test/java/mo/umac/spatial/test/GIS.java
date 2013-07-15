@@ -1,7 +1,7 @@
 /**
  * 
  */
-package mo.umac.spatial;
+package mo.umac.spatial.test;
 
 /**
  * refer to {@link http://www.opengeospatial.org/standards}
