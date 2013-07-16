@@ -4,16 +4,14 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-
 import mo.umac.crawler.AQuery;
 import mo.umac.crawler.YahooLocalCrawlerStrategy;
 import mo.umac.db.DataSet;
-import mo.umac.db.H2DBGeo;
+import mo.umac.db.Postgresql;
 import mo.umac.parser.YahooResultSet;
-import mo.umac.spatial.UScensusData;
 import mo.umac.utils.CommonUtils;
-import mo.umac.utils.FileOperator;
+
+import org.apache.log4j.Logger;
 
 import com.vividsolutions.jts.geom.Envelope;
 
@@ -35,7 +33,7 @@ public abstract class OfflineYahooLocalCrawlerStrategy extends
 	    Envelope envelopeState);
 
     public YahooResultSet query(AQuery aQuery) {
-	DataSet dataset = new H2DBGeo();
+	DataSet dataset = new Postgresql();
 	return dataset.query(aQuery);
     }
 

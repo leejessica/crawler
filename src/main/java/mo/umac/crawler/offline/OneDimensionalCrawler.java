@@ -41,7 +41,9 @@ public class OneDimensionalCrawler extends OfflineYahooLocalCrawlerStrategy {
 	Coordinate left = middleLine.p0;
 	Coordinate right = middleLine.p1;
 	Coordinate center = middleLine.midPoint();
-
+	
+	logger.info(center.toString());
+	
 	YahooResultSet resultSet = oneCrawlingProcedureForOneDimension(center,
 		state, category, query);
 	addResults(center, middleLine, finalResultSet, resultSet);

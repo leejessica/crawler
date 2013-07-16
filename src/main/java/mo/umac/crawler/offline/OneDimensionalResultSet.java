@@ -30,6 +30,7 @@ public class OneDimensionalResultSet {
      * The query circles
      */
     private List<Circle> circles;
+    
 
     public void addAll(List oneList, List antherList) {
 	oneList.addAll(antherList);

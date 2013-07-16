@@ -42,6 +42,8 @@ public abstract class YahooLocalCrawlerStrategy {
 
     protected int zip = 0;
 
+    public static final double EPSILON = 0.0001;
+
     /**
      * Entrance of the crawler
      * 
@@ -86,6 +88,7 @@ public abstract class YahooLocalCrawlerStrategy {
     private LinkedList<Envelope> selectEnvelopes(
 	    LinkedList<String> listNameStates, List<String> listCategoryNames) {
 	// State's information provided by UScensus
+	// FIXME check envelope
 	LinkedList<Envelope> allEnvelopeStates = (LinkedList<Envelope>) UScensusData
 		.MBR(UScensusData.STATE_SHP_FILE_NAME);
 	LinkedList<String> allNameStates = (LinkedList<String>) UScensusData

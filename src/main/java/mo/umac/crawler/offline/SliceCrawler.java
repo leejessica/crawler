@@ -5,8 +5,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import mo.umac.crawler.YahooLocalCrawlerStrategy;
 import mo.umac.parser.POI;
 import mo.umac.spatial.Circle;
+import mo.umac.spatial.GeoOperator;
 
 import org.apache.log4j.Logger;
 
@@ -31,11 +33,13 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
     @Override
     public void crawl(String state, int category, String query,
 	    Envelope envelopeState) {
-
+	logger.debug(envelopeState.toString());
+	
 	// first find the middle line, and then use the 1 dimensional method to
 	// issue queries on this line.
 	LineSegment middleLine = middleLine(envelopeState);
-
+	logger.debug(middleLine.toString());
+	
 	OneDimensionalCrawler oneDimensionalCrawler = new OneDimensionalCrawler();
 	OneDimensionalResultSet oneDimensionalResultSet = oneDimensionalCrawler
 		.extendOneDimensional(state, category, query, middleLine);
@@ -47,27 +51,17 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
 		oneDimensionalResultSet);
 	List<LineSegment> leftRightBoarderLine = borarderLine(envelopeState,
 		middleLine, leftRightNearestPOIs);
-	// TODO compute that should be covered regions (left/right)
 	List<Envelope> leftRightNearestEnvelope = nearestCoveredRegion(
 		envelopeState, middleLine, leftRightNearestPOIs);
 
-	// stop criteria
-	boolean covered = false;
-	covered = judgeCovered(envelopeState, middleLine,
-		oneDimensionalResultSet);
-	if (covered) {
-	    return;
-	}
-
-	boolean left = true;
 	// sort all circles in the middle line
 	Collections.sort(oneDimensionalResultSet.getCircles(),
 		new CircleComparable());
 
-	fillGaps(envelopeState, middleLine, leftRightBoarderLine.get(0),
-		leftRightNearestEnvelope.get(0), oneDimensionalResultSet, left);
-	fillGaps(envelopeState, middleLine, leftRightBoarderLine.get(1),
-		leftRightNearestEnvelope.get(1), oneDimensionalResultSet, !left);
+	fillGaps(state, category, query, middleLine,
+		leftRightBoarderLine.get(0), oneDimensionalResultSet);
+	fillGaps(state, category, query, middleLine,
+		leftRightBoarderLine.get(1), oneDimensionalResultSet);
 
 	List<Envelope> leftRightRemainedEnvelope = remainedRegion(
 		envelopeState, leftRightNearestEnvelope);
@@ -88,8 +82,16 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
      */
     private List<LineSegment> borarderLine(Envelope envelopeState,
 	    LineSegment middleLine, List<POI> leftRightNearestPOIs) {
-	// FIXME borarderLine
-	return null;
+	POI leftPoint = leftRightNearestPOIs.get(0);
+	POI rightPoint = leftRightNearestPOIs.get(1);
+	LineSegment leftLine = leftLine = GeoOperator.parallel(middleLine,
+		leftPoint);
+	LineSegment rightLine = rightLine = GeoOperator.parallel(middleLine,
+		rightPoint);
+	List<LineSegment> list = new ArrayList<LineSegment>();
+	list.add(leftLine);
+	list.add(rightLine);
+	return list;
     }
 
     public class CircleComparable implements Comparator<Circle> {
@@ -104,42 +106,59 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
     /**
      * find the gaps, and then cover the gaps
      * 
-     * @param envelopeState
+     * @param state
+     *            TODO
+     * @param category
+     *            TODO
+     * @param query
+     *            TODO
      * @param middleLine
+     * @param oneDimensionalResultSet
+     * @param envelopeState
      * @param envelope
-     * @param oneDimensionalResultSet
-     * @param left
      */
-    private void fillGaps(Envelope bigEnvelope, LineSegment middleLine,
-	    LineSegment boardLine, Envelope fillingEnvelope,
-	    OneDimensionalResultSet oneDimensionalResultSet, boolean left) {
-	// FIXME fillGaps
-	List<POI> relatedPOIs;
-	// All of these circles are sorted in the line.
-	List<Circle> circles = oneDimensionalResultSet.getCircles();
-	
-	if (left) {
-	    relatedPOIs = oneDimensionalResultSet.getLeftPOIs();
-	} else {
-	    relatedPOIs = oneDimensionalResultSet.getRightPOIs();
-	}
-
-    }
-
-    /**
-     * Judge whether this envelope has been covered by this one dimensional
-     * crawling method
-     * 
-     * @param envelopeState
-     * @param middleLine
-     * @param oneDimensionalResultSet
-     * @return
-     */
-    private boolean judgeCovered(Envelope envelopeState,
-	    LineSegment middleLine,
+    private void fillGaps(String state, int category, String query,
+	    LineSegment middleLine, LineSegment boardLine,
 	    OneDimensionalResultSet oneDimensionalResultSet) {
-	// FIXME judgeCovered
-	return false;
+	// All of these circles are sorted in the line.
+	if (middleLine.p0.x < middleLine.p1.x) {
+	    double xMiddleLine = middleLine.p0.x;
+	    double xBoardLine = boardLine.p0.x;
+	    double yBegin;
+	    double yEnd;
+	    if (boardLine.p0.y < boardLine.p1.y) {
+		yBegin = boardLine.p0.y;
+		yEnd = boardLine.p1.y;
+	    } else {
+		yBegin = boardLine.p1.y;
+		yEnd = boardLine.p0.y;
+	    }
+	    double yFirst = yBegin;
+	    double ySecond = yBegin;
+	    List<Circle> circles = oneDimensionalResultSet.getCircles();
+	    for (int i = 0; i < circles.size(); i++) {
+		Circle circle = circles.get(i);
+		List<Coordinate> list = GeoOperator.intersectOnEarth(circle,
+			boardLine);
+		if (list == null) {
+		    logger.error("Didn't intersect with the circle");
+		}
+		double y1 = list.get(0).y;
+		if (y1 > yFirst) {
+		    // not covered
+		    Envelope smallEnvelope = new Envelope(xMiddleLine,
+			    xBoardLine, yFirst, y1);
+		    crawl(state, category, query, smallEnvelope);
+		}
+		//
+		if (list.size() == 2) {
+		    double y2 = list.get(1).y;
+		    yFirst = y2;
+		} else {
+		    yFirst = y1;
+		}
+	    }
+	}
     }
 
     /**
@@ -151,8 +170,24 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
      */
     private List<Envelope> remainedRegion(Envelope envelopeState,
 	    List<Envelope> leftRightNearestEnvelope) {
-	// FIXME remainedRegion
-	return null;
+	double minX = envelopeState.getMinX();
+	double maxX = envelopeState.getMaxX();
+	double y1 = envelopeState.getMinY();
+	double y2 = envelopeState.getMaxY();
+
+	List<Envelope> leftRightRemainedEnvelope = new ArrayList<Envelope>();
+	Envelope leftNearestEnvelope = leftRightNearestEnvelope.get(0);
+	double maxXLeft = leftNearestEnvelope.getMinX();
+	Envelope leftRemainedEnvelope = new Envelope(minX, maxXLeft, y1, y2);
+
+	Envelope rightNearestEnvelope = leftRightNearestEnvelope.get(1);
+	double minXRight = rightNearestEnvelope.getMaxX();
+	Envelope rightRemainedEnvelope = new Envelope(minXRight, maxX, y1, y2);
+
+	leftRightRemainedEnvelope.add(leftRemainedEnvelope);
+	leftRightRemainedEnvelope.add(rightRemainedEnvelope);
+
+	return leftRightRemainedEnvelope;
     }
 
     /**
@@ -167,8 +202,31 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
     private List<Envelope> nearestCoveredRegion(Envelope envelopeState,
 	    LineSegment middleLine, List<POI> leftRightNearestPOIs) {
 	List<Envelope> leftRightNearestEnvelope = new ArrayList<Envelope>();
-	// FIXME nearestCoveredRegion
-	// cannot exceed the boundary of the envelopeState
+	double y1 = middleLine.p0.y;
+	double y2 = middleLine.p1.y;
+	// left
+	POI left = leftRightNearestPOIs.get(0);
+	double minX = left.getCoordinate().x;
+	Envelope leftEnvelope;
+	if (minX > envelopeState.getMinX()) {
+	    leftEnvelope = new Envelope(minX, middleLine.p0.x, y1, y2);
+	} else {
+	    // no points in this left region
+	    leftEnvelope = null;
+	}
+	// right
+	POI right = leftRightNearestPOIs.get(1);
+	double maxX = right.getCoordinate().x;
+	Envelope rightEnvelope;
+	if (maxX < envelopeState.getMaxX()) {
+	    rightEnvelope = new Envelope(middleLine.p0.x, maxX, y1, y2);
+	} else {
+	    // no points in this left region
+	    rightEnvelope = null;
+	}
+
+	leftRightNearestEnvelope.add(leftEnvelope);
+	leftRightNearestEnvelope.add(rightEnvelope);
 	return leftRightNearestEnvelope;
     }
 
@@ -185,7 +243,34 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
 	    LineSegment middleLine,
 	    OneDimensionalResultSet oneDimensionalResultSet) {
 	List<POI> leftRight = new ArrayList<POI>();
-	// FIXME nearestPOIs
+	List<POI> leftPOIs = oneDimensionalResultSet.getLeftPOIs();
+	// TODO can be optimized later
+	double bigX = leftPOIs.get(0).getCoordinate().x;
+	POI leftNearest = null;
+	for (int i = 0; i < leftPOIs.size(); i++) {
+	    POI point = leftPOIs.get(i);
+	    double x = point.getCoordinate().x;
+	    if (x > bigX && x < middleLine.p0.x) {
+		leftNearest = point;
+		bigX = x;
+	    }
+	}
+	// right
+	List<POI> rightPOIs = oneDimensionalResultSet.getRightPOIs();
+	double smallX = rightPOIs.get(0).getCoordinate().x;
+	POI rightNearest = null;
+	for (int i = 0; i < rightPOIs.size(); i++) {
+	    POI point = rightPOIs.get(i);
+	    double x = point.getCoordinate().x;
+	    if (x < smallX && x > middleLine.p0.x) {
+		rightNearest = point;
+		smallX = x;
+	    }
+	}
+	//
+	leftRight.add(leftNearest);
+	leftRight.add(rightNearest);
+
 	return leftRight;
     }
 
@@ -196,10 +281,17 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
      * @return the longitude of the middle line
      */
     private LineSegment middleLine(Envelope envelopeState) {
-	// Coordinate center = envelopeState.centre();
-	// return center.x;
-	// TODO
-	return null;
-    }
+	double x0 = envelopeState.getMinX();
+	double x1 = envelopeState.getMaxX();
+	if (Math.abs(x0 - x1) > YahooLocalCrawlerStrategy.EPSILON) {
+	    logger.error("envelopeState is not perpendicular: " + x0 + ", "
+		    + x1);
+	}
+	double x = (x0 + x1) / 2;
+	double y0 = envelopeState.getMinY();
+	double y1 = envelopeState.getMaxY();
 
+	LineSegment middleLine = new LineSegment(x, y0, x, y1);
+	return middleLine;
+    }
 }

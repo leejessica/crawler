@@ -32,7 +32,7 @@ public class H2DB extends DataSet {
 
     // table names
     private final String QUERY = "QUERY";
-    private final String ITEM = "ITEM";
+    public final static String ITEM = "ITEM";
     private final String CATEGORY = "CATEGORY";
     private final String RELATIONSHIP = "RELATIONSHIP";
 
@@ -62,7 +62,7 @@ public class H2DB extends DataSet {
     /**
      * sql for select all data from a table. Need concatenate the table's names.
      */
-    private String sqlSelectStar = "SELECT * FROM ";
+    public static String sqlSelectStar = "SELECT * FROM ";
 
     private String sqlSelectCountStar = "SELECT COUNT(*) FROM ";
 
