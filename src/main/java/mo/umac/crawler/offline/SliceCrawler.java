@@ -8,7 +8,9 @@ import java.util.List;
 import mo.umac.crawler.YahooLocalCrawlerStrategy;
 import mo.umac.parser.POI;
 import mo.umac.spatial.Circle;
+import mo.umac.spatial.ECEFLLA;
 import mo.umac.spatial.GeoOperator;
+import mo.umac.spatial.MyEnvelope;
 
 import org.apache.log4j.Logger;
 
@@ -21,6 +23,23 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
     public static Logger logger = Logger
 	    .getLogger(SliceCrawler.class.getName());
 
+    private Envelope lla2ecef(Envelope envelope) {
+	// converting the envelope
+	double minX = envelope.getMinX();
+	double maxX = envelope.getMaxX();
+	double minY = envelope.getMinY();
+	double maxY = envelope.getMaxY();
+
+	double[] p1Lla = { minX, minY, 0 };
+	double[] p1Ecef = ECEFLLA.lla2ecef(p1Lla);
+	double[] p2Lla = { maxX, maxY, 0 };
+	double[] p2Ecef = ECEFLLA.lla2ecef(p2Lla);
+	Envelope envelopeEcef = new Envelope(p1Ecef[0], p1Ecef[1], p2Ecef[0],
+		p2Ecef[1]);
+	return envelopeEcef;
+
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -32,14 +51,17 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
      */
     @Override
     public void crawl(String state, int category, String query,
-	    Envelope envelopeState) {
-	logger.debug(envelopeState.toString());
-	
+	    Envelope envelopeStateLLA) {
+	logger.debug(envelopeStateLLA.toString());
+
+	Envelope envelopeStateECEF = lla2ecef(envelopeStateLLA);
+	logger.debug(envelopeStateECEF.toString());
+
 	// first find the middle line, and then use the 1 dimensional method to
 	// issue queries on this line.
-	LineSegment middleLine = middleLine(envelopeState);
+	LineSegment middleLine = middleLine(envelopeStateECEF);
 	logger.debug(middleLine.toString());
-	
+
 	OneDimensionalCrawler oneDimensionalCrawler = new OneDimensionalCrawler();
 	OneDimensionalResultSet oneDimensionalResultSet = oneDimensionalCrawler
 		.extendOneDimensional(state, category, query, middleLine);
@@ -47,12 +69,12 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
 
 	// For all returned points, find the left and the right nearest point to
 	// the middle line.
-	List<POI> leftRightNearestPOIs = nearestPOIs(envelopeState, middleLine,
-		oneDimensionalResultSet);
-	List<LineSegment> leftRightBoarderLine = borarderLine(envelopeState,
-		middleLine, leftRightNearestPOIs);
+	List<POI> leftRightNearestPOIs = nearestPOIs(envelopeStateECEF,
+		middleLine, oneDimensionalResultSet);
+	List<LineSegment> leftRightBoarderLine = borarderLine(
+		envelopeStateECEF, middleLine, leftRightNearestPOIs);
 	List<Envelope> leftRightNearestEnvelope = nearestCoveredRegion(
-		envelopeState, middleLine, leftRightNearestPOIs);
+		envelopeStateECEF, middleLine, leftRightNearestPOIs);
 
 	// sort all circles in the middle line
 	Collections.sort(oneDimensionalResultSet.getCircles(),
@@ -64,7 +86,7 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
 		leftRightBoarderLine.get(1), oneDimensionalResultSet);
 
 	List<Envelope> leftRightRemainedEnvelope = remainedRegion(
-		envelopeState, leftRightNearestEnvelope);
+		envelopeStateECEF, leftRightNearestEnvelope);
 	Envelope envelopeLeft = leftRightRemainedEnvelope.get(0);
 	crawl(state, category, query, envelopeLeft);
 
@@ -283,10 +305,6 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
     private LineSegment middleLine(Envelope envelopeState) {
 	double x0 = envelopeState.getMinX();
 	double x1 = envelopeState.getMaxX();
-	if (Math.abs(x0 - x1) > YahooLocalCrawlerStrategy.EPSILON) {
-	    logger.error("envelopeState is not perpendicular: " + x0 + ", "
-		    + x1);
-	}
 	double x = (x0 + x1) / 2;
 	double y0 = envelopeState.getMinY();
 	double y1 = envelopeState.getMaxY();

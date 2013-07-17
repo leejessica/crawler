@@ -20,8 +20,8 @@ public class AQuery {
     private String state;
     private int category;
 
-    public AQuery(String query, int topK, String state, int category,
-	    Coordinate point) {
+    public AQuery(Coordinate point, String state, int category, String query,
+	    int topK) {
 	super();
 	this.query = query;
 	this.topK = topK;

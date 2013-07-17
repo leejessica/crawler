@@ -17,14 +17,14 @@ public class OnlineYahooLocalQuery extends AQuery {
 
     public OnlineYahooLocalQuery(String query, int topK, String state,
 	    int category, Coordinate point) {
-	super(query, topK, state, category, point);
+	super(point, state, category, query, topK);
 
     }
 
     public OnlineYahooLocalQuery(String query, int topK, String state,
 	    int category, Coordinate point, String appid, int start,
 	    double radius) {
-	super(query, topK, state, category, point);
+	super(point, state, category, query, topK);
 	this.appid = appid;
 	this.start = start;
 	this.radius = radius;

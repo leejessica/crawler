@@ -54,6 +54,7 @@ public abstract class YahooLocalCrawlerStrategy {
 	    List<String> listCategoryNames) {
 	LinkedList<Envelope> listEnvelopeStates = selectEnvelopes(
 		listNameStates, listCategoryNames);
+	
 	HashMap<Integer, String> categoryIDMap = FileOperator
 		.readCategoryID(CATEGORY_ID_PATH);
 

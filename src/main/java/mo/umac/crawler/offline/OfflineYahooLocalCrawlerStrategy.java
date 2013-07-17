@@ -13,6 +13,7 @@ import mo.umac.utils.CommonUtils;
 
 import org.apache.log4j.Logger;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 
 /**
@@ -26,30 +27,40 @@ public abstract class OfflineYahooLocalCrawlerStrategy extends
 	YahooLocalCrawlerStrategy {
     protected static Logger logger = Logger
 	    .getLogger(OfflineYahooLocalCrawlerStrategy.class.getName());
+
     /**
      * This is the crawling algorithm
      */
     public abstract void crawl(String state, int category, String query,
 	    Envelope envelopeState);
 
+    /**
+     * @param aQuery
+     * @return
+     */
     public YahooResultSet query(AQuery aQuery) {
+	// FIXME change to R tree, file dataset
 	DataSet dataset = new Postgresql();
 	return dataset.query(aQuery);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see mo.umac.crawler.YahooLocalCrawlerStrategy#prepareData()
      */
     @Override
     protected void prepareData() {
 	// TODO connect to the local dataset
-	
+
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see mo.umac.crawler.YahooLocalCrawlerStrategy#endData()
      */
-    protected void endData(){
+    protected void endData() {
 	// TODO shut down the connection
     }
 

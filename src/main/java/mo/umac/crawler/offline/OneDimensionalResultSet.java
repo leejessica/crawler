@@ -3,8 +3,6 @@
  */
 package mo.umac.crawler.offline;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import mo.umac.parser.POI;
@@ -30,7 +28,6 @@ public class OneDimensionalResultSet {
      * The query circles
      */
     private List<Circle> circles;
-    
 
     public void addAll(List oneList, List antherList) {
 	oneList.addAll(antherList);
@@ -39,7 +36,6 @@ public class OneDimensionalResultSet {
     public void addACircle(Circle aCircle) {
 	circles.add(aCircle);
     }
-
 
     // I don't know why this isn't in Long...
     private static int compare(long a, long b) {
