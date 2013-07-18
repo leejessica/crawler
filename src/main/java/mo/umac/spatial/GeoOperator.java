@@ -35,6 +35,23 @@ public class GeoOperator {
     public final static double RADIUS = 6371007.2;// authalic earth radius of
 						  // 6371007.2 meters
 
+    public static Envelope lla2ecef(Envelope envelope) {
+	// converting the envelope
+	double minX = envelope.getMinX();
+	double maxX = envelope.getMaxX();
+	double minY = envelope.getMinY();
+	double maxY = envelope.getMaxY();
+
+	double[] p1Lla = { minX, minY, 0 };
+	double[] p1Ecef = ECEFLLA.lla2ecef(p1Lla);
+	double[] p2Lla = { maxX, maxY, 0 };
+	double[] p2Ecef = ECEFLLA.lla2ecef(p2Lla);
+	Envelope envelopeEcef = new Envelope(p1Ecef[0], p1Ecef[1], p2Ecef[0],
+		p2Ecef[1]);
+	return envelopeEcef;
+
+    }
+
     public void initCRS() {
 	CRSAuthorityFactory factory = CRS.getAuthorityFactory(true);
 	try {
@@ -49,19 +66,17 @@ public class GeoOperator {
     }
 
     /**
+     * Determine the the position of the point to the line
+     * 
      * @param line
      * @param point
      * @return
      */
     public static int findPosition(LineSegment line, Coordinate point) {
 	Coordinate p0 = line.p0;
-	// http://stackoverflow.com/questions/1560492/how-to-tell-whether-a-point-is-to-the-right-or-left-of-a-line
-	// http://stackoverflow.com/questions/3461453/determine-which-side-of-a-line-a-point-lies
-	// TODO check
-	// it is because the line.p0.x should equals to line.p1.x
-	if (point.y < p0.x) {
+	if (point.x < p0.x) {
 	    return Position.LEFT;
-	} else if (point.y > p0.x) {
+	} else if (point.x > p0.x) {
 	    return Position.RIGHT;
 	} else {
 	    return Position.ON;
@@ -187,12 +202,13 @@ public class GeoOperator {
      * @param outsidePoint
      * @return
      */
-    public static LineSegment parallel(LineSegment middleLine, POI outsidePoint) {
+    public static LineSegment parallel(LineSegment middleLine,
+	    Coordinate outsideCoordinate) {
 	Coordinate p0 = middleLine.p0;
 	Coordinate p1 = middleLine.p1;
 	double y0 = p0.y;
 	double y1 = p1.y;
-	double outsidePointX = outsidePoint.getCoordinate().x;
+	double outsidePointX = outsideCoordinate.x;
 	LineSegment lineSeg = new LineSegment(outsidePointX, y0, outsidePointX,
 		y1);
 	return lineSeg;
@@ -203,7 +219,7 @@ public class GeoOperator {
     }
 
     public static void logLineSegment(LineSegment lineSegment) {
-//	logger.info("lineSegment: " + coordinate.x + ", " + coordinate.y);
+	// logger.info("lineSegment: " + coordinate.x + ", " + coordinate.y);
     }
 
 }

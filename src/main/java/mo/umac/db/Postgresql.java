@@ -24,7 +24,7 @@ import org.postgresql.geometric.PGpoint;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
-public class Postgresql extends DataSet {
+public class Postgresql extends DataSetExternal {
 
     public Connection conn;
 

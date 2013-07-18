@@ -18,7 +18,7 @@ import mo.umac.parser.YahooResultSet;
  * @author kate
  * 
  */
-public class FileDB extends DataSet {
+public class FileDB extends DataSetExternal {
 
     @Override
     public void record(int queryID, int level, int parentID,

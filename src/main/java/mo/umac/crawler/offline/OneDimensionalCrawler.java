@@ -35,7 +35,7 @@ public class OneDimensionalCrawler extends OfflineYahooLocalCrawlerStrategy {
      * @param middleLine
      * @return
      */
-    public OneDimensionalResultSet extendOneDimensional(String state,
+    public static OneDimensionalResultSet oneDimCrawl(String state,
 	    int category, String query, LineSegment middleLine) {
 	OneDimensionalResultSet finalResultSet = new OneDimensionalResultSet();
 	Coordinate left = middleLine.p0;
@@ -46,19 +46,14 @@ public class OneDimensionalCrawler extends OfflineYahooLocalCrawlerStrategy {
 	logger.debug(right.toString());
 	logger.debug(center.toString());
 
-	Coordinate nearestPointOneQuery = new Coordinate();
-	Coordinate farthestPoint = new Coordinate();
-
 	AQuery aQuery = new AQuery(center, state, category, query,
 		MAX_TOTAL_RESULTS_RETURNED);
 	YahooResultSet resultSet = query(aQuery);
 
-	nearestFarthest(middleLine, resultSet, nearestPointOneQuery,
-		farthestPoint);
-	addResults(center, middleLine, finalResultSet, resultSet);
+	Coordinate farthestCoordinate = farthest(resultSet);
+	double radius = center.distance(farthestCoordinate);
 
-	// find the top and bottom boundary
-	double radius = center.distance(farthestPoint);
+	addResults(center, middleLine, finalResultSet, resultSet);
 
 	if (radius >= middleLine.getLength() / 2) {
 	    // finished crawling
@@ -72,8 +67,8 @@ public class OneDimensionalCrawler extends OfflineYahooLocalCrawlerStrategy {
 	LineSegment leftLine = new LineSegment(left, newRight);
 	logger.debug("leftLine: " + leftLine.toString());
 
-	OneDimensionalResultSet newLeftResultSet = extendOneDimensional(state,
-		category, query, leftLine);
+	OneDimensionalResultSet newLeftResultSet = oneDimCrawl(state, category,
+		query, leftLine);
 	addResults(finalResultSet, newLeftResultSet);
 
 	Coordinate newLeft = middleLine.pointAlongOffset(0.5, radius);
@@ -81,39 +76,27 @@ public class OneDimensionalCrawler extends OfflineYahooLocalCrawlerStrategy {
 	LineSegment rightLine = new LineSegment(newLeft, right);
 	logger.debug("rightLine: " + rightLine.toString());
 
-	OneDimensionalResultSet newRightResultSet = extendOneDimensional(state,
+	OneDimensionalResultSet newRightResultSet = oneDimCrawl(state,
 		category, query, rightLine);
 	addResults(finalResultSet, newRightResultSet);
 
 	return finalResultSet;
     }
 
-    private void nearestFarthest(LineSegment middleLine,
-	    YahooResultSet resultSet, Coordinate nearestPointOneQuery,
-	    Coordinate farthestPoint) {
+    private static Coordinate farthest(YahooResultSet resultSet) {
+	Coordinate farthestCoordinate;
 	int size = resultSet.getPOIs().size();
 	// farthest
 	if (size == 0) {
-	    return;
+	    return null;
 	} else {
 	    POI farthestPOI = resultSet.getPOIs().get(size - 1);
-	    farthestPoint = farthestPOI.getCoordinate();
+	    farthestCoordinate = farthestPOI.getCoordinate();
 	}
-	// nearest
-	for (int i = 0; i < size; i++) {
-	    POI point = resultSet.getPOIs().get(i);
-	    Coordinate coordinate = point.getCoordinate();
-	    // not on the middleLine
-	    double distance = middleLine.distance(coordinate);
-	    if (distance > 0) {
-		nearestPointOneQuery = coordinate;
-		return;
-	    }
-	}
-
+	return farthestCoordinate;
     }
 
-    private void addResults(Coordinate center, LineSegment line,
+    private static void addResults(Coordinate center, LineSegment line,
 	    OneDimensionalResultSet finalResultSet, YahooResultSet resultSet) {
 	List<POI> pois = resultSet.getPOIs();
 	for (int i = 0; i < pois.size(); i++) {
@@ -135,7 +118,7 @@ public class OneDimensionalCrawler extends OfflineYahooLocalCrawlerStrategy {
 	Circle circle = new Circle(center, radius);
     }
 
-    private void addResults(OneDimensionalResultSet finalResultSet,
+    private static void addResults(OneDimensionalResultSet finalResultSet,
 	    OneDimensionalResultSet newResultSet) {
 	finalResultSet.addAll(finalResultSet.getLeftPOIs(),
 		newResultSet.getLeftPOIs());

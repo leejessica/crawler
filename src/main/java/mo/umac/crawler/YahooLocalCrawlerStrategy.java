@@ -25,17 +25,17 @@ public abstract class YahooLocalCrawlerStrategy {
     /**
      * The maximum number of returned results by a query.
      */
-    protected final int MAX_RESULTS_NUM = 20;
+    protected final static int MAX_RESULTS_NUM = 20;
     /**
      * The maximum starting result position to return.
      */
-    protected final int MAX_START = 250;
+    protected final static int MAX_START = 250;
 
     /**
      * The maximum number of results on can get through this query by only
      * changing the start value.
      */
-    protected final int MAX_TOTAL_RESULTS_RETURNED = MAX_START
+    protected static int MAX_TOTAL_RESULTS_RETURNED = MAX_START
 	    + MAX_RESULTS_NUM; // =270;
 
     protected int countNumQueries = 1;

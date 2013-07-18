@@ -4,7 +4,7 @@ import mo.umac.crawler.AQuery;
 import mo.umac.crawler.online.YahooLocalQueryFileDB;
 import mo.umac.parser.YahooResultSet;
 
-public abstract class DataSet {
+public abstract class DataSetExternal {
 
     /**
      * A folder stores all crawled .xml file from Yahoo Local.

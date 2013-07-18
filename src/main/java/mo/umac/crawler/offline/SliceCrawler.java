@@ -7,6 +7,7 @@ import java.util.List;
 
 import mo.umac.crawler.YahooLocalCrawlerStrategy;
 import mo.umac.parser.POI;
+import mo.umac.parser.YahooResultSet;
 import mo.umac.spatial.Circle;
 import mo.umac.spatial.ECEFLLA;
 import mo.umac.spatial.GeoOperator;
@@ -23,23 +24,6 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
     public static Logger logger = Logger
 	    .getLogger(SliceCrawler.class.getName());
 
-    private Envelope lla2ecef(Envelope envelope) {
-	// converting the envelope
-	double minX = envelope.getMinX();
-	double maxX = envelope.getMaxX();
-	double minY = envelope.getMinY();
-	double maxY = envelope.getMaxY();
-
-	double[] p1Lla = { minX, minY, 0 };
-	double[] p1Ecef = ECEFLLA.lla2ecef(p1Lla);
-	double[] p2Lla = { maxX, maxY, 0 };
-	double[] p2Ecef = ECEFLLA.lla2ecef(p2Lla);
-	Envelope envelopeEcef = new Envelope(p1Ecef[0], p1Ecef[1], p2Ecef[0],
-		p2Ecef[1]);
-	return envelopeEcef;
-
-    }
-
     /*
      * (non-Javadoc)
      * 
@@ -51,34 +35,41 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
      */
     @Override
     public void crawl(String state, int category, String query,
-	    Envelope envelopeStateLLA) {
-	logger.debug(envelopeStateLLA.toString());
+	    Envelope envelopeStateECEF) {
 
-	Envelope envelopeStateECEF = lla2ecef(envelopeStateLLA);
-	logger.debug(envelopeStateECEF.toString());
+	if (envelopeStateECEF == null) {
+	    return;
+	}
 
 	// first find the middle line, and then use the 1 dimensional method to
 	// issue queries on this line.
 	LineSegment middleLine = middleLine(envelopeStateECEF);
 	logger.debug(middleLine.toString());
 
-	OneDimensionalCrawler oneDimensionalCrawler = new OneDimensionalCrawler();
-	OneDimensionalResultSet oneDimensionalResultSet = oneDimensionalCrawler
-		.extendOneDimensional(state, category, query, middleLine);
+	OneDimensionalResultSet oneDimensionalResultSet = OneDimensionalCrawler
+		.oneDimCrawl(state, category, query, middleLine);
 	oneDimensionalResultSet.setLine(middleLine);
 
 	// For all returned points, find the left and the right nearest point to
 	// the middle line.
-	List<POI> leftRightNearestPOIs = nearestPOIs(envelopeStateECEF,
-		middleLine, oneDimensionalResultSet);
+	List<Coordinate> leftRightNearestCoordinates = nearestLeftRightCoordinates(
+		envelopeStateECEF, middleLine, oneDimensionalResultSet);
+	logger.debug(leftRightNearestCoordinates.get(0).toString());
+	logger.debug(leftRightNearestCoordinates.get(1).toString());
+	//
 	List<LineSegment> leftRightBoarderLine = borarderLine(
-		envelopeStateECEF, middleLine, leftRightNearestPOIs);
-	List<Envelope> leftRightNearestEnvelope = nearestCoveredRegion(
-		envelopeStateECEF, middleLine, leftRightNearestPOIs);
+		envelopeStateECEF, middleLine, leftRightNearestCoordinates);
+	logger.debug(leftRightBoarderLine.get(0).toString());
+	logger.debug(leftRightBoarderLine.get(1).toString());
 
 	// sort all circles in the middle line
 	Collections.sort(oneDimensionalResultSet.getCircles(),
 		new CircleComparable());
+	// print sorting results
+	for (int i = 0; i < oneDimensionalResultSet.getCircles().size(); i++) {
+	    Circle circle = oneDimensionalResultSet.getCircles().get(i);
+	    logger.debug(circle.getCenter().toString());
+	}
 
 	fillGaps(state, category, query, middleLine,
 		leftRightBoarderLine.get(0), oneDimensionalResultSet);
@@ -86,11 +77,13 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
 		leftRightBoarderLine.get(1), oneDimensionalResultSet);
 
 	List<Envelope> leftRightRemainedEnvelope = remainedRegion(
-		envelopeStateECEF, leftRightNearestEnvelope);
+		envelopeStateECEF, leftRightBoarderLine);
 	Envelope envelopeLeft = leftRightRemainedEnvelope.get(0);
+	logger.debug(envelopeLeft.toString());
 	crawl(state, category, query, envelopeLeft);
 
 	Envelope envelopeRight = leftRightRemainedEnvelope.get(1);
+	logger.debug(envelopeRight.toString());
 	crawl(state, category, query, envelopeRight);
     }
 
@@ -103,13 +96,13 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
      * @return
      */
     private List<LineSegment> borarderLine(Envelope envelopeState,
-	    LineSegment middleLine, List<POI> leftRightNearestPOIs) {
-	POI leftPoint = leftRightNearestPOIs.get(0);
-	POI rightPoint = leftRightNearestPOIs.get(1);
-	LineSegment leftLine = leftLine = GeoOperator.parallel(middleLine,
-		leftPoint);
-	LineSegment rightLine = rightLine = GeoOperator.parallel(middleLine,
-		rightPoint);
+	    LineSegment middleLine, List<Coordinate> leftRightNearestCoordinates) {
+	Coordinate leftCoordinate = leftRightNearestCoordinates.get(0);
+	Coordinate rightCoordinate = leftRightNearestCoordinates.get(1);
+
+	LineSegment leftLine = GeoOperator.parallel(middleLine, leftCoordinate);
+	LineSegment rightLine = GeoOperator.parallel(middleLine,
+		rightCoordinate);
 	List<LineSegment> list = new ArrayList<LineSegment>();
 	list.add(leftLine);
 	list.add(rightLine);
@@ -191,20 +184,31 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
      * @return
      */
     private List<Envelope> remainedRegion(Envelope envelopeState,
-	    List<Envelope> leftRightNearestEnvelope) {
+	    List<LineSegment> leftRightBoarderLine) {
 	double minX = envelopeState.getMinX();
 	double maxX = envelopeState.getMaxX();
 	double y1 = envelopeState.getMinY();
 	double y2 = envelopeState.getMaxY();
 
 	List<Envelope> leftRightRemainedEnvelope = new ArrayList<Envelope>();
-	Envelope leftNearestEnvelope = leftRightNearestEnvelope.get(0);
-	double maxXLeft = leftNearestEnvelope.getMinX();
-	Envelope leftRemainedEnvelope = new Envelope(minX, maxXLeft, y1, y2);
-
-	Envelope rightNearestEnvelope = leftRightNearestEnvelope.get(1);
-	double minXRight = rightNearestEnvelope.getMaxX();
-	Envelope rightRemainedEnvelope = new Envelope(minXRight, maxX, y1, y2);
+	//
+	LineSegment leftBoraderLine = leftRightBoarderLine.get(0);
+	Envelope leftRemainedEnvelope;
+	double maxXLeft = leftBoraderLine.p0.x;
+	if (maxXLeft > minX) {
+	    leftRemainedEnvelope = new Envelope(minX, maxXLeft, y1, y2);
+	} else {
+	    leftRemainedEnvelope = null;
+	}
+	//
+	LineSegment rightBoraderLine = leftRightBoarderLine.get(1);
+	Envelope rightRemainedEnvelope;
+	double minXRight = rightBoraderLine.p0.x;
+	if (minXRight < maxX) {
+	    rightRemainedEnvelope = new Envelope(minXRight, maxX, y1, y2);
+	} else {
+	    rightRemainedEnvelope = null;
+	}
 
 	leftRightRemainedEnvelope.add(leftRemainedEnvelope);
 	leftRightRemainedEnvelope.add(rightRemainedEnvelope);
@@ -213,79 +217,39 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
     }
 
     /**
-     * Compute the left region and the right region based on the left/right
-     * nearest points.
-     * 
-     * @param envelopeState
-     * @param middleLine
-     * @param leftRightPOIs
-     * @return
-     */
-    private List<Envelope> nearestCoveredRegion(Envelope envelopeState,
-	    LineSegment middleLine, List<POI> leftRightNearestPOIs) {
-	List<Envelope> leftRightNearestEnvelope = new ArrayList<Envelope>();
-	double y1 = middleLine.p0.y;
-	double y2 = middleLine.p1.y;
-	// left
-	POI left = leftRightNearestPOIs.get(0);
-	double minX = left.getCoordinate().x;
-	Envelope leftEnvelope;
-	if (minX > envelopeState.getMinX()) {
-	    leftEnvelope = new Envelope(minX, middleLine.p0.x, y1, y2);
-	} else {
-	    // no points in this left region
-	    leftEnvelope = null;
-	}
-	// right
-	POI right = leftRightNearestPOIs.get(1);
-	double maxX = right.getCoordinate().x;
-	Envelope rightEnvelope;
-	if (maxX < envelopeState.getMaxX()) {
-	    rightEnvelope = new Envelope(middleLine.p0.x, maxX, y1, y2);
-	} else {
-	    // no points in this left region
-	    rightEnvelope = null;
-	}
-
-	leftRightNearestEnvelope.add(leftEnvelope);
-	leftRightNearestEnvelope.add(rightEnvelope);
-	return leftRightNearestEnvelope;
-    }
-
-    /**
-     * Find the nearest left and right POIs to the middle line. But not in the
-     * middle line
+     * Find the nearest left and right Coordinates to the middle line. But not
+     * in the middle line
      * 
      * @param envelopeState
      * @param middleLine
      * @param oneDimensionalResultSet
      * @return the left & the right nearest point
      */
-    private List<POI> nearestPOIs(Envelope envelopeState,
-	    LineSegment middleLine,
+    private List<Coordinate> nearestLeftRightCoordinates(
+	    Envelope envelopeState, LineSegment middleLine,
 	    OneDimensionalResultSet oneDimensionalResultSet) {
-	List<POI> leftRight = new ArrayList<POI>();
+	List<Coordinate> leftRight = new ArrayList<Coordinate>();
+	//
 	List<POI> leftPOIs = oneDimensionalResultSet.getLeftPOIs();
-	// TODO can be optimized later
 	double bigX = leftPOIs.get(0).getCoordinate().x;
-	POI leftNearest = null;
-	for (int i = 0; i < leftPOIs.size(); i++) {
+	Coordinate leftNearest = null;
+	for (int i = 1; i < leftPOIs.size(); i++) {
 	    POI point = leftPOIs.get(i);
 	    double x = point.getCoordinate().x;
-	    if (x > bigX && x < middleLine.p0.x) {
-		leftNearest = point;
+	    if (x > bigX /* && x < middleLine.p0.x */) {
+		leftNearest = point.getCoordinate();
 		bigX = x;
 	    }
 	}
 	// right
 	List<POI> rightPOIs = oneDimensionalResultSet.getRightPOIs();
 	double smallX = rightPOIs.get(0).getCoordinate().x;
-	POI rightNearest = null;
-	for (int i = 0; i < rightPOIs.size(); i++) {
+	Coordinate rightNearest = null;
+	for (int i = 1; i < rightPOIs.size(); i++) {
 	    POI point = rightPOIs.get(i);
 	    double x = point.getCoordinate().x;
-	    if (x < smallX && x > middleLine.p0.x) {
-		rightNearest = point;
+	    if (x < smallX /* && x > middleLine.p0.x */) {
+		rightNearest = point.getCoordinate();
 		smallX = x;
 	    }
 	}

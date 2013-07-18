@@ -26,7 +26,7 @@ import mo.umac.parser.YahooResultSet;
  * @author Kate
  * 
  */
-public class H2DB extends DataSet {
+public class H2DB extends DataSetExternal {
 
     public final String DB_NAME = "../yahoolocal-h2/datasets";
 

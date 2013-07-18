@@ -33,7 +33,7 @@ import mo.umac.spatial.GeoOperator;
  * @author kate
  * 
  */
-public class H2DBGeo extends DataSet {
+public class H2DBGeo extends DataSetExternal {
 
     public final static String GEO_DB_NAME = "../yahoolocal-h2-geo/datasets";
 

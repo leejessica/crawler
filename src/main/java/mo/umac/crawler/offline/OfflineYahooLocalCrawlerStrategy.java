@@ -6,9 +6,10 @@ import java.util.List;
 
 import mo.umac.crawler.AQuery;
 import mo.umac.crawler.YahooLocalCrawlerStrategy;
-import mo.umac.db.DataSet;
+import mo.umac.db.DataSetExternal;
 import mo.umac.db.Postgresql;
 import mo.umac.parser.YahooResultSet;
+import mo.umac.spatial.GeoOperator;
 import mo.umac.utils.CommonUtils;
 
 import org.apache.log4j.Logger;
@@ -38,9 +39,9 @@ public abstract class OfflineYahooLocalCrawlerStrategy extends
      * @param aQuery
      * @return
      */
-    public YahooResultSet query(AQuery aQuery) {
+    public static YahooResultSet query(AQuery aQuery) {
 	// FIXME change to R tree, file dataset
-	DataSet dataset = new Postgresql();
+	DataSetExternal dataset = new Postgresql();
 	return dataset.query(aQuery);
     }
 
@@ -90,8 +91,14 @@ public abstract class OfflineYahooLocalCrawlerStrategy extends
 		    category = (Integer) searchingResult;
 
 		    //
-		    Envelope envelopeState = listEnvelopeStates.get(i);
-		    crawl(state, category, query, envelopeState);
+		    Envelope envelopeStateLLA = listEnvelopeStates.get(i);
+
+		    logger.debug(envelopeStateLLA.toString());
+		    Envelope envelopeStateECEF = GeoOperator
+			    .lla2ecef(envelopeStateLLA);
+		    logger.debug(envelopeStateECEF.toString());
+
+		    crawl(state, category, query, envelopeStateECEF);
 		    //
 		} else {
 		    logger.error("Cannot find category id for query: " + query
