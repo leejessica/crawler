@@ -5,8 +5,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import mo.umac.crawler.POI;
 import mo.umac.crawler.YahooLocalCrawlerStrategy;
-import mo.umac.parser.POI;
 import mo.umac.parser.YahooResultSet;
 import mo.umac.spatial.Circle;
 import mo.umac.spatial.ECEFLLA;

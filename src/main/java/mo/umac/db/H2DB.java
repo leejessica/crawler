@@ -14,9 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import mo.umac.crawler.AQuery;
+import mo.umac.crawler.POI;
 import mo.umac.crawler.online.YahooLocalQueryFileDB;
 import mo.umac.parser.Category;
-import mo.umac.parser.POI;
 import mo.umac.parser.Rating;
 import mo.umac.parser.YahooResultSet;
 
@@ -26,7 +26,7 @@ import mo.umac.parser.YahooResultSet;
  * @author Kate
  * 
  */
-public class H2DB extends DataSetExternal {
+public class H2DB extends DataSet {
 
     public final String DB_NAME = "../yahoolocal-h2/datasets";
 
@@ -40,22 +40,33 @@ public class H2DB extends DataSetExternal {
     /**
      * level: the divided level radius: the radius of the circle want to covered
      */
-    private String sqlCreateQueryTable = "CREATE TABLE IF NOT EXISTS QUERY (QUERYID INT PRIMARY KEY, QUERY VARCHAR(100), ZIP INT, RESULTS INT, START INT, LATITUDE DOUBLE, LONGITUDE DOUBLE, RADIUS DOUBLE, LEVEL INT, PARENTID INT, TOTALRESULTSAVAILABLE INT, TOTALRESULTSRETURNED INT, FIRSTRESULTPOSITION INT)";
-    private String sqlCreateItemTable = "CREATE TABLE IF NOT EXISTS ITEM (ITEMID INT PRIMARY KEY, TITLE VARCHAR(200), CITY VARCHAR(200), STATE VARCHAR(10), LATITUDE DOUBLE, LONGITUDE DOUBLE, DISTANCE DOUBLE, AVERAGERATING DOUBLE, TOTALRATINGS DOUBLE, TOTALREVIEWS DOUBLE)";
-    private String sqlCreateCategoryTable = "CREATE TABLE IF NOT EXISTS CATEGORY (ITEMID INT, CATEGORYID INT, CATEGORYNAME VARCHAR(200))";
+    private String sqlCreateQueryTable = "CREATE TABLE IF NOT EXISTS QUERY "
+	    + "(QUERYID INT PRIMARY KEY, QUERY VARCHAR(100), ZIP INT, RESULTS INT, START INT, "
+	    + "LATITUDE DOUBLE, LONGITUDE DOUBLE, RADIUS DOUBLE, LEVEL INT, PARENTID INT, "
+	    + "TOTALRESULTSAVAILABLE INT, TOTALRESULTSRETURNED INT, FIRSTRESULTPOSITION INT)";
+    private String sqlCreateItemTable = "CREATE TABLE IF NOT EXISTS ITEM "
+	    + "(ITEMID INT PRIMARY KEY, TITLE VARCHAR(200), CITY VARCHAR(200), STATE VARCHAR(10), "
+	    + "LATITUDE DOUBLE, LONGITUDE DOUBLE, DISTANCE DOUBLE, "
+	    + "AVERAGERATING DOUBLE, TOTALRATINGS DOUBLE, TOTALREVIEWS DOUBLE)";
+    private String sqlCreateCategoryTable = "CREATE TABLE IF NOT EXISTS CATEGORY (ITEMID INT, "
+	    + "CATEGORYID INT, CATEGORYNAME VARCHAR(200))";
 
     /**
      * This table records that the item is returned by which query in which
      * position.
      */
-    private String sqlCreateRelationshipTable = "CREATE TABLE IF NOT EXISTS RELATIONSHIP (ITEMID INT, QEURYID INT, POSITION INT)";
+    private String sqlCreateRelationshipTable = "CREATE TABLE IF NOT EXISTS RELATIONSHIP "
+	    + "(ITEMID INT, QEURYID INT, POSITION INT)";
 
     // sqls preparation for insertion
-    private String sqlPrepInsertItem = "INSERT INTO ITEM (ITEMID, TITLE, CITY, STATE, LATITUDE, LONGITUDE, DISTANCE, AVERAGERATING, TOTALRATINGS, TOTALREVIEWS) VALUES (?,?,?,?,?,?,?,?,?,?)";
+    private String sqlPrepInsertItem = "INSERT INTO ITEM (ITEMID, TITLE, CITY, STATE, "
+	    + "LATITUDE, LONGITUDE, DISTANCE, AVERAGERATING, TOTALRATINGS, TOTALREVIEWS) VALUES (?,?,?,?,?,?,?,?,?,?)";
 
     private String sqlPrepInsertCategory = "INSERT INTO CATEGORY (ITEMID, CATEGORYID, CATEGORYNAME) VALUES (?,?,?)";
 
-    private String sqlPrepInsertQuery = "INSERT INTO QUERY (QUERYID, QUERY, ZIP, RESULTS, START, LATITUDE, LONGITUDE, RADIUS, LEVEL, PARENTID, TOTALRESULTSAVAILABLE ,TOTALRESULTSRETURNED, FIRSTRESULTPOSITION) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    private String sqlPrepInsertQuery = "INSERT INTO QUERY (QUERYID, QUERY, ZIP, RESULTS, START, "
+	    + "LATITUDE, LONGITUDE, RADIUS, LEVEL, PARENTID, "
+	    + "TOTALRESULTSAVAILABLE ,TOTALRESULTSRETURNED, FIRSTRESULTPOSITION) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     private String sqlPrepInsertRelationship = "INSERT INTO RELATIONSHIP (ITEMID, QEURYID, POSITION) VALUES(?,?,?)";
 
@@ -557,9 +568,9 @@ public class H2DB extends DataSetExternal {
 			    setPrepCategory(itemID, category, prepCategory);
 			    prepCategory.addBatch();
 			}
-			POI result = new POI(itemID, title, "", city, state,
-				"", longitude, latitude, null, distance, "",
-				"", "", "", "", categories);
+			POI result = new POI(itemID, title, city, state,
+				longitude, latitude, null, distance, categories);
+
 			setPrepItem(result, prepItem);
 			prepItem.addBatch();
 		    } else {
@@ -578,9 +589,8 @@ public class H2DB extends DataSetExternal {
 			    setPrepCategory(itemID, category, prepCategory);
 			    prepCategory.addBatch();
 			}
-			POI result = new POI(itemID, title, "", city, state,
-				"", longitude, latitude, null, distance, "",
-				"", "", "", "", categories);
+			POI result = new POI(itemID, title, city, state,
+				longitude, latitude, null, distance, categories);
 			setPrepItem(result, prepItem);
 			prepItem.addBatch();
 		    }
@@ -627,8 +637,9 @@ public class H2DB extends DataSetExternal {
     }
 
     @Override
-    public YahooResultSet query(AQuery qc) {
+    public void init() {
 	// TODO Auto-generated method stub
-	return null;
+
     }
+
 }

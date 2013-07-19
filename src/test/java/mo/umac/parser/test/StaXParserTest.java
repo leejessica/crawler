@@ -6,7 +6,7 @@ package mo.umac.parser.test;
 import org.apache.log4j.xml.DOMConfigurator;
 
 import mo.umac.crawler.Main;
-import mo.umac.parser.POI;
+import mo.umac.crawler.POI;
 import mo.umac.parser.YahooResultSet;
 import mo.umac.parser.StaXParser;
 

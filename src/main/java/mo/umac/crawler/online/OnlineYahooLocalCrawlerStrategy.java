@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import mo.umac.crawler.YahooLocalCrawlerStrategy;
-import mo.umac.db.DataSetExternal;
+import mo.umac.db.DataSet;
 import mo.umac.db.H2DB;
 import mo.umac.parser.StaXParser;
 import mo.umac.parser.YahooResultSet;
@@ -172,7 +172,7 @@ public abstract class OnlineYahooLocalCrawlerStrategy extends
 
     @Override
     protected void prepareData() {
-	FileOperator.createFolder("", DataSetExternal.FOLDER_NAME);
+	FileOperator.createFolder("", DataSet.FOLDER_NAME);
 	httpClient = createHttpClient();
 
     }
@@ -215,22 +215,22 @@ public abstract class OnlineYahooLocalCrawlerStrategy extends
 			String categoryFolderName = category + "+" + query;
 			// first create the category folder, and then create the
 			// state folder inside the category folder.
-			FileOperator.createFolder(DataSetExternal.FOLDER_NAME,
+			FileOperator.createFolder(DataSet.FOLDER_NAME,
 				categoryFolderName);
-			String categoryFolderPath = DataSetExternal.FOLDER_NAME
+			String categoryFolderPath = DataSet.FOLDER_NAME
 				+ categoryFolderName + "/";
 			String subFolder = FileOperator.createFolder(
 				categoryFolderPath, state);
 			// create log files
 			// 1. query file
-			String queryFile = subFolder + DataSetExternal.QUERY_FILE_NAME;
+			String queryFile = subFolder + DataSet.QUERY_FILE_NAME;
 			FileOperator.createFile(queryFile);
 			BufferedWriter queryOutput = new BufferedWriter(
 				new OutputStreamWriter(new FileOutputStream(
 					queryFile, true)));
 			// 2. results file
 			String resultsFile = subFolder
-				+ DataSetExternal.RESULT_FILE_NAME;
+				+ DataSet.RESULT_FILE_NAME;
 			FileOperator.createFile(resultsFile);
 			BufferedWriter resultsOutput = new BufferedWriter(
 				new OutputStreamWriter(new FileOutputStream(
@@ -284,8 +284,8 @@ public abstract class OnlineYahooLocalCrawlerStrategy extends
     private void crawlOneCategoryInUS(LinkedList<Envelope> envelopeStates,
 	    LinkedList<String> nameStates, int category, String query) {
 	String categoryFolderName = category + "+" + query;
-	FileOperator.createFolder(DataSetExternal.FOLDER_NAME, categoryFolderName);
-	String categoryFolderPath = DataSetExternal.FOLDER_NAME + categoryFolderName
+	FileOperator.createFolder(DataSet.FOLDER_NAME, categoryFolderName);
+	String categoryFolderPath = DataSet.FOLDER_NAME + categoryFolderName
 		+ "/";
 	try {
 	    String appid = FileOperator
@@ -296,13 +296,13 @@ public abstract class OnlineYahooLocalCrawlerStrategy extends
 		String subFolder = FileOperator.createFolder(
 			categoryFolderPath, state);
 		// query file
-		String queryFile = subFolder + DataSetExternal.QUERY_FILE_NAME;
+		String queryFile = subFolder + DataSet.QUERY_FILE_NAME;
 		FileOperator.createFile(queryFile);
 		BufferedWriter queryOutput = new BufferedWriter(
 			new OutputStreamWriter(new FileOutputStream(queryFile,
 				true)));
 		// results file
-		String resultsFile = subFolder + DataSetExternal.RESULT_FILE_NAME;
+		String resultsFile = subFolder + DataSet.RESULT_FILE_NAME;
 		FileOperator.createFile(resultsFile);
 		BufferedWriter resultsOutput = new BufferedWriter(
 			new OutputStreamWriter(new FileOutputStream(
@@ -562,7 +562,7 @@ public abstract class OnlineYahooLocalCrawlerStrategy extends
 	    queryIDString = queryIDString.substring(0, dotIndex);
 	    // FIXME change the query id to integer!!!
 	    int queryID = Integer.parseInt(queryIDString);
-	    DataSetExternal dataset = new H2DB();
+	    DataSet dataset = new H2DB();
 	    dataset.record(queryID, 0, 0, qc, resultSet);
 	}
 	limitedPageCount = 0;

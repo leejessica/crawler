@@ -10,8 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import mo.umac.crawler.AQuery;
+import mo.umac.crawler.POI;
 import mo.umac.crawler.online.YahooLocalQueryFileDB;
-import mo.umac.parser.POI;
 import mo.umac.parser.Rating;
 import mo.umac.parser.YahooResultSet;
 
@@ -24,11 +24,11 @@ import org.postgresql.geometric.PGpoint;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
-public class Postgresql extends DataSetExternal {
+public class Postgresql extends DataSet {
 
     public Connection conn;
 
-    public final String DB_NAME = "yahoo";
+    public static String DB_NAME = "yahoo";
     public final String USER = "postgres";
     public final String PASSWORD = "postgres";
 
@@ -70,15 +70,15 @@ public class Postgresql extends DataSetExternal {
 
     public static void main(String[] args) {
 	Postgresql postGIS = new Postgresql();
-	// postGIS.createTable();
-//	postGIS.insert();
+	// postGIS.createTable(sqlCreateItemTable0, sqlAddGeom);
+	// postGIS.insert();
 	// postGIS.select();
     }
 
-    public Connection connect() {
+    public Connection connect(String dbname) {
 	try {
 	    Class.forName("org.postgresql.Driver");
-	    String url = "jdbc:postgresql://localhost:5432/" + DB_NAME;
+	    String url = "jdbc:postgresql://localhost:5432/" + dbname;
 	    conn = DriverManager.getConnection(url, USER, PASSWORD);
 	} catch (ClassNotFoundException e) {
 	    e.printStackTrace();
@@ -88,12 +88,12 @@ public class Postgresql extends DataSetExternal {
 	return conn;
     }
 
-    public void createTable() {
-	Connection conn = connect();
+    public void createTable(String sql, String sqlAddGeom) {
+	Connection conn = connect(DB_NAME);
 	Statement stat;
 	try {
 	    stat = conn.createStatement();
-	    stat.execute(sqlCreateItemTable0);
+	    stat.execute(sql);
 	    stat.execute(sqlAddGeom);
 	    stat.close();
 	    conn.close();
@@ -103,7 +103,7 @@ public class Postgresql extends DataSetExternal {
     }
 
     public void insert() {
-	Connection conn = connect();
+	Connection conn = connect(DB_NAME);
 	PreparedStatement prepItem;
 	try {
 	    prepItem = conn.prepareStatement(sqlPrepInsertItem);
@@ -120,7 +120,7 @@ public class Postgresql extends DataSetExternal {
 
     public void importData(int queryID, int level, int parentID,
 	    YahooLocalQueryFileDB qc, YahooResultSet resultSet) {
-	Connection con = connect();
+	Connection con = connect(DB_NAME);
 	// prepared statement
 	PreparedStatement prepItem;
 	try {
@@ -133,6 +133,8 @@ public class Postgresql extends DataSetExternal {
 		prepItem.addBatch();
 	    }
 	    con.setAutoCommit(false);
+	    prepItem.close();
+	    con.close();
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
@@ -191,7 +193,7 @@ public class Postgresql extends DataSetExternal {
     }
 
     public void select() {
-	Connection conn = connect();
+	Connection conn = connect(DB_NAME);
 
 	Statement s;
 	try {
@@ -315,7 +317,7 @@ public class Postgresql extends DataSetExternal {
     public YahooResultSet knnQuery(String query, int category, String state,
 	    int topK, Coordinate coordinate) {
 	YahooResultSet yahooResultSet = new YahooResultSet();
-	Connection conn = connect();
+	Connection conn = connect(DB_NAME);
 	String sql = "SELECT itemid, title, city, state, longitude, latitude "
 		+ "FROM item ORDER BY geom <-> st_setsrid(st_makepoint("
 		+ coordinate.x + "," + coordinate.y + ")," + SRID + ") LIMIT"
@@ -332,8 +334,8 @@ public class Postgresql extends DataSetExternal {
 		String stateInResult = r.getString(4);
 		double longitude = r.getDouble(5);
 		double latitude = r.getDouble(6);
-		POI poi = new POI(id, title, "", city, stateInResult, "",
-			longitude, latitude, null, -1, "", "", "", "", "", null);
+		POI poi = new POI(id, title, city, stateInResult, longitude,
+			latitude, null, -1, null);
 		poiList.add(poi);
 	    }
 	    int totalResultsReturned = poiList.size();
@@ -346,5 +348,11 @@ public class Postgresql extends DataSetExternal {
 	}
 
 	return yahooResultSet;
+    }
+
+    @Override
+    public void init() {
+	// TODO Auto-generated method stub
+
     }
 }

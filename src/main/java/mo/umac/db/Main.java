@@ -33,7 +33,7 @@ public class Main {
 	    Postgresql post = new Postgresql();
 	    Statement stat = connH2.createStatement();
 	    //
-	    Connection connPostgresql = post.connect();
+	    Connection connPostgresql = post.connect(Postgresql.DB_NAME);
 	    PreparedStatement prepItem = null;
 	    connPostgresql.setAutoCommit(false);
 	    prepItem = connPostgresql

@@ -7,6 +7,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.util.List;
 
+import mo.umac.crawler.POI;
+
 /**
  * ResultsSet (the xml page) of one query returned by Yahoo Local!
  * 

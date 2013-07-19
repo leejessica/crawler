@@ -1,10 +1,16 @@
 package mo.umac.db;
 
+import java.util.List;
+
 import mo.umac.crawler.AQuery;
+import mo.umac.crawler.POI;
 import mo.umac.crawler.online.YahooLocalQueryFileDB;
 import mo.umac.parser.YahooResultSet;
+import mo.umac.rtree.MyRTree;
 
-public abstract class DataSetExternal {
+import com.vividsolutions.jts.geom.Coordinate;
+
+public abstract class DataSet {
 
     /**
      * A folder stores all crawled .xml file from Yahoo Local.
@@ -26,6 +32,26 @@ public abstract class DataSetExternal {
     public abstract void record(int queryID, int level, int parentID,
 	    YahooLocalQueryFileDB qc, YahooResultSet resultSet);
 
-    public abstract YahooResultSet query(AQuery qc);
+    private List<POI> points;
 
+    private MyRTree rtree;
+
+    public abstract void init();
+
+    /**
+     * Read dataset from external database.
+     */
+    public void read() {
+
+    }
+
+    public void index(List<Coordinate> coordinate) {
+	rtree = new MyRTree(coordinate);
+    }
+
+    public YahooResultSet query(AQuery qc) {
+	List<Integer> results = rtree.searchNN(qc.getPoint(), qc.getTopK());
+	// TODO
+	return null;
+    }
 }

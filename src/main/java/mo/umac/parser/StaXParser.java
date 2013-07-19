@@ -18,6 +18,8 @@ import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
+import mo.umac.crawler.POI;
+
 import org.apache.log4j.Logger;
 
 /**
@@ -166,19 +168,12 @@ public class StaXParser {
 		} else if (startElement.getName().getLocalPart().equals(TITLE)) {
 		    event = eventReader.nextEvent();
 		    result.setTitle(event.toString());
-		} else if (startElement.getName().getLocalPart()
-			.equals(ADDRESS)) {
-		    event = eventReader.nextEvent();
-		    result.setAddress(event.toString());
 		} else if (startElement.getName().getLocalPart().equals(CITY)) {
 		    event = eventReader.nextEvent();
 		    result.setCity(event.toString());
 		} else if (startElement.getName().getLocalPart().equals(STATE)) {
 		    event = eventReader.nextEvent();
 		    result.setState(event.toString());
-		} else if (startElement.getName().getLocalPart().equals(PHONE)) {
-		    event = eventReader.nextEvent();
-		    result.setPhone(event.toString());
 		} else if (startElement.getName().getLocalPart()
 			.equals(LATITUDE)) {
 		    event = eventReader.nextEvent();
@@ -220,25 +215,6 @@ public class StaXParser {
 		else if (startElement.getName().getLocalPart().equals(DISTANCE)) {
 		    event = eventReader.nextEvent();
 		    result.setDistance(Double.parseDouble(event.toString()));
-		} else if (startElement.getName().getLocalPart().equals(URL)) {
-		    event = eventReader.nextEvent();
-		    result.setUrl(event.toString());
-		}
-		if (startElement.getName().getLocalPart().equals(CLICK_URL)) {
-		    event = eventReader.nextEvent();
-		    result.setClickUrl(event.toString());
-		}
-		if (startElement.getName().getLocalPart().equals(MAP_URL)) {
-		    event = eventReader.nextEvent();
-		    result.setMapUrl(event.toString());
-		} else if (startElement.getName().getLocalPart()
-			.equals(BUSINESS_URL)) {
-		    event = eventReader.nextEvent();
-		    result.setBusinessUrl(event.toString());
-		} else if (startElement.getName().getLocalPart()
-			.equals(BUSINESS_CLICK_URL)) {
-		    event = eventReader.nextEvent();
-		    result.setBusinessClickUrl(event.toString());
 		}
 		//
 		else if (startElement.getName().getLocalPart()

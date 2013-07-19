@@ -5,7 +5,7 @@ package mo.umac.crawler.offline;
 
 import java.util.List;
 
-import mo.umac.parser.POI;
+import mo.umac.crawler.POI;
 import mo.umac.spatial.Circle;
 
 import com.vividsolutions.jts.geom.Coordinate;

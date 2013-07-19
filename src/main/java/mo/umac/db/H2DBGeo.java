@@ -20,9 +20,9 @@ import com.vividsolutions.jts.geom.impl.CoordinateArraySequenceFactory;
 import com.vividsolutions.jts.io.WKBWriter;
 
 import mo.umac.crawler.AQuery;
+import mo.umac.crawler.POI;
 import mo.umac.crawler.online.YahooLocalQueryFileDB;
 import mo.umac.parser.Category;
-import mo.umac.parser.POI;
 import mo.umac.parser.Rating;
 import mo.umac.parser.YahooResultSet;
 import mo.umac.spatial.GeoOperator;
@@ -33,7 +33,7 @@ import mo.umac.spatial.GeoOperator;
  * @author kate
  * 
  */
-public class H2DBGeo extends DataSetExternal {
+public class H2DBGeo extends DataSet {
 
     public final static String GEO_DB_NAME = "../yahoolocal-h2-geo/datasets";
 
@@ -186,9 +186,8 @@ public class H2DBGeo extends DataSetExternal {
 			    setPrepCategory(itemID, category, prepCategory);
 			    prepCategory.addBatch();
 			}
-			POI result = new POI(itemID, title, "", city, state,
-				"", longitude, latitude, null, distance, "",
-				"", "", "", "", categories);
+			POI result = new POI(itemID, title, city, state, longitude, latitude,
+				null, distance, categories);
 			setPrepItem(result, prepItem);
 			prepItem.addBatch();
 		    } else {
@@ -207,9 +206,8 @@ public class H2DBGeo extends DataSetExternal {
 			    setPrepCategory(itemID, category, prepCategory);
 			    prepCategory.addBatch();
 			}
-			POI result = new POI(itemID, title, "", city, state,
-				"", longitude, latitude, null, distance, "",
-				"", "", "", "", categories);
+			POI result = new POI(itemID, title, city, state, longitude, latitude,
+				null, distance, categories);
 			setPrepItem(result, prepItem);
 			prepItem.addBatch();
 		    }
@@ -303,11 +301,6 @@ public class H2DBGeo extends DataSetExternal {
 
     }
 
-    @Override
-    public YahooResultSet query(AQuery qc) {
-	// TODO Auto-generated method stub
-	return null;
-    }
 
     private static Connection createConnection() {
 	try {
@@ -428,5 +421,11 @@ public class H2DBGeo extends DataSetExternal {
 	    e.printStackTrace();
 	}
 	return prepRelationship;
+    }
+
+    @Override
+    public void init() {
+	// TODO Auto-generated method stub
+	
     }
 }

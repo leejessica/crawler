@@ -2,7 +2,6 @@ package mo.umac.rtree;
 
 import java.util.List;
 import java.util.Properties;
-import java.util.Vector;
 
 import com.infomatiq.jsi.Point;
 import com.infomatiq.jsi.Rectangle;
@@ -29,6 +28,20 @@ public class MyRTree extends RTree {
 	    values[1] = (float) points.get(i).y;
 	    tmpRect = new Rectangle(values[0], values[1], values[0], values[1]);
 	    this.add(tmpRect, i);
+	}
+    }
+
+    public MyRTree(List<Coordinate> points, List<Integer> ids) {
+	this();
+
+	Rectangle tmpRect = null;
+	float[] values = new float[2];
+
+	for (int i = 0; i < points.size(); i++) {
+	    values[0] = (float) points.get(i).x;
+	    values[1] = (float) points.get(i).y;
+	    tmpRect = new Rectangle(values[0], values[1], values[0], values[1]);
+	    this.add(tmpRect, ids.get(i));
 	}
     }
 
@@ -67,4 +80,5 @@ public class MyRTree extends RTree {
     public static Point coordinateToPoint(Coordinate v) {
 	return new Point((float) v.x, (float) v.y);
     }
+
 }

@@ -11,6 +11,9 @@ import com.vividsolutions.jts.geom.Coordinate;
  * 
  */
 public class AQuery {
+    
+    private int queryID;
+    
     /**
      * keyword of this query
      */

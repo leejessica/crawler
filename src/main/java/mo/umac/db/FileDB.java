@@ -8,9 +8,9 @@ import java.io.IOException;
 import java.util.List;
 
 import mo.umac.crawler.AQuery;
+import mo.umac.crawler.POI;
 import mo.umac.crawler.online.YahooLocalQueryFileDB;
 import mo.umac.parser.Category;
-import mo.umac.parser.POI;
 import mo.umac.parser.Rating;
 import mo.umac.parser.YahooResultSet;
 
@@ -18,7 +18,7 @@ import mo.umac.parser.YahooResultSet;
  * @author kate
  * 
  */
-public class FileDB extends DataSetExternal {
+public class FileDB extends DataSet {
 
     @Override
     public void record(int queryID, int level, int parentID,
@@ -110,21 +110,14 @@ public class FileDB extends DataSetExternal {
 	    POI result = results.get(i);
 	    int id = result.getId();
 	    String title = result.getTitle();
-	    String address = result.getAddress();
 	    String city = result.getCity();
 	    String state = result.getState();
-	    String phone = result.getPhone();
 	    Double longitude = result.getLongitude();
 	    Double latitude = result.getLatitude();
 
 	    Rating rating = result.getRating();
 
 	    double distance = result.getDistance();
-	    String url = result.getUrl();
-	    String clickUrl = result.getClickUrl();
-	    String mapUrl = result.getMapUrl();
-	    String businessUrl = result.getBusinessUrl();
-	    String businessClickUrl = result.getBusinessClickUrl();
 
 	    List<Category> categories = result.getCategories();
 
@@ -162,10 +155,10 @@ public class FileDB extends DataSetExternal {
 	}
     }
 
-	@Override
-	public YahooResultSet query(AQuery qc) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public void init() {
+	// TODO Auto-generated method stub
+	
+    }
 
 }
