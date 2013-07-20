@@ -1,26 +1,38 @@
 package mo.umac.db;
 
-import mo.umac.crawler.AQuery;
-import mo.umac.crawler.online.YahooLocalQueryFileDB;
-import mo.umac.parser.YahooResultSet;
+import java.util.HashMap;
 
-public class Website extends DataSet {
+import mo.umac.crawler.AQuery;
+import mo.umac.crawler.POI;
+import mo.umac.crawler.ResultSetYahoo;
+import mo.umac.crawler.online.YahooLocalQueryFileDB;
+
+public class Website extends DBExternal {
 
     @Override
     public void record(int queryID, int level, int parentID,
-	    YahooLocalQueryFileDB qc, YahooResultSet resultSet) {
+	    YahooLocalQueryFileDB qc, ResultSetYahoo resultSet) {
 	// TODO Auto-generated method stub
 	
     }
 
+
     @Override
-    public YahooResultSet query(AQuery qc) {
+    public void init() {
+	// TODO Auto-generated method stub
+	
+    }
+
+
+    @Override
+    public HashMap<Integer, POI> readFromExtenalDB() {
 	// TODO Auto-generated method stub
 	return null;
     }
 
+
     @Override
-    public void init() {
+    public void writeToExternalDB() {
 	// TODO Auto-generated method stub
 	
     }

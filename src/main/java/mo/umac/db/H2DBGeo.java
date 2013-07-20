@@ -11,6 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -21,10 +22,10 @@ import com.vividsolutions.jts.io.WKBWriter;
 
 import mo.umac.crawler.AQuery;
 import mo.umac.crawler.POI;
+import mo.umac.crawler.ResultSetYahoo;
 import mo.umac.crawler.online.YahooLocalQueryFileDB;
 import mo.umac.parser.Category;
 import mo.umac.parser.Rating;
-import mo.umac.parser.YahooResultSet;
 import mo.umac.spatial.GeoOperator;
 
 /**
@@ -33,7 +34,7 @@ import mo.umac.spatial.GeoOperator;
  * @author kate
  * 
  */
-public class H2DBGeo extends DataSet {
+public class H2DBGeo extends DBExternal {
 
     public final static String GEO_DB_NAME = "../yahoolocal-h2-geo/datasets";
 
@@ -255,7 +256,7 @@ public class H2DBGeo extends DataSet {
 
     @Override
     public void record(int queryID, int level, int parentID,
-	    YahooLocalQueryFileDB qc, YahooResultSet resultSet) {
+	    YahooLocalQueryFileDB qc, ResultSetYahoo resultSet) {
 	conn = createConnection();
 	// prepared statement
 	PreparedStatement prepQuery;
@@ -425,6 +426,18 @@ public class H2DBGeo extends DataSet {
 
     @Override
     public void init() {
+	// TODO Auto-generated method stub
+	
+    }
+
+    @Override
+    public HashMap<Integer, POI> readFromExtenalDB() {
+	// TODO Auto-generated method stub
+	return null;
+    }
+
+    @Override
+    public void writeToExternalDB() {
 	// TODO Auto-generated method stub
 	
     }

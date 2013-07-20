@@ -36,18 +36,20 @@ public class GeoOperator {
 						  // 6371007.2 meters
 
     public static Envelope lla2ecef(Envelope envelope) {
+	// TODO check
 	// converting the envelope
 	double minX = envelope.getMinX();
 	double maxX = envelope.getMaxX();
 	double minY = envelope.getMinY();
 	double maxY = envelope.getMaxY();
 
-	double[] p1Lla = { minX, minY, 0 };
-	double[] p1Ecef = ECEFLLA.lla2ecef(p1Lla);
-	double[] p2Lla = { maxX, maxY, 0 };
-	double[] p2Ecef = ECEFLLA.lla2ecef(p2Lla);
-	Envelope envelopeEcef = new Envelope(p1Ecef[0], p1Ecef[1], p2Ecef[0],
-		p2Ecef[1]);
+	Coordinate p1lla = new Coordinate(minX, minY);
+	Coordinate p2lla = new Coordinate(maxX, maxY);
+
+	Coordinate p1ecef = ECEFLLA.lla2ecef(p1lla);
+	Coordinate p2ecef = ECEFLLA.lla2ecef(p2lla);
+
+	Envelope envelopeEcef = new Envelope(p1ecef, p2ecef);
 	return envelopeEcef;
 
     }

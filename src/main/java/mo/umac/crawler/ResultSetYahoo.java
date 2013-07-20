@@ -1,13 +1,13 @@
 /**
  * 
  */
-package mo.umac.parser;
+package mo.umac.crawler;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.util.List;
 
-import mo.umac.crawler.POI;
+import mo.umac.parser.YahooXmlType;
 
 /**
  * ResultsSet (the xml page) of one query returned by Yahoo Local!
@@ -15,7 +15,7 @@ import mo.umac.crawler.POI;
  * @author kate
  * 
  */
-public class YahooResultSet {
+public class ResultSetYahoo extends ResultSet{
 
     // add at 2013-4-5
     /**
@@ -47,7 +47,7 @@ public class YahooResultSet {
 
     private boolean UnexpectedError = false;
 
-    public YahooResultSet() {
+    public ResultSetYahoo() {
 
     }
 

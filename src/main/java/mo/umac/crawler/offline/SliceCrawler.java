@@ -7,7 +7,7 @@ import java.util.List;
 
 import mo.umac.crawler.POI;
 import mo.umac.crawler.YahooLocalCrawlerStrategy;
-import mo.umac.parser.YahooResultSet;
+import mo.umac.crawler.ResultSetYahoo;
 import mo.umac.spatial.Circle;
 import mo.umac.spatial.ECEFLLA;
 import mo.umac.spatial.GeoOperator;

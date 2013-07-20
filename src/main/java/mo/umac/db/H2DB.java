@@ -11,14 +11,15 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import mo.umac.crawler.AQuery;
 import mo.umac.crawler.POI;
+import mo.umac.crawler.ResultSetYahoo;
 import mo.umac.crawler.online.YahooLocalQueryFileDB;
 import mo.umac.parser.Category;
 import mo.umac.parser.Rating;
-import mo.umac.parser.YahooResultSet;
 
 /**
  * Operators of the database
@@ -26,7 +27,7 @@ import mo.umac.parser.YahooResultSet;
  * @author Kate
  * 
  */
-public class H2DB extends DataSet {
+public class H2DB extends DBExternal {
 
     public final String DB_NAME = "../yahoolocal-h2/datasets";
 
@@ -79,7 +80,7 @@ public class H2DB extends DataSet {
 
     @Override
     public void record(int queryID, int level, int parentID,
-	    YahooLocalQueryFileDB qc, YahooResultSet resultSet) {
+	    YahooLocalQueryFileDB qc, ResultSetYahoo resultSet) {
 	Connection con = qc.getCon();
 	// prepared statement
 	PreparedStatement prepItem;
@@ -141,10 +142,7 @@ public class H2DB extends DataSet {
     private void printQueryTable() {
 	String sqlSelectQuery = sqlSelectStar + QUERY;
 	try {
-	    Class.forName("org.h2.Driver");
-	    Connection conn = DriverManager.getConnection(
-		    "jdbc:h2:file:../yahoolocal-h2/datasets;AUTO_SERVER=TRUE",
-		    "sa", "");
+	    Connection conn = connect(DB_NAME);
 	    Statement stat = conn.createStatement();
 	    try {
 		java.sql.ResultSet rs = stat.executeQuery(sqlSelectQuery);
@@ -189,8 +187,6 @@ public class H2DB extends DataSet {
 	    }
 	    stat.close();
 	    conn.close();
-	} catch (ClassNotFoundException e) {
-	    e.printStackTrace();
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
@@ -199,10 +195,7 @@ public class H2DB extends DataSet {
     private void printItemTable() {
 	String sqlSelectItem = sqlSelectStar + ITEM;
 	try {
-	    Class.forName("org.h2.Driver");
-	    Connection conn = DriverManager.getConnection(
-		    "jdbc:h2:file:../yahoolocal-h2/datasets;AUTO_SERVER=TRUE",
-		    "sa", "");
+	    Connection conn = connect(DB_NAME);
 	    Statement stat = conn.createStatement();
 	    try {
 		java.sql.ResultSet rs = stat.executeQuery(sqlSelectItem);
@@ -240,8 +233,6 @@ public class H2DB extends DataSet {
 	    }
 	    stat.close();
 	    conn.close();
-	} catch (ClassNotFoundException e) {
-	    e.printStackTrace();
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
@@ -250,10 +241,7 @@ public class H2DB extends DataSet {
     private void printCategoryTable() {
 	String sqlSelectCategory = sqlSelectStar + CATEGORY;
 	try {
-	    Class.forName("org.h2.Driver");
-	    Connection conn = DriverManager.getConnection(
-		    "jdbc:h2:file:../yahoolocal-h2/datasets;AUTO_SERVER=TRUE",
-		    "sa", "");
+	    Connection conn = connect(DB_NAME);
 	    Statement stat = conn.createStatement();
 	    try {
 		java.sql.ResultSet rs = stat.executeQuery(sqlSelectCategory);
@@ -275,8 +263,6 @@ public class H2DB extends DataSet {
 	    }
 	    stat.close();
 	    conn.close();
-	} catch (ClassNotFoundException e) {
-	    e.printStackTrace();
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
@@ -285,10 +271,7 @@ public class H2DB extends DataSet {
     private void printRelationshipTable() {
 	String sqlSelectRelationship = sqlSelectStar + RELATIONSHIP;
 	try {
-	    Class.forName("org.h2.Driver");
-	    Connection conn = DriverManager.getConnection(
-		    "jdbc:h2:file:../yahoolocal-h2/datasets;AUTO_SERVER=TRUE",
-		    "sa", "");
+	    Connection conn = connect(DB_NAME);
 	    Statement stat = conn.createStatement();
 	    try {
 		java.sql.ResultSet rs = stat
@@ -311,8 +294,6 @@ public class H2DB extends DataSet {
 	    }
 	    stat.close();
 	    conn.close();
-	} catch (ClassNotFoundException e) {
-	    e.printStackTrace();
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
@@ -322,10 +303,7 @@ public class H2DB extends DataSet {
 	int count = 0;
 	String sql = sqlSelectCountStar + tableName + " WHERE STATE='NY'";
 	try {
-	    Class.forName("org.h2.Driver");
-	    Connection conn = DriverManager.getConnection(
-		    "jdbc:h2:file:../yahoolocal-h2/datasets;AUTO_SERVER=TRUE",
-		    "sa", "");
+	    Connection conn = connect(DB_NAME);
 	    Statement stat = conn.createStatement();
 	    try {
 		java.sql.ResultSet rs = stat.executeQuery(sql);
@@ -339,8 +317,6 @@ public class H2DB extends DataSet {
 	    }
 	    stat.close();
 	    conn.close();
-	} catch (ClassNotFoundException e) {
-	    e.printStackTrace();
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
@@ -435,10 +411,7 @@ public class H2DB extends DataSet {
 
     private void createTables() {
 	try {
-	    Class.forName("org.h2.Driver");
-	    Connection conn = DriverManager.getConnection(
-		    "jdbc:h2:file:../yahoolocal-h2/datasets;AUTO_SERVER=TRUE",
-		    "sa", "");
+	    Connection conn = connect(DB_NAME);
 	    Statement stat = conn.createStatement();
 	    stat.execute(sqlCreateQueryTable);
 	    stat.execute(sqlCreateItemTable);
@@ -446,11 +419,23 @@ public class H2DB extends DataSet {
 	    stat.execute(sqlCreateRelationshipTable);
 	    stat.close();
 	    conn.close();
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+    }
+
+    public Connection connect(String dbname) {
+	Connection conn = null;
+	try {
+	    Class.forName("org.h2.Driver");
+	    conn = DriverManager.getConnection("jdbc:h2:file:" + dbname
+		    + ";AUTO_SERVER=TRUE", "sa", "");
 	} catch (ClassNotFoundException e) {
 	    e.printStackTrace();
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
+	return conn;
     }
 
     /**
@@ -469,12 +454,8 @@ public class H2DB extends DataSet {
     private void convertQueryFile(String folderPath, String h2Name) {
 	String queryFile = folderPath + "query";
 	BufferedReader brQuery = null;
-
 	try {
-	    Class.forName("org.h2.Driver");
-	    Connection conn = DriverManager.getConnection(
-		    "jdbc:h2:file:../yahoolocal-h2/datasets;AUTO_SERVER=TRUE",
-		    "sa", "");
+	    Connection conn = connect(DB_NAME);
 	    brQuery = new BufferedReader(new InputStreamReader(
 		    new FileInputStream(queryFile)));
 	    String data = null;
@@ -517,8 +498,6 @@ public class H2DB extends DataSet {
 	    e.printStackTrace();
 	} catch (IOException e) {
 	    e.printStackTrace();
-	} catch (ClassNotFoundException e1) {
-	    e1.printStackTrace();
 	} catch (SQLException e1) {
 	    e1.printStackTrace();
 	}
@@ -528,10 +507,7 @@ public class H2DB extends DataSet {
 	String resultsFile = folderPath + "results";
 	BufferedReader brResult = null;
 	try {
-	    Class.forName("org.h2.Driver");
-	    Connection conn = DriverManager.getConnection(
-		    "jdbc:h2:file:../yahoolocal-h2/datasets;AUTO_SERVER=TRUE",
-		    "sa", "");
+	    Connection conn = connect(DB_NAME);
 	    brResult = new BufferedReader(new InputStreamReader(
 		    new FileInputStream(resultsFile)));
 	    String data = null;
@@ -613,8 +589,6 @@ public class H2DB extends DataSet {
 	    e.printStackTrace();
 	} catch (IOException e) {
 	    e.printStackTrace();
-	} catch (ClassNotFoundException e1) {
-	    e1.printStackTrace();
 	} catch (SQLException e1) {
 	    e1.printStackTrace();
 	}
@@ -638,6 +612,18 @@ public class H2DB extends DataSet {
 
     @Override
     public void init() {
+	// TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public HashMap<Integer, POI> readFromExtenalDB() {
+	// TODO Auto-generated method stub
+	return null;
+    }
+
+    @Override
+    public void writeToExternalDB() {
 	// TODO Auto-generated method stub
 
     }

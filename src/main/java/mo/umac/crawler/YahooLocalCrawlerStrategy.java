@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import mo.umac.parser.YahooResultSet;
 import mo.umac.spatial.UScensusData;
 import mo.umac.utils.FileOperator;
 

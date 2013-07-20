@@ -6,9 +6,10 @@ import java.util.List;
 
 import mo.umac.crawler.AQuery;
 import mo.umac.crawler.YahooLocalCrawlerStrategy;
-import mo.umac.db.DataSet;
+import mo.umac.crawler.ResultSetYahoo;
+import mo.umac.db.DBExternal;
+import mo.umac.db.DBInMemory;
 import mo.umac.db.Postgresql;
-import mo.umac.parser.YahooResultSet;
 import mo.umac.spatial.GeoOperator;
 import mo.umac.utils.CommonUtils;
 
@@ -39,9 +40,8 @@ public abstract class OfflineYahooLocalCrawlerStrategy extends
      * @param aQuery
      * @return
      */
-    public static YahooResultSet query(AQuery aQuery) {
-	// FIXME change to R tree, file dataset
-	DataSet dataset = new Postgresql();
+    public static ResultSetYahoo query(AQuery aQuery) {
+	DBInMemory dataset = new DBInMemory();
 	return dataset.query(aQuery);
     }
 

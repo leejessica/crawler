@@ -1,5 +1,7 @@
 package mo.umac.spatial;
 
+import com.vividsolutions.jts.geom.Coordinate;
+
 public class ECEFLLA {
     /*
      * 
@@ -87,10 +89,28 @@ public class ECEFLLA {
 	return ret;
     }
 
+    public static Coordinate ecef2lla(Coordinate ecef) {
+	double longitude = ecef.x;
+	double latitude = ecef.y;
+	double[] ecef2 = { latitude, longitude, 0 };
+	double[] lla2 = ecef2lla(ecef2);
+	Coordinate lla = new Coordinate(lla2[1], lla2[0]);
+	return lla;
+    }
+
+    public static Coordinate lla2ecef(Coordinate lla) {
+	double longitude = lla.x;
+	double latitude = lla.y;
+	double[] lla2 = { latitude, longitude, 0 };
+	double[] ecef2 = lla2ecef(lla2);
+	Coordinate ecef = new Coordinate(ecef2[1], ecef2[0]);
+	return ecef;
+    }
+
     /**
      * {@link http://www.mathworks.com/help/aeroblks/llatoecefposition.html}
      * 
-     * Another implementation 
+     * Another implementation
      * 
      * @author kate
      * 
@@ -132,7 +152,7 @@ public class ECEFLLA {
 
 	double[] ret2 = ECEFLLA.lla2ecef(lla);
 	System.out.println(ret2[0] + ", " + ret2[1] + ", " + ret2[2]);
-	
+
 	double[] ret3 = ECEFLLA.ecef2lla(ret2);
 	System.out.println(ret3[0] + ", " + ret3[1] + ", " + ret3[2]);
     }

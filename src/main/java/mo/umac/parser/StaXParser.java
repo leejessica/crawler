@@ -19,6 +19,7 @@ import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
 import mo.umac.crawler.POI;
+import mo.umac.crawler.ResultSetYahoo;
 
 import org.apache.log4j.Logger;
 
@@ -65,8 +66,8 @@ public class StaXParser {
     static final String CATEGORY = "Category";
 
     @SuppressWarnings({ "unchecked", "null" })
-    public YahooResultSet readConfig(String configFile) {
-	YahooResultSet resultSet = new YahooResultSet();
+    public ResultSetYahoo readConfig(String configFile) {
+	ResultSetYahoo resultSet = new ResultSetYahoo();
 	try {
 	    // First create a new XMLInputFactory
 	    XMLInputFactory inputFactory = XMLInputFactory.newInstance();
@@ -98,8 +99,8 @@ public class StaXParser {
 	return resultSet;
     }
 
-    private YahooResultSet parseErrorInfo(XMLEventReader eventReader,
-	    YahooResultSet resultSet) throws XMLStreamException {
+    private ResultSetYahoo parseErrorInfo(XMLEventReader eventReader,
+	    ResultSetYahoo resultSet) throws XMLStreamException {
 	while (eventReader.hasNext()) {
 	    XMLEvent event = eventReader.nextEvent();
 	    if (event.isStartElement()) {
@@ -126,8 +127,8 @@ public class StaXParser {
      * @return
      * @throws XMLStreamException
      */
-    private YahooResultSet parseResultSetInfo(XMLEventReader eventReader,
-	    YahooResultSet resultSet, StartElement startElement)
+    private ResultSetYahoo parseResultSetInfo(XMLEventReader eventReader,
+	    ResultSetYahoo resultSet, StartElement startElement)
 	    throws XMLStreamException {
 	List<POI> results = new ArrayList<POI>();
 	POI result = null;

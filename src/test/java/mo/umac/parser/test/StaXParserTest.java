@@ -7,7 +7,7 @@ import org.apache.log4j.xml.DOMConfigurator;
 
 import mo.umac.crawler.Main;
 import mo.umac.crawler.POI;
-import mo.umac.parser.YahooResultSet;
+import mo.umac.crawler.ResultSetYahoo;
 import mo.umac.parser.StaXParser;
 
 /**
@@ -25,7 +25,7 @@ public class StaXParserTest {
 	private void parsePage() {
 		StaXParser read = new StaXParser();
 		String testXmlFile = "./src/test/resources/returnedpages/demo.xml";
-		YahooResultSet resultSet = read.readConfig(testXmlFile);
+		ResultSetYahoo resultSet = read.readConfig(testXmlFile);
 		System.out.println(resultSet.getTotalResultsAvailable());
 		System.out.println(resultSet.getTotalResultsReturned());
 		System.out.println(resultSet.getFirstResultPosition());
@@ -41,14 +41,14 @@ public class StaXParserTest {
 	private void parseErrorPage1() {
 		StaXParser read = new StaXParser();
 		String testXmlFile = "./src/test/resources/returnedpages/limitexceed.xml";
-		YahooResultSet resultSet = read.readConfig(testXmlFile);
+		ResultSetYahoo resultSet = read.readConfig(testXmlFile);
 		System.out.println(resultSet.getXmlType());
 	}
 	
 	private void parseErrorPage2() {
 		StaXParser read = new StaXParser();
 		String testXmlFile = "./src/test/resources/returnedpages/invalidvalue.xml";
-		YahooResultSet resultSet = read.readConfig(testXmlFile);
+		ResultSetYahoo resultSet = read.readConfig(testXmlFile);
 		System.out.println(resultSet.getXmlType());
 	}
 	
@@ -56,7 +56,7 @@ public class StaXParserTest {
 		// XXX I'm not sure whether this condition will appear in Yahoo! Local.
 		StaXParser read = new StaXParser();
 		String testXmlFile = "./src/test/resources/returnedpages/empty.xml";
-		YahooResultSet resultSet = read.readConfig(testXmlFile);
+		ResultSetYahoo resultSet = read.readConfig(testXmlFile);
 		System.out.println(resultSet.getXmlType());
 	}
 

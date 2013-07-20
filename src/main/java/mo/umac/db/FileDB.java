@@ -5,24 +5,25 @@ package mo.umac.db;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
 import mo.umac.crawler.AQuery;
 import mo.umac.crawler.POI;
+import mo.umac.crawler.ResultSetYahoo;
 import mo.umac.crawler.online.YahooLocalQueryFileDB;
 import mo.umac.parser.Category;
 import mo.umac.parser.Rating;
-import mo.umac.parser.YahooResultSet;
 
 /**
  * @author kate
  * 
  */
-public class FileDB extends DataSet {
+public class FileDB extends DBExternal {
 
     @Override
     public void record(int queryID, int level, int parentID,
-	    YahooLocalQueryFileDB qc, YahooResultSet resultSet) {
+	    YahooLocalQueryFileDB qc, ResultSetYahoo resultSet) {
 	writeQueryFile(Integer.toString(queryID), qc.getQueryOutput(),
 		qc.queryInfo(), resultSet);
 	if (resultSet.getTotalResultsReturned() > 0) {
@@ -37,7 +38,7 @@ public class FileDB extends DataSet {
      * @param resultSet
      */
     private void writeQueryFile(String partFileName, BufferedWriter dbOutput,
-	    String queryInfo, YahooResultSet resultSet) {
+	    String queryInfo, ResultSetYahoo resultSet) {
 	try {
 	    dbOutput.write(partFileName);
 	    dbOutput.write(";");
@@ -63,7 +64,7 @@ public class FileDB extends DataSet {
      * @deprecated
      */
     private void writeQueryFile(String partFileName, YahooLocalQueryFileDB qc,
-	    YahooResultSet resultSet) {
+	    ResultSetYahoo resultSet) {
 	BufferedWriter dbOutput = qc.getQueryOutput();
 	String query = qc.getQuery();
 	int zip = qc.getZip();
@@ -103,7 +104,7 @@ public class FileDB extends DataSet {
 	}
     }
 
-    private void writeResultsFile(String partFileName, YahooResultSet resultSet) {
+    private void writeResultsFile(String partFileName, ResultSetYahoo resultSet) {
 	BufferedWriter resultsOutput = resultSet.getResultsOutput();
 	List<POI> results = resultSet.getPOIs();
 	for (int i = 0; i < results.size(); i++) {
@@ -157,6 +158,18 @@ public class FileDB extends DataSet {
 
     @Override
     public void init() {
+	// TODO Auto-generated method stub
+	
+    }
+
+    @Override
+    public HashMap<Integer, POI> readFromExtenalDB() {
+	// TODO Auto-generated method stub
+	return null;
+    }
+
+    @Override
+    public void writeToExternalDB() {
 	// TODO Auto-generated method stub
 	
     }

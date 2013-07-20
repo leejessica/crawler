@@ -1,7 +1,12 @@
 package mo.umac.rtree;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Properties;
+
+import mo.umac.crawler.POI;
 
 import com.infomatiq.jsi.Point;
 import com.infomatiq.jsi.Rectangle;
@@ -17,6 +22,11 @@ public class MyRTree extends RTree {
 	this.init(props);
     }
 
+    /**
+     * @param points
+     * 
+     * @deprecated
+     */
     public MyRTree(List<Coordinate> points) {
 	this();
 
@@ -31,18 +41,23 @@ public class MyRTree extends RTree {
 	}
     }
 
-    public MyRTree(List<Coordinate> points, List<Integer> ids) {
+    public MyRTree(HashMap<Integer, POI> pois) {
 	this();
 
 	Rectangle tmpRect = null;
 	float[] values = new float[2];
 
-	for (int i = 0; i < points.size(); i++) {
-	    values[0] = (float) points.get(i).x;
-	    values[1] = (float) points.get(i).y;
+	for (Iterator iterator = pois.entrySet().iterator(); iterator.hasNext();) {
+	    Entry entry = (Entry) iterator.next();
+	    int id = (Integer) entry.getKey();
+	    POI poi = (POI) entry.getValue();
+
+	    values[0] = (float) poi.getCoordinate().x;
+	    values[1] = (float) poi.getCoordinate().y;
 	    tmpRect = new Rectangle(values[0], values[1], values[0], values[1]);
-	    this.add(tmpRect, ids.get(i));
+	    this.add(tmpRect, id);
 	}
+
     }
 
     public List<Integer> rangeSearch(Coordinate point, double range) {

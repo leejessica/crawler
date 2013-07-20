@@ -7,7 +7,7 @@ import java.util.List;
 
 import mo.umac.crawler.AQuery;
 import mo.umac.crawler.POI;
-import mo.umac.parser.YahooResultSet;
+import mo.umac.crawler.ResultSetYahoo;
 import mo.umac.spatial.Circle;
 import mo.umac.spatial.GeoOperator;
 
@@ -48,7 +48,7 @@ public class OneDimensionalCrawler extends OfflineYahooLocalCrawlerStrategy {
 
 	AQuery aQuery = new AQuery(center, state, category, query,
 		MAX_TOTAL_RESULTS_RETURNED);
-	YahooResultSet resultSet = query(aQuery);
+	ResultSetYahoo resultSet = query(aQuery);
 
 	Coordinate farthestCoordinate = farthest(resultSet);
 	double radius = center.distance(farthestCoordinate);
@@ -83,7 +83,7 @@ public class OneDimensionalCrawler extends OfflineYahooLocalCrawlerStrategy {
 	return finalResultSet;
     }
 
-    private static Coordinate farthest(YahooResultSet resultSet) {
+    private static Coordinate farthest(ResultSetYahoo resultSet) {
 	Coordinate farthestCoordinate;
 	int size = resultSet.getPOIs().size();
 	// farthest
@@ -97,7 +97,7 @@ public class OneDimensionalCrawler extends OfflineYahooLocalCrawlerStrategy {
     }
 
     private static void addResults(Coordinate center, LineSegment line,
-	    OneDimensionalResultSet finalResultSet, YahooResultSet resultSet) {
+	    OneDimensionalResultSet finalResultSet, ResultSetYahoo resultSet) {
 	List<POI> pois = resultSet.getPOIs();
 	for (int i = 0; i < pois.size(); i++) {
 	    POI poi = pois.get(i);

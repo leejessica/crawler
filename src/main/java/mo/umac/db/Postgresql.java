@@ -7,13 +7,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import mo.umac.crawler.AQuery;
 import mo.umac.crawler.POI;
+import mo.umac.crawler.ResultSetYahoo;
 import mo.umac.crawler.online.YahooLocalQueryFileDB;
 import mo.umac.parser.Rating;
-import mo.umac.parser.YahooResultSet;
 
 import org.postgis.Geometry;
 import org.postgis.PGgeometry;
@@ -24,7 +25,7 @@ import org.postgresql.geometric.PGpoint;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
-public class Postgresql extends DataSet {
+public class Postgresql extends DBExternal {
 
     public Connection conn;
 
@@ -119,7 +120,7 @@ public class Postgresql extends DataSet {
     }
 
     public void importData(int queryID, int level, int parentID,
-	    YahooLocalQueryFileDB qc, YahooResultSet resultSet) {
+	    YahooLocalQueryFileDB qc, ResultSetYahoo resultSet) {
 	Connection con = connect(DB_NAME);
 	// prepared statement
 	PreparedStatement prepItem;
@@ -289,14 +290,13 @@ public class Postgresql extends DataSet {
 
     @Override
     public void record(int queryID, int level, int parentID,
-	    YahooLocalQueryFileDB qc, YahooResultSet resultSet) {
+	    YahooLocalQueryFileDB qc, ResultSetYahoo resultSet) {
 	// TODO Auto-generated method stub
 
     }
 
-    @Override
-    public YahooResultSet query(AQuery qc) {
-	YahooResultSet resultSet = knnQuery(qc.getQuery(), qc.getCategory(),
+    public ResultSetYahoo query(AQuery qc) {
+	ResultSetYahoo resultSet = knnQuery(qc.getQuery(), qc.getCategory(),
 		qc.getState(), qc.getTopK(), qc.getPoint());
 	// FIXME open a database storing these internal results
 
@@ -314,9 +314,9 @@ public class Postgresql extends DataSet {
      * 
      * @return
      */
-    public YahooResultSet knnQuery(String query, int category, String state,
+    public ResultSetYahoo knnQuery(String query, int category, String state,
 	    int topK, Coordinate coordinate) {
-	YahooResultSet yahooResultSet = new YahooResultSet();
+	ResultSetYahoo yahooResultSet = new ResultSetYahoo();
 	Connection conn = connect(DB_NAME);
 	String sql = "SELECT itemid, title, city, state, longitude, latitude "
 		+ "FROM item ORDER BY geom <-> st_setsrid(st_makepoint("
@@ -354,5 +354,17 @@ public class Postgresql extends DataSet {
     public void init() {
 	// TODO Auto-generated method stub
 
+    }
+
+    @Override
+    public HashMap<Integer, POI> readFromExtenalDB() {
+	// TODO Auto-generated method stub
+	return null;
+    }
+
+    @Override
+    public void writeToExternalDB() {
+	// TODO Auto-generated method stub
+	
     }
 }
