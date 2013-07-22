@@ -8,10 +8,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
-import mo.umac.crawler.AQuery;
-import mo.umac.crawler.POI;
-import mo.umac.crawler.ResultSetYahoo;
-import mo.umac.crawler.online.YahooLocalQueryFileDB;
+import mo.umac.metadata.AQuery;
+import mo.umac.metadata.APOI;
+import mo.umac.metadata.ResultSetYahooOnline;
+import mo.umac.metadata.YahooLocalQueryFileDB;
 import mo.umac.parser.Category;
 import mo.umac.parser.Rating;
 
@@ -22,8 +22,8 @@ import mo.umac.parser.Rating;
 public class FileDB extends DBExternal {
 
     @Override
-    public void record(int queryID, int level, int parentID,
-	    YahooLocalQueryFileDB qc, ResultSetYahoo resultSet) {
+    public void writeToExternalDB(int queryID, int level, int parentID,
+	    YahooLocalQueryFileDB qc, ResultSetYahooOnline resultSet) {
 	writeQueryFile(Integer.toString(queryID), qc.getQueryOutput(),
 		qc.queryInfo(), resultSet);
 	if (resultSet.getTotalResultsReturned() > 0) {
@@ -38,7 +38,7 @@ public class FileDB extends DBExternal {
      * @param resultSet
      */
     private void writeQueryFile(String partFileName, BufferedWriter dbOutput,
-	    String queryInfo, ResultSetYahoo resultSet) {
+	    String queryInfo, ResultSetYahooOnline resultSet) {
 	try {
 	    dbOutput.write(partFileName);
 	    dbOutput.write(";");
@@ -64,7 +64,7 @@ public class FileDB extends DBExternal {
      * @deprecated
      */
     private void writeQueryFile(String partFileName, YahooLocalQueryFileDB qc,
-	    ResultSetYahoo resultSet) {
+	    ResultSetYahooOnline resultSet) {
 	BufferedWriter dbOutput = qc.getQueryOutput();
 	String query = qc.getQuery();
 	int zip = qc.getZip();
@@ -104,11 +104,11 @@ public class FileDB extends DBExternal {
 	}
     }
 
-    private void writeResultsFile(String partFileName, ResultSetYahoo resultSet) {
+    private void writeResultsFile(String partFileName, ResultSetYahooOnline resultSet) {
 	BufferedWriter resultsOutput = resultSet.getResultsOutput();
-	List<POI> results = resultSet.getPOIs();
+	List<APOI> results = resultSet.getPOIs();
 	for (int i = 0; i < results.size(); i++) {
-	    POI result = results.get(i);
+	    APOI result = results.get(i);
 	    int id = result.getId();
 	    String title = result.getTitle();
 	    String city = result.getCity();
@@ -163,7 +163,7 @@ public class FileDB extends DBExternal {
     }
 
     @Override
-    public HashMap<Integer, POI> readFromExtenalDB() {
+    public HashMap<Integer, APOI> readFromExtenalDB() {
 	// TODO Auto-generated method stub
 	return null;
     }

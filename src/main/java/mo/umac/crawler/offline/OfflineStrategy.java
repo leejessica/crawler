@@ -4,18 +4,17 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import mo.umac.crawler.AQuery;
-import mo.umac.crawler.YahooLocalCrawlerStrategy;
-import mo.umac.crawler.ResultSetYahoo;
+import mo.umac.crawler.CrawlerStrategy;
 import mo.umac.db.DBExternal;
 import mo.umac.db.DBInMemory;
-import mo.umac.db.Postgresql;
+import mo.umac.db.H2DB;
+import mo.umac.metadata.AQuery;
+import mo.umac.metadata.ResultSet;
 import mo.umac.spatial.GeoOperator;
 import mo.umac.utils.CommonUtils;
 
 import org.apache.log4j.Logger;
 
-import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 
 /**
@@ -25,10 +24,9 @@ import com.vividsolutions.jts.geom.Envelope;
  * @author Kate
  * 
  */
-public abstract class OfflineYahooLocalCrawlerStrategy extends
-	YahooLocalCrawlerStrategy {
-    protected static Logger logger = Logger
-	    .getLogger(OfflineYahooLocalCrawlerStrategy.class.getName());
+public abstract class OfflineStrategy extends CrawlerStrategy {
+    protected static Logger logger = Logger.getLogger(OfflineStrategy.class
+	    .getName());
 
     /**
      * This is the crawling algorithm
@@ -40,20 +38,17 @@ public abstract class OfflineYahooLocalCrawlerStrategy extends
      * @param aQuery
      * @return
      */
-    public static ResultSetYahoo query(AQuery aQuery) {
-	DBInMemory dataset = new DBInMemory();
-	return dataset.query(aQuery);
+    public static ResultSet query(AQuery aQuery) {
+	return CrawlerStrategy.dbInMemory.query(aQuery);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see mo.umac.crawler.YahooLocalCrawlerStrategy#prepareData()
-     */
-    @Override
-    protected void prepareData() {
-	// TODO connect to the local dataset
-
+    protected void prepareData(String category, String state) {
+	CrawlerStrategy.dbExternal = new H2DB(H2DB.DB_NAME_SOURCE,
+		H2DB.DB_NAME_TARGET);
+	CrawlerStrategy.dbInMemory = new DBInMemory();
+	// FIXME check
+	CrawlerStrategy.dbInMemory.readFromExtenalDB(category, state);
+	CrawlerStrategy.dbInMemory.index();
     }
 
     /*
@@ -83,13 +78,16 @@ public abstract class OfflineYahooLocalCrawlerStrategy extends
 	    for (int j = 0; j < listCategoryNames.size(); j++) {
 		String query = listCategoryNames.get(j);
 		logger.info("crawling the category: " + query);
+
+		// load data from the external dataset
+		prepareData(query, state);
+
 		// initial category
 		int category = -1;
 		Object searchingResult = CommonUtils.getKeyByValue(
 			categoryIDMap, query);
 		if (searchingResult != null) {
 		    category = (Integer) searchingResult;
-
 		    //
 		    Envelope envelopeStateLLA = listEnvelopeStates.get(i);
 

@@ -27,9 +27,8 @@ public class Main {
 	String sqlSelectItem = H2DB.sqlSelectStar + H2DB.ITEM;
 	try {
 	    Class.forName("org.h2.Driver");
-	    Connection connH2 = DriverManager.getConnection(
-		    "jdbc:h2:file:../yahoolocal-h2/datasets;AUTO_SERVER=TRUE",
-		    "sa", "");
+	    Connection connH2 = DriverManager.getConnection("jdbc:h2:file:"
+		    + H2DB.DB_NAME_SOURCE + ";AUTO_SERVER=TRUE", "sa", "");
 	    Postgresql post = new Postgresql();
 	    Statement stat = connH2.createStatement();
 	    //

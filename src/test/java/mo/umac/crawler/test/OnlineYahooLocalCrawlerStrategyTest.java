@@ -2,9 +2,9 @@ package mo.umac.crawler.test;
 
 import java.io.File;
 
-import mo.umac.crawler.ResultSetYahoo;
-import mo.umac.crawler.online.OnlineYahooLocalCrawlerStrategy;
+import mo.umac.crawler.online.OnlineStrategy;
 import mo.umac.crawler.online.QuadTreeCrawler;
+import mo.umac.metadata.ResultSetYahooOnline;
 import mo.umac.parser.StaXParser;
 
 public class OnlineYahooLocalCrawlerStrategyTest {
@@ -19,11 +19,11 @@ public class OnlineYahooLocalCrawlerStrategyTest {
 	}
 
 	public void testQueryFunction() {
-		OnlineYahooLocalCrawlerStrategy strategy = new QuadTreeCrawler();
+		OnlineStrategy strategy = new QuadTreeCrawler();
 		StaXParser parseXml = new StaXParser();
 		String filePath = "./src/test/resources/bugs/localSearch.xml";
 		File xmlFile = new File(filePath);
-		ResultSetYahoo resultSet = parseXml.readConfig(xmlFile.getPath());
+		ResultSetYahooOnline resultSet = parseXml.readConfig(xmlFile.getPath());
 		System.out.println(resultSet.getXmlType());
 	}
 

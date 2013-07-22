@@ -1,6 +1,6 @@
 package mo.umac.crawler.online;
 
-import mo.umac.crawler.AQuery;
+import mo.umac.metadata.AQuery;
 
 import com.vividsolutions.jts.geom.Coordinate;
 

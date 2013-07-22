@@ -5,9 +5,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import mo.umac.crawler.POI;
-import mo.umac.crawler.YahooLocalCrawlerStrategy;
-import mo.umac.crawler.ResultSetYahoo;
+import mo.umac.crawler.CrawlerStrategy;
+import mo.umac.metadata.APOI;
+import mo.umac.metadata.ResultSetYahooOnline;
 import mo.umac.spatial.Circle;
 import mo.umac.spatial.ECEFLLA;
 import mo.umac.spatial.GeoOperator;
@@ -19,7 +19,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.LineSegment;
 
-public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
+public class SliceCrawler extends OfflineStrategy {
 
     public static Logger logger = Logger
 	    .getLogger(SliceCrawler.class.getName());
@@ -36,7 +36,8 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
     @Override
     public void crawl(String state, int category, String query,
 	    Envelope envelopeStateECEF) {
-
+	
+	// finished crawling
 	if (envelopeStateECEF == null) {
 	    return;
 	}
@@ -44,9 +45,9 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
 	// first find the middle line, and then use the 1 dimensional method to
 	// issue queries on this line.
 	LineSegment middleLine = middleLine(envelopeStateECEF);
-	logger.debug(middleLine.toString());
+	logger.debug("middleLine = " + middleLine.toString());
 
-	OneDimensionalResultSet oneDimensionalResultSet = OneDimensionalCrawler
+	ResultSetOneDimensional oneDimensionalResultSet = OneDimensionalCrawler
 		.oneDimCrawl(state, category, query, middleLine);
 	oneDimensionalResultSet.setLine(middleLine);
 
@@ -134,7 +135,7 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
      */
     private void fillGaps(String state, int category, String query,
 	    LineSegment middleLine, LineSegment boardLine,
-	    OneDimensionalResultSet oneDimensionalResultSet) {
+	    ResultSetOneDimensional oneDimensionalResultSet) {
 	// All of these circles are sorted in the line.
 	if (middleLine.p0.x < middleLine.p1.x) {
 	    double xMiddleLine = middleLine.p0.x;
@@ -227,14 +228,14 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
      */
     private List<Coordinate> nearestLeftRightCoordinates(
 	    Envelope envelopeState, LineSegment middleLine,
-	    OneDimensionalResultSet oneDimensionalResultSet) {
+	    ResultSetOneDimensional oneDimensionalResultSet) {
 	List<Coordinate> leftRight = new ArrayList<Coordinate>();
 	//
-	List<POI> leftPOIs = oneDimensionalResultSet.getLeftPOIs();
+	List<APOI> leftPOIs = oneDimensionalResultSet.getLeftPOIs();
 	double bigX = leftPOIs.get(0).getCoordinate().x;
 	Coordinate leftNearest = null;
 	for (int i = 1; i < leftPOIs.size(); i++) {
-	    POI point = leftPOIs.get(i);
+	    APOI point = leftPOIs.get(i);
 	    double x = point.getCoordinate().x;
 	    if (x > bigX /* && x < middleLine.p0.x */) {
 		leftNearest = point.getCoordinate();
@@ -242,11 +243,11 @@ public class SliceCrawler extends OfflineYahooLocalCrawlerStrategy {
 	    }
 	}
 	// right
-	List<POI> rightPOIs = oneDimensionalResultSet.getRightPOIs();
+	List<APOI> rightPOIs = oneDimensionalResultSet.getRightPOIs();
 	double smallX = rightPOIs.get(0).getCoordinate().x;
 	Coordinate rightNearest = null;
 	for (int i = 1; i < rightPOIs.size(); i++) {
-	    POI point = rightPOIs.get(i);
+	    APOI point = rightPOIs.get(i);
 	    double x = point.getCoordinate().x;
 	    if (x < smallX /* && x > middleLine.p0.x */) {
 		rightNearest = point.getCoordinate();

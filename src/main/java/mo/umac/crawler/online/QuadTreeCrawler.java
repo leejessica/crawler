@@ -15,7 +15,7 @@ import com.vividsolutions.jts.geom.Envelope;
  * @author kate
  * 
  */
-public class QuadTreeCrawler extends OnlineYahooLocalCrawlerStrategy {
+public class QuadTreeCrawler extends OnlineStrategy {
 	//
 	public static Logger logger = Logger.getLogger(QuadTreeCrawler.class
 			.getName());

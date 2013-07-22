@@ -1,10 +1,9 @@
-package mo.umac.crawler.online;
+package mo.umac.metadata;
 
 import java.io.BufferedWriter;
 import java.math.BigDecimal;
 import java.sql.Connection;
 
-import mo.umac.crawler.AQuery;
 import mo.umac.spatial.Circle;
 
 import com.vividsolutions.jts.geom.Envelope;

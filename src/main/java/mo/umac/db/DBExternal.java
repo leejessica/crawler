@@ -3,10 +3,11 @@ package mo.umac.db;
 import java.util.HashMap;
 import java.util.List;
 
-import mo.umac.crawler.AQuery;
-import mo.umac.crawler.POI;
-import mo.umac.crawler.ResultSetYahoo;
-import mo.umac.crawler.online.YahooLocalQueryFileDB;
+import mo.umac.metadata.AQuery;
+import mo.umac.metadata.APOI;
+import mo.umac.metadata.ResultSet;
+import mo.umac.metadata.ResultSetYahooOnline;
+import mo.umac.metadata.YahooLocalQueryFileDB;
 import mo.umac.rtree.MyRTree;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -29,16 +30,27 @@ public abstract class DBExternal {
      * A file stores the xml file's name and the detailed results of a query.
      */
     public static final String RESULT_FILE_NAME = "results";
+    
+    
+//    public static String dbNameSource = "";
+//
+//    public static String dbNameTarget = "";
+    
 
-    public abstract void record(int queryID, int level, int parentID,
-	    YahooLocalQueryFileDB qc, ResultSetYahoo resultSet);
+    public abstract void writeToExternalDB(int queryID, int level, int parentID,
+	    YahooLocalQueryFileDB qc, ResultSetYahooOnline resultSet);
 
     public abstract void init();
 
     /**
      * Read dataset from external database.
      */
-    public abstract HashMap<Integer, POI> readFromExtenalDB();
+    public abstract HashMap<Integer, APOI> readFromExtenalDB(String category, String state);
 
     public abstract void writeToExternalDB();
+
+    public abstract void writeToExternalDB(
+	    int queryID, AQuery query, ResultSet resultSet) ;
+
+    public abstract ResultSet queryByID(List<Integer> resultsID);
 }

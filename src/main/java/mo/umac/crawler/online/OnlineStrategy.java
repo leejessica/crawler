@@ -20,10 +20,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import mo.umac.crawler.YahooLocalCrawlerStrategy;
-import mo.umac.crawler.ResultSetYahoo;
+import mo.umac.crawler.CrawlerStrategy;
 import mo.umac.db.DBExternal;
 import mo.umac.db.H2DB;
+import mo.umac.metadata.ResultSetYahooOnline;
+import mo.umac.metadata.YahooLocalQueryFileDB;
 import mo.umac.parser.StaXParser;
 import mo.umac.parser.YahooXmlType;
 import mo.umac.spatial.Circle;
@@ -52,14 +53,13 @@ import com.vividsolutions.jts.geom.Envelope;
  * @author Kate Yim
  * 
  */
-public abstract class OnlineYahooLocalCrawlerStrategy extends
-	YahooLocalCrawlerStrategy {
+public abstract class OnlineStrategy extends CrawlerStrategy {
 
-    protected static Logger logger = Logger
-	    .getLogger(OnlineYahooLocalCrawlerStrategy.class.getName());
+    protected static Logger logger = Logger.getLogger(OnlineStrategy.class
+	    .getName());
 
     public static final String APPID = "appid";
-    
+
     protected boolean firstCrawl = false;
 
     // protected String query = "restaurants";
@@ -170,19 +170,6 @@ public abstract class OnlineYahooLocalCrawlerStrategy extends
     //
     // }
 
-    @Override
-    protected void prepareData() {
-	FileOperator.createFolder("", DBExternal.FOLDER_NAME);
-	httpClient = createHttpClient();
-
-    }
-    
-    /* (non-Javadoc)
-     * @see mo.umac.crawler.YahooLocalCrawlerStrategy#endData()
-     */
-    protected void endData(){
-	httpClient.getConnectionManager().shutdown();
-    }
 
     /*
      * (non-Javadoc)
@@ -196,9 +183,10 @@ public abstract class OnlineYahooLocalCrawlerStrategy extends
 	    LinkedList<Envelope> listEnvelopeStates,
 	    List<String> listCategoryNames, LinkedList<String> nameStates,
 	    HashMap<Integer, String> categoryIDMap) {
+	FileOperator.createFolder("", DBExternal.FOLDER_NAME);
+	httpClient = createHttpClient();
 	try {
-	    String appid = FileOperator
-		    .readAppid(OnlineYahooLocalCrawlerStrategy.PROPERTY_PATH);
+	    String appid = FileOperator.readAppid(OnlineStrategy.PROPERTY_PATH);
 	    for (int i = 0; i < nameStates.size(); i++) {
 		String state = nameStates.get(i);
 		logger.info("crawling in the state: " + state);
@@ -223,7 +211,8 @@ public abstract class OnlineYahooLocalCrawlerStrategy extends
 				categoryFolderPath, state);
 			// create log files
 			// 1. query file
-			String queryFile = subFolder + DBExternal.QUERY_FILE_NAME;
+			String queryFile = subFolder
+				+ DBExternal.QUERY_FILE_NAME;
 			FileOperator.createFile(queryFile);
 			BufferedWriter queryOutput = new BufferedWriter(
 				new OutputStreamWriter(new FileOutputStream(
@@ -251,6 +240,7 @@ public abstract class OnlineYahooLocalCrawlerStrategy extends
 		    }
 		}
 	    }
+	    httpClient.getConnectionManager().shutdown();
 	} catch (FileNotFoundException e) {
 	    e.printStackTrace();
 	} catch (IOException e) {
@@ -288,8 +278,7 @@ public abstract class OnlineYahooLocalCrawlerStrategy extends
 	String categoryFolderPath = DBExternal.FOLDER_NAME + categoryFolderName
 		+ "/";
 	try {
-	    String appid = FileOperator
-		    .readAppid(OnlineYahooLocalCrawlerStrategy.PROPERTY_PATH);
+	    String appid = FileOperator.readAppid(OnlineStrategy.PROPERTY_PATH);
 	    for (int i = 0; i < nameStates.size(); i++) {
 		// for (int i = nameStates.size() - 1; i >= 0; i--) {
 		String state = nameStates.get(i);
@@ -382,7 +371,7 @@ public abstract class OnlineYahooLocalCrawlerStrategy extends
      * @param resultSet
      * @return the max start value in constructing a query.
      */
-    protected int maxStartForThisQuery(ResultSetYahoo resultSet) {
+    protected int maxStartForThisQuery(ResultSetYahooOnline resultSet) {
 	int totalResultAvailable = resultSet.getTotalResultsAvailable();
 	if (totalResultAvailable > MAX_START + MAX_RESULTS_NUM) {
 	    return MAX_START;
@@ -427,8 +416,8 @@ public abstract class OnlineYahooLocalCrawlerStrategy extends
 	    Envelope aEnvelope, String state, int category, String query,
 	    String subFolder, String queryFile, BufferedWriter queryOutput,
 	    String resultsFile, BufferedWriter resultsOutput,
-	    ResultSetYahoo resultSet) {
-	ResultSetYahoo tempResultSet;
+	    ResultSetYahooOnline resultSet) {
+	ResultSetYahooOnline tempResultSet;
 	// the first page for any query
 	int start = 1;
 	Circle circle = Coverage.computeCircle(aEnvelope);
@@ -505,7 +494,7 @@ public abstract class OnlineYahooLocalCrawlerStrategy extends
      *            All information need in one query
      * @return The parsed result set.
      */
-    public ResultSetYahoo query(YahooLocalQueryFileDB qc) {
+    public ResultSetYahooOnline query(YahooLocalQueryFileDB qc) {
 	// FIXME add continue crawling from the interrupt
 	// First search from the query file
 	// compare the query info with existing records
@@ -513,7 +502,7 @@ public abstract class OnlineYahooLocalCrawlerStrategy extends
 	// How to get file Name from BufferedWriter???
 
 	File xmlFile = null;
-	ResultSetYahoo resultSet;
+	ResultSetYahooOnline resultSet;
 	StaXParser parseXml = new StaXParser();
 	String url = qc.toUrl();
 	xmlFile = issueToWeb(qc, null);
@@ -563,7 +552,7 @@ public abstract class OnlineYahooLocalCrawlerStrategy extends
 	    // FIXME change the query id to integer!!!
 	    int queryID = Integer.parseInt(queryIDString);
 	    DBExternal dataset = new H2DB();
-	    dataset.record(queryID, 0, 0, qc, resultSet);
+	    dataset.writeToExternalDB(queryID, 0, 0, qc, resultSet);
 	}
 	limitedPageCount = 0;
 	return resultSet;

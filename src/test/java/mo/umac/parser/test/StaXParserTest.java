@@ -6,8 +6,8 @@ package mo.umac.parser.test;
 import org.apache.log4j.xml.DOMConfigurator;
 
 import mo.umac.crawler.Main;
-import mo.umac.crawler.POI;
-import mo.umac.crawler.ResultSetYahoo;
+import mo.umac.metadata.APOI;
+import mo.umac.metadata.ResultSetYahooOnline;
 import mo.umac.parser.StaXParser;
 
 /**
@@ -25,11 +25,11 @@ public class StaXParserTest {
 	private void parsePage() {
 		StaXParser read = new StaXParser();
 		String testXmlFile = "./src/test/resources/returnedpages/demo.xml";
-		ResultSetYahoo resultSet = read.readConfig(testXmlFile);
+		ResultSetYahooOnline resultSet = read.readConfig(testXmlFile);
 		System.out.println(resultSet.getTotalResultsAvailable());
 		System.out.println(resultSet.getTotalResultsReturned());
 		System.out.println(resultSet.getFirstResultPosition());
-		for (POI result : resultSet.getPOIs()) {
+		for (APOI result : resultSet.getPOIs()) {
 			System.out.println(result.toString());
 			System.out.println(result.getRating().toString());
 			for (int i = 0; i < result.getCategories().size(); i++) {
@@ -41,14 +41,14 @@ public class StaXParserTest {
 	private void parseErrorPage1() {
 		StaXParser read = new StaXParser();
 		String testXmlFile = "./src/test/resources/returnedpages/limitexceed.xml";
-		ResultSetYahoo resultSet = read.readConfig(testXmlFile);
+		ResultSetYahooOnline resultSet = read.readConfig(testXmlFile);
 		System.out.println(resultSet.getXmlType());
 	}
 	
 	private void parseErrorPage2() {
 		StaXParser read = new StaXParser();
 		String testXmlFile = "./src/test/resources/returnedpages/invalidvalue.xml";
-		ResultSetYahoo resultSet = read.readConfig(testXmlFile);
+		ResultSetYahooOnline resultSet = read.readConfig(testXmlFile);
 		System.out.println(resultSet.getXmlType());
 	}
 	
@@ -56,7 +56,7 @@ public class StaXParserTest {
 		// XXX I'm not sure whether this condition will appear in Yahoo! Local.
 		StaXParser read = new StaXParser();
 		String testXmlFile = "./src/test/resources/returnedpages/empty.xml";
-		ResultSetYahoo resultSet = read.readConfig(testXmlFile);
+		ResultSetYahooOnline resultSet = read.readConfig(testXmlFile);
 		System.out.println(resultSet.getXmlType());
 	}
 

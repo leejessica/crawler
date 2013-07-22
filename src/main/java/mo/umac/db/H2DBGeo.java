@@ -20,10 +20,10 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequenceFactory;
 import com.vividsolutions.jts.io.WKBWriter;
 
-import mo.umac.crawler.AQuery;
-import mo.umac.crawler.POI;
-import mo.umac.crawler.ResultSetYahoo;
-import mo.umac.crawler.online.YahooLocalQueryFileDB;
+import mo.umac.metadata.AQuery;
+import mo.umac.metadata.APOI;
+import mo.umac.metadata.ResultSetYahooOnline;
+import mo.umac.metadata.YahooLocalQueryFileDB;
 import mo.umac.parser.Category;
 import mo.umac.parser.Rating;
 import mo.umac.spatial.GeoOperator;
@@ -91,9 +91,8 @@ public class H2DBGeo extends DBExternal {
 
 	try {
 	    Class.forName("org.h2.Driver");
-	    Connection conn = DriverManager.getConnection(
-		    "jdbc:h2:file:../yahoolocal-h2/datasets;AUTO_SERVER=TRUE",
-		    "sa", "");
+	    Connection conn = DriverManager.getConnection("jdbc:h2:file:"
+		    + H2DB.DB_NAME_SOURCE + ";AUTO_SERVER=TRUE", "sa", "");
 	    brQuery = new BufferedReader(new InputStreamReader(
 		    new FileInputStream(queryFile)));
 	    String data = null;
@@ -148,9 +147,8 @@ public class H2DBGeo extends DBExternal {
 	BufferedReader brResult = null;
 	try {
 	    Class.forName("org.h2.Driver");
-	    Connection conn = DriverManager.getConnection(
-		    "jdbc:h2:file:../yahoolocal-h2/datasets;AUTO_SERVER=TRUE",
-		    "sa", "");
+	    Connection conn = DriverManager.getConnection("jdbc:h2:file:"
+		    + H2DB.DB_NAME_SOURCE + ";AUTO_SERVER=TRUE", "sa", "");
 	    brResult = new BufferedReader(new InputStreamReader(
 		    new FileInputStream(resultsFile)));
 	    String data = null;
@@ -187,8 +185,8 @@ public class H2DBGeo extends DBExternal {
 			    setPrepCategory(itemID, category, prepCategory);
 			    prepCategory.addBatch();
 			}
-			POI result = new POI(itemID, title, city, state, longitude, latitude,
-				null, distance, categories);
+			APOI result = new APOI(itemID, title, city, state,
+				longitude, latitude, null, distance, categories);
 			setPrepItem(result, prepItem);
 			prepItem.addBatch();
 		    } else {
@@ -207,8 +205,8 @@ public class H2DBGeo extends DBExternal {
 			    setPrepCategory(itemID, category, prepCategory);
 			    prepCategory.addBatch();
 			}
-			POI result = new POI(itemID, title, city, state, longitude, latitude,
-				null, distance, categories);
+			APOI result = new APOI(itemID, title, city, state,
+				longitude, latitude, null, distance, categories);
 			setPrepItem(result, prepItem);
 			prepItem.addBatch();
 		    }
@@ -255,8 +253,8 @@ public class H2DBGeo extends DBExternal {
     }
 
     @Override
-    public void record(int queryID, int level, int parentID,
-	    YahooLocalQueryFileDB qc, ResultSetYahoo resultSet) {
+    public void writeToExternalDB(int queryID, int level, int parentID,
+	    YahooLocalQueryFileDB qc, ResultSetYahooOnline resultSet) {
 	conn = createConnection();
 	// prepared statement
 	PreparedStatement prepQuery;
@@ -268,7 +266,7 @@ public class H2DBGeo extends DBExternal {
 	    prepItem = conn.prepareStatement(sqlPrepInsertItem);
 	    prepCategory = conn.prepareStatement(sqlPrepInsertCategory);
 	    prepRelationship = conn.prepareStatement(sqlPrepInsertRelationship);
-	    List<POI> results = resultSet.getPOIs();
+	    List<APOI> results = resultSet.getPOIs();
 	    //
 	    byte[] geomByte = pointWriter(qc.getCircle().getCenter().x, qc
 		    .getCircle().getCenter().y);
@@ -279,7 +277,7 @@ public class H2DBGeo extends DBExternal {
 		    resultSet.getFirstResultPosition(), prepQuery);
 	    prepQuery.addBatch();
 	    for (int i = 0; i < results.size(); i++) {
-		POI result = results.get(i);
+		APOI result = results.get(i);
 		//
 		setPrepItem(result, prepItem);
 		prepItem.addBatch();
@@ -301,7 +299,6 @@ public class H2DBGeo extends DBExternal {
 	}
 
     }
-
 
     private static Connection createConnection() {
 	try {
@@ -374,7 +371,7 @@ public class H2DBGeo extends DBExternal {
 	return prepQuery;
     }
 
-    private PreparedStatement setPrepItem(POI result, PreparedStatement prepItem) {
+    private PreparedStatement setPrepItem(APOI result, PreparedStatement prepItem) {
 	try {
 	    prepItem.setInt(1, result.getId());
 	    prepItem.setString(2, result.getTitle());
@@ -427,11 +424,11 @@ public class H2DBGeo extends DBExternal {
     @Override
     public void init() {
 	// TODO Auto-generated method stub
-	
+
     }
 
     @Override
-    public HashMap<Integer, POI> readFromExtenalDB() {
+    public HashMap<Integer, APOI> readFromExtenalDB() {
 	// TODO Auto-generated method stub
 	return null;
     }
@@ -439,6 +436,6 @@ public class H2DBGeo extends DBExternal {
     @Override
     public void writeToExternalDB() {
 	// TODO Auto-generated method stub
-	
+
     }
 }

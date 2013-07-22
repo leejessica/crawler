@@ -5,7 +5,8 @@ package mo.umac.crawler.offline;
 
 import java.util.List;
 
-import mo.umac.crawler.POI;
+import mo.umac.metadata.APOI;
+import mo.umac.metadata.ResultSet;
 import mo.umac.spatial.Circle;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -15,13 +16,12 @@ import com.vividsolutions.jts.geom.LineSegment;
  * @author kate
  * 
  */
-public class OneDimensionalResultSet {
+public class ResultSetOneDimensional extends ResultSet {
 
     private LineSegment line;
-    private List<POI> pois;
-    private List<POI> leftPOIs;
-    private List<POI> rightPOIs;
-    private List<POI> onPOIs;
+    private List<APOI> leftPOIs;
+    private List<APOI> rightPOIs;
+    private List<APOI> onPOIs;
 
     private int numQueries;
     /**
@@ -50,14 +50,6 @@ public class OneDimensionalResultSet {
 	this.numQueries = numQueries;
     }
 
-    public List<POI> getPois() {
-	return pois;
-    }
-
-    public void setPois(List<POI> pois) {
-	this.pois = pois;
-    }
-
     public List<Circle> getCircles() {
 	return circles;
     }
@@ -66,27 +58,27 @@ public class OneDimensionalResultSet {
 	this.circles = circles;
     }
 
-    public List<POI> getLeftPOIs() {
+    public List<APOI> getLeftPOIs() {
 	return leftPOIs;
     }
 
-    public void setLeftPOIs(List<POI> leftPOIs) {
+    public void setLeftPOIs(List<APOI> leftPOIs) {
 	this.leftPOIs = leftPOIs;
     }
 
-    public List<POI> getRightPOIs() {
+    public List<APOI> getRightPOIs() {
 	return rightPOIs;
     }
 
-    public void setRightPOIs(List<POI> rightPOIs) {
+    public void setRightPOIs(List<APOI> rightPOIs) {
 	this.rightPOIs = rightPOIs;
     }
 
-    public List<POI> getOnPOIs() {
+    public List<APOI> getOnPOIs() {
 	return onPOIs;
     }
 
-    public void setOnPOIs(List<POI> onLinePOI) {
+    public void setOnPOIs(List<APOI> onLinePOI) {
 	this.onPOIs = onLinePOI;
     }
 

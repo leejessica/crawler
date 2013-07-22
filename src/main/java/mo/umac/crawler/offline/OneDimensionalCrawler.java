@@ -5,9 +5,12 @@ package mo.umac.crawler.offline;
 
 import java.util.List;
 
-import mo.umac.crawler.AQuery;
-import mo.umac.crawler.POI;
-import mo.umac.crawler.ResultSetYahoo;
+import org.apache.log4j.Logger;
+
+import mo.umac.metadata.APOI;
+import mo.umac.metadata.AQuery;
+import mo.umac.metadata.ResultSet;
+import mo.umac.metadata.ResultSetYahooOnline;
 import mo.umac.spatial.Circle;
 import mo.umac.spatial.GeoOperator;
 
@@ -22,8 +25,11 @@ import com.vividsolutions.jts.geomgraph.Position;
  * @author Kate
  * 
  */
-public class OneDimensionalCrawler extends OfflineYahooLocalCrawlerStrategy {
+public class OneDimensionalCrawler extends OfflineStrategy {
 
+    public static Logger logger = Logger
+	    .getLogger(OneDimensionalCrawler.class.getName());
+    
     /**
      * Begin at the center of the line
      * 
@@ -35,20 +41,20 @@ public class OneDimensionalCrawler extends OfflineYahooLocalCrawlerStrategy {
      * @param middleLine
      * @return
      */
-    public static OneDimensionalResultSet oneDimCrawl(String state,
+    public static ResultSetOneDimensional oneDimCrawl(String state,
 	    int category, String query, LineSegment middleLine) {
-	OneDimensionalResultSet finalResultSet = new OneDimensionalResultSet();
+	ResultSetOneDimensional finalResultSet = new ResultSetOneDimensional();
 	Coordinate left = middleLine.p0;
 	Coordinate right = middleLine.p1;
 	Coordinate center = middleLine.midPoint();
 
-	logger.debug(left.toString());
-	logger.debug(right.toString());
-	logger.debug(center.toString());
+	logger.debug("left = " + left.toString());
+	logger.debug("right = " + right.toString());
+	logger.debug("center = " + center.toString());
 
 	AQuery aQuery = new AQuery(center, state, category, query,
 		MAX_TOTAL_RESULTS_RETURNED);
-	ResultSetYahoo resultSet = query(aQuery);
+	ResultSet resultSet = query(aQuery);
 
 	Coordinate farthestCoordinate = farthest(resultSet);
 	double radius = center.distance(farthestCoordinate);
@@ -67,7 +73,7 @@ public class OneDimensionalCrawler extends OfflineYahooLocalCrawlerStrategy {
 	LineSegment leftLine = new LineSegment(left, newRight);
 	logger.debug("leftLine: " + leftLine.toString());
 
-	OneDimensionalResultSet newLeftResultSet = oneDimCrawl(state, category,
+	ResultSetOneDimensional newLeftResultSet = oneDimCrawl(state, category,
 		query, leftLine);
 	addResults(finalResultSet, newLeftResultSet);
 
@@ -76,31 +82,31 @@ public class OneDimensionalCrawler extends OfflineYahooLocalCrawlerStrategy {
 	LineSegment rightLine = new LineSegment(newLeft, right);
 	logger.debug("rightLine: " + rightLine.toString());
 
-	OneDimensionalResultSet newRightResultSet = oneDimCrawl(state,
+	ResultSetOneDimensional newRightResultSet = oneDimCrawl(state,
 		category, query, rightLine);
 	addResults(finalResultSet, newRightResultSet);
 
 	return finalResultSet;
     }
 
-    private static Coordinate farthest(ResultSetYahoo resultSet) {
+    private static Coordinate farthest(ResultSet resultSet) {
 	Coordinate farthestCoordinate;
 	int size = resultSet.getPOIs().size();
 	// farthest
 	if (size == 0) {
 	    return null;
 	} else {
-	    POI farthestPOI = resultSet.getPOIs().get(size - 1);
+	    APOI farthestPOI = resultSet.getPOIs().get(size - 1);
 	    farthestCoordinate = farthestPOI.getCoordinate();
 	}
 	return farthestCoordinate;
     }
 
     private static void addResults(Coordinate center, LineSegment line,
-	    OneDimensionalResultSet finalResultSet, ResultSetYahoo resultSet) {
-	List<POI> pois = resultSet.getPOIs();
+	    ResultSetOneDimensional finalResultSet, ResultSet resultSet) {
+	List<APOI> pois = resultSet.getPOIs();
 	for (int i = 0; i < pois.size(); i++) {
-	    POI poi = pois.get(i);
+	    APOI poi = pois.get(i);
 	    int position = GeoOperator.findPosition(line, poi.getCoordinate());
 	    switch (position) {
 	    case Position.LEFT:
@@ -118,8 +124,8 @@ public class OneDimensionalCrawler extends OfflineYahooLocalCrawlerStrategy {
 	Circle circle = new Circle(center, radius);
     }
 
-    private static void addResults(OneDimensionalResultSet finalResultSet,
-	    OneDimensionalResultSet newResultSet) {
+    private static void addResults(ResultSetOneDimensional finalResultSet,
+	    ResultSetOneDimensional newResultSet) {
 	finalResultSet.addAll(finalResultSet.getLeftPOIs(),
 		newResultSet.getLeftPOIs());
 	finalResultSet.addAll(finalResultSet.getRightPOIs(),

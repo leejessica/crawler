@@ -2,16 +2,16 @@ package mo.umac.db;
 
 import java.util.HashMap;
 
-import mo.umac.crawler.AQuery;
-import mo.umac.crawler.POI;
-import mo.umac.crawler.ResultSetYahoo;
-import mo.umac.crawler.online.YahooLocalQueryFileDB;
+import mo.umac.metadata.AQuery;
+import mo.umac.metadata.APOI;
+import mo.umac.metadata.ResultSetYahooOnline;
+import mo.umac.metadata.YahooLocalQueryFileDB;
 
 public class Website extends DBExternal {
 
     @Override
-    public void record(int queryID, int level, int parentID,
-	    YahooLocalQueryFileDB qc, ResultSetYahoo resultSet) {
+    public void writeToExternalDB(int queryID, int level, int parentID,
+	    YahooLocalQueryFileDB qc, ResultSetYahooOnline resultSet) {
 	// TODO Auto-generated method stub
 	
     }
@@ -25,7 +25,7 @@ public class Website extends DBExternal {
 
 
     @Override
-    public HashMap<Integer, POI> readFromExtenalDB() {
+    public HashMap<Integer, APOI> readFromExtenalDB() {
 	// TODO Auto-generated method stub
 	return null;
     }

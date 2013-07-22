@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import mo.umac.db.DBExternal;
+import mo.umac.db.DBInMemory;
 import mo.umac.spatial.UScensusData;
 import mo.umac.utils.FileOperator;
 
@@ -11,10 +13,10 @@ import org.apache.log4j.Logger;
 
 import com.vividsolutions.jts.geom.Envelope;
 
-public abstract class YahooLocalCrawlerStrategy {
+public abstract class CrawlerStrategy {
 
-    protected static Logger logger = Logger
-	    .getLogger(YahooLocalCrawlerStrategy.class.getName());
+    protected static Logger logger = Logger.getLogger(CrawlerStrategy.class
+	    .getName());
 
     /**
      * The path of the category ids of Yahoo! Local
@@ -37,9 +39,13 @@ public abstract class YahooLocalCrawlerStrategy {
     protected static int MAX_TOTAL_RESULTS_RETURNED = MAX_START
 	    + MAX_RESULTS_NUM; // =270;
 
-    protected int countNumQueries = 1;
+    public static int countNumQueries = 1;
 
     protected int zip = 0;
+
+    public static DBInMemory dbInMemory;
+
+    public static DBExternal dbExternal;
 
     public static final double EPSILON = 0.0001;
 
@@ -53,25 +59,13 @@ public abstract class YahooLocalCrawlerStrategy {
 	    List<String> listCategoryNames) {
 	LinkedList<Envelope> listEnvelopeStates = selectEnvelopes(
 		listNameStates, listCategoryNames);
-	
+
 	HashMap<Integer, String> categoryIDMap = FileOperator
 		.readCategoryID(CATEGORY_ID_PATH);
 
-	prepareData();
-
 	crawlByCategoriesStates(listEnvelopeStates, listCategoryNames,
 		listNameStates, categoryIDMap);
-
-	endData();
-
     }
-
-    /**
-     * Initializations for storing the data
-     */
-    protected abstract void prepareData();
-
-    protected abstract void endData();
 
     protected abstract void crawlByCategoriesStates(
 	    LinkedList<Envelope> listEnvelopeStates,

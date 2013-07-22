@@ -3,8 +3,8 @@ package mo.umac.spatial;
 import java.util.ArrayList;
 import java.util.List;
 
-import mo.umac.crawler.POI;
-import mo.umac.crawler.YahooLocalCrawlerStrategy;
+import mo.umac.crawler.CrawlerStrategy;
+import mo.umac.metadata.APOI;
 
 import org.apache.log4j.Logger;
 import org.apache.xerces.dom3.DOMConfiguration;

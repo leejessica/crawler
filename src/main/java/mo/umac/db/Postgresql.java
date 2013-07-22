@@ -10,10 +10,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import mo.umac.crawler.AQuery;
-import mo.umac.crawler.POI;
-import mo.umac.crawler.ResultSetYahoo;
-import mo.umac.crawler.online.YahooLocalQueryFileDB;
+import mo.umac.metadata.AQuery;
+import mo.umac.metadata.APOI;
+import mo.umac.metadata.ResultSetYahooOnline;
+import mo.umac.metadata.YahooLocalQueryFileDB;
 import mo.umac.parser.Rating;
 
 import org.postgis.Geometry;
@@ -120,15 +120,15 @@ public class Postgresql extends DBExternal {
     }
 
     public void importData(int queryID, int level, int parentID,
-	    YahooLocalQueryFileDB qc, ResultSetYahoo resultSet) {
+	    YahooLocalQueryFileDB qc, ResultSetYahooOnline resultSet) {
 	Connection con = connect(DB_NAME);
 	// prepared statement
 	PreparedStatement prepItem;
 	try {
 	    prepItem = con.prepareStatement(sqlPrepInsertItem);
-	    List<POI> results = resultSet.getPOIs();
+	    List<APOI> results = resultSet.getPOIs();
 	    for (int i = 0; i < results.size(); i++) {
-		POI result = results.get(i);
+		APOI result = results.get(i);
 		// table 1
 		setPrepItem(result, prepItem);
 		prepItem.addBatch();
@@ -165,7 +165,7 @@ public class Postgresql extends DBExternal {
 	return prepItem;
     }
 
-    private PreparedStatement setPrepItem(POI result, PreparedStatement prepItem) {
+    private PreparedStatement setPrepItem(APOI result, PreparedStatement prepItem) {
 	try {
 	    prepItem.setInt(1, result.getId());
 	    prepItem.setString(2, result.getTitle());
@@ -289,14 +289,14 @@ public class Postgresql extends DBExternal {
     }
 
     @Override
-    public void record(int queryID, int level, int parentID,
-	    YahooLocalQueryFileDB qc, ResultSetYahoo resultSet) {
+    public void writeToExternalDB(int queryID, int level, int parentID,
+	    YahooLocalQueryFileDB qc, ResultSetYahooOnline resultSet) {
 	// TODO Auto-generated method stub
 
     }
 
-    public ResultSetYahoo query(AQuery qc) {
-	ResultSetYahoo resultSet = knnQuery(qc.getQuery(), qc.getCategory(),
+    public ResultSetYahooOnline query(AQuery qc) {
+	ResultSetYahooOnline resultSet = knnQuery(qc.getQuery(), qc.getCategory(),
 		qc.getState(), qc.getTopK(), qc.getPoint());
 	// FIXME open a database storing these internal results
 
@@ -314,15 +314,15 @@ public class Postgresql extends DBExternal {
      * 
      * @return
      */
-    public ResultSetYahoo knnQuery(String query, int category, String state,
+    public ResultSetYahooOnline knnQuery(String query, int category, String state,
 	    int topK, Coordinate coordinate) {
-	ResultSetYahoo yahooResultSet = new ResultSetYahoo();
+	ResultSetYahooOnline yahooResultSet = new ResultSetYahooOnline();
 	Connection conn = connect(DB_NAME);
 	String sql = "SELECT itemid, title, city, state, longitude, latitude "
 		+ "FROM item ORDER BY geom <-> st_setsrid(st_makepoint("
 		+ coordinate.x + "," + coordinate.y + ")," + SRID + ") LIMIT"
 		+ topK;
-	List<POI> poiList = new ArrayList<POI>();
+	List<APOI> poiList = new ArrayList<APOI>();
 	Statement s;
 	try {
 	    s = conn.createStatement();
@@ -334,7 +334,7 @@ public class Postgresql extends DBExternal {
 		String stateInResult = r.getString(4);
 		double longitude = r.getDouble(5);
 		double latitude = r.getDouble(6);
-		POI poi = new POI(id, title, city, stateInResult, longitude,
+		APOI poi = new APOI(id, title, city, stateInResult, longitude,
 			latitude, null, -1, null);
 		poiList.add(poi);
 	    }
@@ -357,7 +357,7 @@ public class Postgresql extends DBExternal {
     }
 
     @Override
-    public HashMap<Integer, POI> readFromExtenalDB() {
+    public HashMap<Integer, APOI> readFromExtenalDB() {
 	// TODO Auto-generated method stub
 	return null;
     }

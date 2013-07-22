@@ -7,14 +7,15 @@ import java.util.LinkedList;
 import java.util.List;
 
 
+
 /**
  * @author kate
  *
  */
 public class CrawlerContext {
-    private YahooLocalCrawlerStrategy crawlerStrategy;
+    private CrawlerStrategy crawlerStrategy;
 
-	public CrawlerContext(YahooLocalCrawlerStrategy crawlerStrategy) {
+	public CrawlerContext(CrawlerStrategy crawlerStrategy) {
 		this.crawlerStrategy = crawlerStrategy;
 	}
 

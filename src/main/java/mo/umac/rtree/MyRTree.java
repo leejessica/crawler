@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 
-import mo.umac.crawler.POI;
+import mo.umac.metadata.APOI;
 
 import com.infomatiq.jsi.Point;
 import com.infomatiq.jsi.Rectangle;
@@ -41,7 +41,7 @@ public class MyRTree extends RTree {
 	}
     }
 
-    public MyRTree(HashMap<Integer, POI> pois) {
+    public MyRTree(HashMap<Integer, APOI> pois) {
 	this();
 
 	Rectangle tmpRect = null;
@@ -50,7 +50,7 @@ public class MyRTree extends RTree {
 	for (Iterator iterator = pois.entrySet().iterator(); iterator.hasNext();) {
 	    Entry entry = (Entry) iterator.next();
 	    int id = (Integer) entry.getKey();
-	    POI poi = (POI) entry.getValue();
+	    APOI poi = (APOI) entry.getValue();
 
 	    values[0] = (float) poi.getCoordinate().x;
 	    values[1] = (float) poi.getCoordinate().y;

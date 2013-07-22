@@ -18,8 +18,8 @@ import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
-import mo.umac.crawler.POI;
-import mo.umac.crawler.ResultSetYahoo;
+import mo.umac.metadata.APOI;
+import mo.umac.metadata.ResultSetYahooOnline;
 
 import org.apache.log4j.Logger;
 
@@ -66,8 +66,8 @@ public class StaXParser {
     static final String CATEGORY = "Category";
 
     @SuppressWarnings({ "unchecked", "null" })
-    public ResultSetYahoo readConfig(String configFile) {
-	ResultSetYahoo resultSet = new ResultSetYahoo();
+    public ResultSetYahooOnline readConfig(String configFile) {
+	ResultSetYahooOnline resultSet = new ResultSetYahooOnline();
 	try {
 	    // First create a new XMLInputFactory
 	    XMLInputFactory inputFactory = XMLInputFactory.newInstance();
@@ -99,8 +99,8 @@ public class StaXParser {
 	return resultSet;
     }
 
-    private ResultSetYahoo parseErrorInfo(XMLEventReader eventReader,
-	    ResultSetYahoo resultSet) throws XMLStreamException {
+    private ResultSetYahooOnline parseErrorInfo(XMLEventReader eventReader,
+	    ResultSetYahooOnline resultSet) throws XMLStreamException {
 	while (eventReader.hasNext()) {
 	    XMLEvent event = eventReader.nextEvent();
 	    if (event.isStartElement()) {
@@ -127,11 +127,11 @@ public class StaXParser {
      * @return
      * @throws XMLStreamException
      */
-    private ResultSetYahoo parseResultSetInfo(XMLEventReader eventReader,
-	    ResultSetYahoo resultSet, StartElement startElement)
+    private ResultSetYahooOnline parseResultSetInfo(XMLEventReader eventReader,
+	    ResultSetYahooOnline resultSet, StartElement startElement)
 	    throws XMLStreamException {
-	List<POI> results = new ArrayList<POI>();
-	POI result = null;
+	List<APOI> results = new ArrayList<APOI>();
+	APOI result = null;
 	Rating rating = null;
 	List<Category> categories = new ArrayList<Category>();
 	Iterator<Attribute> attributes = startElement.getAttributes();
@@ -157,7 +157,7 @@ public class StaXParser {
 		startElement = event.asStartElement();
 
 		if (startElement.getName().getLocalPart().equals(RESULT)) {
-		    result = new POI();
+		    result = new APOI();
 		    attributes = startElement.getAttributes();
 		    while (attributes.hasNext()) {
 			Attribute attribute = attributes.next();

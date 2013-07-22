@@ -1,7 +1,7 @@
 /**
  * 
  */
-package mo.umac.crawler;
+package mo.umac.metadata;
 
 import java.util.List;
 
@@ -14,13 +14,13 @@ import com.vividsolutions.jts.geom.Coordinate;
  * @author kate
  * 
  */
-public class POI {
+public class APOI {
     private int id;
     private String title;
     private String city;
     private String state;
-    private Coordinate coordinate;
-    private Rating rating;
+    private Coordinate coordinate = new Coordinate();
+    private Rating rating = new Rating();
 
     /**
      * The distance parsed by the returned web pages. The unit is mile.
@@ -29,11 +29,11 @@ public class POI {
 
     private List<Category> categories;
 
-    public POI() {
+    public APOI() {
 
     }
 
-    public POI(int id, String title, String city, String state,
+    public APOI(int id, String title, String city, String state,
 	    Coordinate coordinate, Rating rating, double distanceInMiles,
 	    List<Category> categories) {
 	super();
@@ -47,7 +47,7 @@ public class POI {
 	this.categories = categories;
     }
 
-    public POI(int id, String title, String city, String state,
+    public APOI(int id, String title, String city, String state,
 	    Double longitude, Double latitude, Rating rating, double distance,
 	    List<Category> categories) {
 	super();

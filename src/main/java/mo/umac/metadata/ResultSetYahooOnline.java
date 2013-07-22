@@ -1,7 +1,7 @@
 /**
  * 
  */
-package mo.umac.crawler;
+package mo.umac.metadata;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -15,7 +15,7 @@ import mo.umac.parser.YahooXmlType;
  * @author kate
  * 
  */
-public class ResultSetYahoo extends ResultSet{
+public class ResultSetYahooOnline extends ResultSet {
 
     // add at 2013-4-5
     /**
@@ -30,24 +30,11 @@ public class ResultSetYahoo extends ResultSet{
 
     private BufferedWriter resultsOutput;
 
-    private int totalResultsAvailable = 0;
-
-    private int totalResultsReturned = 0;
-
-    private int firstResultPosition = 0;
-
-    private List<POI> pois;
-
-    /**
-     * TODO The radius of this query circle
-     */
-    private double radius = 0.0;
-
     // private boolean limitExceeded = false;
 
     private boolean UnexpectedError = false;
 
-    public ResultSetYahoo() {
+    public ResultSetYahooOnline() {
 
     }
 
@@ -67,26 +54,6 @@ public class ResultSetYahoo extends ResultSet{
 	return UnexpectedError;
     }
 
-    public int getTotalResultsAvailable() {
-	return totalResultsAvailable;
-    }
-
-    public int getTotalResultsReturned() {
-	return totalResultsReturned;
-    }
-
-    public int getFirstResultPosition() {
-	return firstResultPosition;
-    }
-
-    // public void setLimitExceeded(boolean limitExceeded) {
-    // this.limitExceeded = limitExceeded;
-    // }
-    //
-    // public boolean isLimitExceeded() {
-    // return limitExceeded;
-    // }
-
     public String getXmlFileName() {
 	return xmlFileName;
     }
@@ -103,40 +70,12 @@ public class ResultSetYahoo extends ResultSet{
 	this.xmlFile = xmlFile;
     }
 
-    public List<POI> getPOIs() {
-	return pois;
-    }
-
-    public void setPOIs(List<POI> pois) {
-	this.pois = pois;
-    }
-
-    public void setTotalResultsAvailable(int totalResultsAvailable) {
-	this.totalResultsAvailable = totalResultsAvailable;
-    }
-
-    public void setTotalResultsReturned(int totalResultsReturned) {
-	this.totalResultsReturned = totalResultsReturned;
-    }
-
-    public void setFirstResultPosition(int firstResultPosition) {
-	this.firstResultPosition = firstResultPosition;
-    }
-
     public BufferedWriter getResultsOutput() {
 	return resultsOutput;
     }
 
     public void setResultsOutput(BufferedWriter resultsOutput) {
 	this.resultsOutput = resultsOutput;
-    }
-
-    public double getRadius() {
-	return radius;
-    }
-
-    public void setRadius(double radius) {
-	this.radius = radius;
     }
 
 }
