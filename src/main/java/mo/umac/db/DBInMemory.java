@@ -1,20 +1,18 @@
 package mo.umac.db;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-
 import mo.umac.crawler.CrawlerStrategy;
-import mo.umac.crawler.offline.OfflineStrategy;
 import mo.umac.metadata.APOI;
 import mo.umac.metadata.AQuery;
-import mo.umac.metadata.DefaultValues;
 import mo.umac.metadata.ResultSet;
 import mo.umac.metadata.ResultSetYahooOnline;
 import mo.umac.metadata.YahooLocalQueryFileDB;
 import mo.umac.rtree.MyRTree;
-import mo.umac.spatial.ECEFLLA;
+
+import org.apache.log4j.Logger;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
@@ -35,10 +33,6 @@ public class DBInMemory {
      */
     public void readFromExtenalDB(String category, String state) {
 	pois = CrawlerStrategy.dbExternal.readFromExtenalDB(category, state);
-    }
-
-    public void writeToExternalDB() {
-	CrawlerStrategy.dbExternal.writeToExternalDB();
     }
 
     public void writeToExternalDB(int queryID, int level, int parentID,
@@ -64,11 +58,6 @@ public class DBInMemory {
 	rtree = new MyRTree(coordinate);
     }
 
-    private ResultSet queryByID(List<Integer> resultsID) {
-	ResultSet resultSet = CrawlerStrategy.dbExternal.queryByID(resultsID);
-	return resultSet;
-    }
-
     /**
      * Indexing all pois
      */
@@ -77,25 +66,44 @@ public class DBInMemory {
     }
 
     public ResultSet query(AQuery qc) {
-	Coordinate ecef = qc.getPoint();
-	logger.debug("query ecef = " + ecef.toString());
-	Coordinate lla = ECEFLLA.ecef2lla(ecef);
-	logger.debug("query lla = " + lla.toString());
-	List<Integer> resultsID = rtree.searchNN(lla, qc.getTopK());
+	Coordinate queryPoint = qc.getPoint();
+	logger.debug("query point = " + queryPoint.toString());
+	
+	List<Integer> resultsID = rtree.searchNN(queryPoint, qc.getTopK());
 	// FIXME add re-transfering from the break point.
 	int queryID = CrawlerStrategy.countNumQueries;
-	// FIXME wrong counting...
-	logger.debug("countNumQueries" + CrawlerStrategy.countNumQueries);
+	if(queryID % 500 == 0){
+	    logger.info("countNumQueries = " + CrawlerStrategy.countNumQueries);
+	    logger.info("number of points crawled = " + numCrawlerPoints());
+	}
 	CrawlerStrategy.countNumQueries++;
 
 	ResultSet resultSet = queryByID(resultsID);
-	List<APOI> pois = resultSet.getPOIs();
 	int totalResultsReturned = resultsID.size();
-	resultSet.setPOIs(pois);
 	resultSet.setTotalResultsReturned(totalResultsReturned);
 	//
 	writeToExternalDB(queryID, qc, resultSet);
 	return resultSet;
     }
+    
+    /**
+     * @param resultsID
+     * @return
+     */
+    public ResultSet queryByID(List<Integer> resultsID) {
+	List<APOI> points = new ArrayList<APOI>();
+	for (int i = 0; i < resultsID.size(); i++) {
+	    int id = resultsID.get(i);
+	    APOI point = pois.get(id);
+	    points.add(point);
+	}
+	ResultSet resultSet = new ResultSet();
+	resultSet.setPOIs(points);
+	return resultSet;
+    }
 
+    public int numCrawlerPoints(){
+	return CrawlerStrategy.dbExternal.numCrawlerPoints();
+    }
+    
 }

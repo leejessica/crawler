@@ -148,13 +148,18 @@ public class ECEFLLA {
     }
 
     public static void main(String[] args) {
-	double[] lla = { 42.08236, -72.62152, 0 };
-
+	double[] lla = { 40.477399, -79.76259, 0 };
+	
+	double[] ecef = {-4535481.430374093, 1137889.5962155731, 0};
+	
 	double[] ret2 = ECEFLLA.lla2ecef(lla);
 	System.out.println(ret2[0] + ", " + ret2[1] + ", " + ret2[2]);
-
+	
+	ret2[2] = 0;
+	
 	double[] ret3 = ECEFLLA.ecef2lla(ret2);
 	System.out.println(ret3[0] + ", " + ret3[1] + ", " + ret3[2]);
+
     }
 
 }

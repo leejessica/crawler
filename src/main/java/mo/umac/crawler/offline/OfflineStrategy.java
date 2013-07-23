@@ -12,6 +12,7 @@ import mo.umac.metadata.AQuery;
 import mo.umac.metadata.ResultSet;
 import mo.umac.spatial.GeoOperator;
 import mo.umac.utils.CommonUtils;
+import mo.umac.utils.FileOperator;
 
 import org.apache.log4j.Logger;
 
@@ -43,12 +44,17 @@ public abstract class OfflineStrategy extends CrawlerStrategy {
     }
 
     protected void prepareData(String category, String state) {
+	// 
+	CrawlerStrategy.categoryIDMap = FileOperator
+		.readCategoryID(CATEGORY_ID_PATH);
+	// source database
 	CrawlerStrategy.dbExternal = new H2DB(H2DB.DB_NAME_SOURCE,
 		H2DB.DB_NAME_TARGET);
 	CrawlerStrategy.dbInMemory = new DBInMemory();
-	// FIXME check
 	CrawlerStrategy.dbInMemory.readFromExtenalDB(category, state);
 	CrawlerStrategy.dbInMemory.index();
+	// target database
+	CrawlerStrategy.dbExternal.createTables(H2DB.DB_NAME_TARGET);
     }
 
     /*

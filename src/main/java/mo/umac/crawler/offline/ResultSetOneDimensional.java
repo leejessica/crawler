@@ -3,13 +3,13 @@
  */
 package mo.umac.crawler.offline;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import mo.umac.metadata.APOI;
 import mo.umac.metadata.ResultSet;
 import mo.umac.spatial.Circle;
 
-import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.LineSegment;
 
 /**
@@ -19,23 +19,18 @@ import com.vividsolutions.jts.geom.LineSegment;
 public class ResultSetOneDimensional extends ResultSet {
 
     private LineSegment line;
-    private List<APOI> leftPOIs;
-    private List<APOI> rightPOIs;
-    private List<APOI> onPOIs;
+    private List<APOI> leftPOIs = new ArrayList<APOI>();
+    private List<APOI> rightPOIs = new ArrayList<APOI>();
+    private List<APOI> onPOIs = new ArrayList<APOI>();
 
     private int numQueries;
-    /**
-     * The query circles
-     */
-    private List<Circle> circles;
+ 
 
+    
     public void addAll(List oneList, List antherList) {
 	oneList.addAll(antherList);
     }
 
-    public void addACircle(Circle aCircle) {
-	circles.add(aCircle);
-    }
 
     // I don't know why this isn't in Long...
     private static int compare(long a, long b) {
@@ -50,13 +45,6 @@ public class ResultSetOneDimensional extends ResultSet {
 	this.numQueries = numQueries;
     }
 
-    public List<Circle> getCircles() {
-	return circles;
-    }
-
-    public void setCircles(List<Circle> circles) {
-	this.circles = circles;
-    }
 
     public List<APOI> getLeftPOIs() {
 	return leftPOIs;

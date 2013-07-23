@@ -1,20 +1,31 @@
 package mo.umac.metadata;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import mo.umac.spatial.Circle;
 
 public class ResultSet {
     protected List<APOI> pois;
-
-    /**
-     * TODO The radius of this query circle
-     */
-    private double radius = -1;
 
     private int totalResultsAvailable = DefaultValues.INIT_INT;
 
     private int totalResultsReturned = DefaultValues.INIT_INT;
 
     private int firstResultPosition = DefaultValues.INIT_INT;
+
+    /**
+     * one circle represents the scope of one query.
+     */
+    private List<Circle> circles = new ArrayList<Circle>();
+
+    public void addACircle(Circle aCircle) {
+	circles.add(aCircle);
+    }
+
+    public List<Circle> getCircles() {
+	return circles;
+    }
 
     public List<APOI> getPOIs() {
 	return pois;
@@ -46,14 +57,6 @@ public class ResultSet {
 
     public void setFirstResultPosition(int firstResultPosition) {
 	this.firstResultPosition = firstResultPosition;
-    }
-
-    public double getRadius() {
-	return radius;
-    }
-
-    public void setRadius(double radius) {
-	this.radius = radius;
     }
 
 }

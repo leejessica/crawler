@@ -32,9 +32,9 @@ public abstract class DBExternal {
     public static final String RESULT_FILE_NAME = "results";
     
     
-//    public static String dbNameSource = "";
-//
-//    public static String dbNameTarget = "";
+    public static String dbNameSource = "";
+
+    public static String dbNameTarget = "";
     
 
     public abstract void writeToExternalDB(int queryID, int level, int parentID,
@@ -47,10 +47,10 @@ public abstract class DBExternal {
      */
     public abstract HashMap<Integer, APOI> readFromExtenalDB(String category, String state);
 
-    public abstract void writeToExternalDB();
-
     public abstract void writeToExternalDB(
 	    int queryID, AQuery query, ResultSet resultSet) ;
 
-    public abstract ResultSet queryByID(List<Integer> resultsID);
+    public abstract void createTables(String dbNameTarget);
+
+    public abstract int numCrawlerPoints();
 }

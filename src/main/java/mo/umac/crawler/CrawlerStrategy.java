@@ -1,8 +1,10 @@
 package mo.umac.crawler;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import mo.umac.db.DBExternal;
 import mo.umac.db.DBInMemory;
@@ -48,7 +50,9 @@ public abstract class CrawlerStrategy {
     public static DBExternal dbExternal;
 
     public static final double EPSILON = 0.0001;
-
+    
+    public static HashMap<Integer, String> categoryIDMap;
+    
     /**
      * Entrance of the crawler
      * 

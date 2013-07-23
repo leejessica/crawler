@@ -11,9 +11,9 @@ import com.vividsolutions.jts.geom.Coordinate;
  * 
  */
 public class AQuery {
-    
+
     private int queryID;
-    
+
     /**
      * keyword of this query
      */
@@ -22,6 +22,11 @@ public class AQuery {
     private int topK;
     private String state;
     private int category;
+
+    /**
+     * The geometric information of the query point
+     */
+    private Coordinate point;
 
     public AQuery(Coordinate point, String state, int category, String query,
 	    int topK) {
@@ -35,11 +40,6 @@ public class AQuery {
 
     public AQuery() {
     }
-
-    /**
-     * The geometric information of the query point
-     */
-    private Coordinate point;
 
     public String getQuery() {
 	return query;

@@ -92,7 +92,7 @@ public class H2DBGeo extends DBExternal {
 	try {
 	    Class.forName("org.h2.Driver");
 	    Connection conn = DriverManager.getConnection("jdbc:h2:file:"
-		    + H2DB.DB_NAME_SOURCE + ";AUTO_SERVER=TRUE", "sa", "");
+		    + H2DB.dbNameSource + ";AUTO_SERVER=TRUE", "sa", "");
 	    brQuery = new BufferedReader(new InputStreamReader(
 		    new FileInputStream(queryFile)));
 	    String data = null;
@@ -148,7 +148,7 @@ public class H2DBGeo extends DBExternal {
 	try {
 	    Class.forName("org.h2.Driver");
 	    Connection conn = DriverManager.getConnection("jdbc:h2:file:"
-		    + H2DB.DB_NAME_SOURCE + ";AUTO_SERVER=TRUE", "sa", "");
+		    + H2DB.dbNameSource + ";AUTO_SERVER=TRUE", "sa", "");
 	    brResult = new BufferedReader(new InputStreamReader(
 		    new FileInputStream(resultsFile)));
 	    String data = null;

@@ -36,7 +36,6 @@ public class GeoOperator {
 						  // 6371007.2 meters
 
     public static Envelope lla2ecef(Envelope envelope) {
-	// TODO check
 	// converting the envelope
 	double minX = envelope.getMinX();
 	double maxX = envelope.getMaxX();
@@ -88,26 +87,36 @@ public class GeoOperator {
     /**
      * {@link http://paulbourke.net/geometry/circlesphere/}
      * 
-     * Calculate the intersection of a ray and a sphere. The line segment is
-     * defined from p1 to p2 The sphere is of radius r and centered at sc There
-     * are potentially two points of intersection given by p = p1 + mu1 (p2 -
-     * p1) p = p1 + mu2 (p2 - p1) Return FALSE if the ray doesn't intersect the
-     * sphere. *
+     * Calculate the intersection of a ray and a sphere
+     * <p>
+     * The line segment is defined from p1 to p2
+     * <p>
+     * The sphere is of radius r and centered at sc
+     * <p>
+     * There are potentially two points of intersection given by
+     * <p>
+     * p = p1 - mu1 (p2 - p1)
+     * <p>
+     * p = p1 + mu2 (p2 - p1)
+     * <p>
+     * Return FALSE if the ray doesn't intersect the sphere.
+     * 
      * 
      * @param circle
      * @param lineSeg
      * @return
-     * @deprecated
      */
-    public List intersect(Circle circle, LineSegment lineSeg) {
+    public static List intersect(Circle circle, LineSegment lineSeg) {
+	logger.debug("--------------intersect------------");
 	List<Coordinate> list = new ArrayList<Coordinate>();
 	double a, b, c;
 	double bb4ac;
-	Coordinate dp = new Coordinate();
 	Coordinate p1 = lineSeg.p0;
 	Coordinate p2 = lineSeg.p1;
 	Coordinate sc = circle.getCenter();
 	double r = circle.getRadius();
+
+	Coordinate dp = new Coordinate();
 	dp.x = p2.x - p1.x;
 	dp.y = p2.y - p1.y;
 	a = dp.x * dp.x + dp.y * dp.y;
@@ -117,14 +126,93 @@ public class GeoOperator {
 	c -= 2 * (sc.x * p1.x + sc.y * p1.y);
 	c -= r * r;
 	bb4ac = b * b - 4 * a * c;
-	if (Math.abs(a) < 0.001 || bb4ac < 0) {
+	logger.debug("a = " + a);
+	logger.debug("b = " + b);
+	logger.debug("c = " + c);
+	logger.debug("bb4ac = " + bb4ac);
+	// for line segment
+	if (Math.abs(a) < CrawlerStrategy.EPSILON || bb4ac < 0) {
 	    return null;
+	} else {
+	    double mu1 = (-b - Math.sqrt(bb4ac)) / (2 * a);
+	    double mu2 = (-b + Math.sqrt(bb4ac)) / (2 * a);
+	    logger.debug("mu1 = " + mu1);
+	    logger.debug("mu2 = " + mu2);
+	    /**
+	     * Line segment doesn't intersect and on outside of sphere, in which
+	     * case both values of u will either be less than 0 or greater than
+	     * 1.
+	     **/
+	    // if ((mu1 < 0 || mu1 > 1) && (mu2 < 0 || mu2 > 1)) {
+	    // return null;
+	    // }
+	    /**
+	     * Line segment doesn't intersect and is inside sphere, in which
+	     * case one value of u will be negative and the other greater than
+	     * 1.
+	     */
+	    // if ((mu1 < 0 || mu2 > 1) || (mu2 < 0 || mu1 > 1)) {
+	    // return null;
+	    // }
+	    /**
+	     * Line segment intersects at one point, in which case one value of
+	     * u will be between 0 and 1 and the other not.
+	     */
+	    if ((mu1 >= 0 && mu1 <= 1)) {
+		Coordinate p11 = new Coordinate();
+		p11.x = p1.x + mu1 * (p2.x - p1.x);
+		p11.y = p1.y + mu1 * (p2.y - p1.y);
+		logger.debug("p11 = " + p11);
+		list.add(p11);
+	    }
+	    /**
+	     * Line segment intersects at two points, in which case both values
+	     * of u will be between 0 and 1.
+	     */
+	    if ((mu2 >= 0 && mu2 <= 1)) {
+		if (mu2 != mu1) {
+		    Coordinate p12 = new Coordinate();
+		    p12.x = p1.x + mu2 * (p2.x - p1.x);
+		    p12.y = p1.y + mu2 * (p2.y - p1.y);
+		    logger.debug("p12 = " + p12);
+		    list.add(p12);
+		} else {
+		    logger.debug("mu2 == mu1");
+		}
+	    }
+	    /**
+	     * Line segment is tangential to the sphere, in which case both
+	     * values of u will be the same and between 0 and 1.
+	     */
 	}
-
-	double t1 = (-b + Math.sqrt(bb4ac)) / (2 * a);
-	double t2 = (-b - Math.sqrt(bb4ac)) / (2 * a);
-	// Point p = p1+t*(p2-p1)
 	return list;
+
+	// for line
+	// if (Math.abs(a) < CrawlerStrategy.EPSILON || bb4ac < 0) {
+	// return null;
+	// } else if (Math.abs(bb4ac - 0) < CrawlerStrategy.EPSILON) {
+	// double mu = (-b) / (2 * a);
+	// Coordinate p = new Coordinate();
+	// p.x = p1.x + mu * (p2.x - p1.x);
+	// p.y = p1.y + mu * (p2.y - p1.y);
+	// logger.debug("p = " + p);
+	// list.add(p);
+	// return list;
+	// } else if (bb4ac > 0) {
+	// double mu1 = (-b - Math.sqrt(bb4ac)) / (2 * a);
+	// double mu2 = (-b + Math.sqrt(bb4ac)) / (2 * a);
+	// Coordinate p11 = new Coordinate();
+	// p11.x = p1.x + mu1 * (p2.x - p1.x);
+	// p11.y = p1.y + mu1 * (p2.y - p1.y);
+	// logger.debug("p11 = " + p11);
+	// list.add(p11);
+	// Coordinate p12 = new Coordinate();
+	// p12.x = p1.x + mu2 * (p2.x - p1.x);
+	// p12.y = p1.y + mu2 * (p2.y - p1.y);
+	// logger.debug("p12 = " + p12);
+	// list.add(p12);
+	// return list;
+	// }
     }
 
     /**

@@ -356,15 +356,4 @@ public class Postgresql extends DBExternal {
 
     }
 
-    @Override
-    public HashMap<Integer, APOI> readFromExtenalDB() {
-	// TODO Auto-generated method stub
-	return null;
-    }
-
-    @Override
-    public void writeToExternalDB() {
-	// TODO Auto-generated method stub
-	
-    }
 }

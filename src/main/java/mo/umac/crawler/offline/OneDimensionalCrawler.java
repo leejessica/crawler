@@ -27,9 +27,9 @@ import com.vividsolutions.jts.geomgraph.Position;
  */
 public class OneDimensionalCrawler extends OfflineStrategy {
 
-    public static Logger logger = Logger
-	    .getLogger(OneDimensionalCrawler.class.getName());
-    
+    public static Logger logger = Logger.getLogger(OneDimensionalCrawler.class
+	    .getName());
+
     /**
      * Begin at the center of the line
      * 
@@ -44,49 +44,77 @@ public class OneDimensionalCrawler extends OfflineStrategy {
     public static ResultSetOneDimensional oneDimCrawl(String state,
 	    int category, String query, LineSegment middleLine) {
 	ResultSetOneDimensional finalResultSet = new ResultSetOneDimensional();
-	Coordinate left = middleLine.p0;
-	Coordinate right = middleLine.p1;
+	Coordinate up = middleLine.p0;
+	Coordinate down = middleLine.p1;
 	Coordinate center = middleLine.midPoint();
 
-	logger.debug("left = " + left.toString());
-	logger.debug("right = " + right.toString());
+	logger.debug("up = " + up.toString());
+	logger.debug("down = " + down.toString());
 	logger.debug("center = " + center.toString());
 
 	AQuery aQuery = new AQuery(center, state, category, query,
 		MAX_TOTAL_RESULTS_RETURNED);
 	ResultSet resultSet = query(aQuery);
+	logger.debug("resultSet.getPOIs().size() = "
+		+ resultSet.getPOIs().size());
 
 	Coordinate farthestCoordinate = farthest(resultSet);
+	logger.debug("farthestCoordinate = " + farthestCoordinate.toString());
 	double radius = center.distance(farthestCoordinate);
+	logger.debug("radius = " + radius);
+
+	Circle aCircle = new Circle(center, radius);
+	resultSet.addACircle(aCircle);
 
 	addResults(center, middleLine, finalResultSet, resultSet);
 
+	logger.debug("middleLine.getLength() / 2 = " + middleLine.getLength()
+		/ 2);
 	if (radius >= middleLine.getLength() / 2) {
 	    // finished crawling
+	    logger.debug("finished crawling");
 	    return finalResultSet;
 	}
 
 	// recursively crawl
-	Coordinate newRight = middleLine.pointAlongOffset(0.5, -radius);
-	logger.debug("newRight: " + newRight.toString());
+	// upper
+	// Coordinate newRight = middleLine.pointAlongOffset(0.5, -radius);
+	Coordinate newDown = newDown(center, radius);
+	logger.debug("newDown: " + newDown.toString());
 	//
-	LineSegment leftLine = new LineSegment(left, newRight);
-	logger.debug("leftLine: " + leftLine.toString());
-
+	LineSegment upperLine = new LineSegment(up, newDown);
+	logger.debug("upperLine: " + upperLine.toString());
 	ResultSetOneDimensional newLeftResultSet = oneDimCrawl(state, category,
-		query, leftLine);
+		query, upperLine);
 	addResults(finalResultSet, newLeftResultSet);
-
-	Coordinate newLeft = middleLine.pointAlongOffset(0.5, radius);
-	logger.debug("newLeft: " + newLeft.toString());
-	LineSegment rightLine = new LineSegment(newLeft, right);
-	logger.debug("rightLine: " + rightLine.toString());
-
+	// lower
+	// Coordinate newLeft = middleLine.pointAlongOffset(0.5, radius);
+	Coordinate newUp = newUp(center, radius);
+	logger.debug("newUp: " + newUp.toString());
+	LineSegment lowerLine = new LineSegment(newUp, down);
+	logger.debug("lowerLine: " + lowerLine.toString());
 	ResultSetOneDimensional newRightResultSet = oneDimCrawl(state,
-		category, query, rightLine);
+		category, query, lowerLine);
 	addResults(finalResultSet, newRightResultSet);
 
 	return finalResultSet;
+    }
+
+    /**
+     * This line is perpendicular, so it has the same x as center.x
+     * 
+     * @param center
+     * @param radius
+     * @return
+     */
+    private static Coordinate newDown(Coordinate center, double radius) {
+	Coordinate newDown = new Coordinate(center.x, center.y - radius);
+	return newDown;
+    }
+
+    private static Coordinate newUp(Coordinate center, double radius) {
+	Coordinate newDown = new Coordinate(center.x, center.y + radius);
+	return newDown;
     }
 
     private static Coordinate farthest(ResultSet resultSet) {
@@ -120,8 +148,8 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 		break;
 	    }
 	}
-	double radius = resultSet.getRadius();
-	Circle circle = new Circle(center, radius);
+	// TODO check
+	finalResultSet.addAll(finalResultSet.getCircles(), resultSet.getCircles());
     }
 
     private static void addResults(ResultSetOneDimensional finalResultSet,
