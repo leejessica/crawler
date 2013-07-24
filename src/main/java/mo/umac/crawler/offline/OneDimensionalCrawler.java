@@ -57,7 +57,13 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 	ResultSet resultSet = query(aQuery);
 	logger.debug("resultSet.getPOIs().size() = "
 		+ resultSet.getPOIs().size());
-
+	List<APOI> resultPoints = resultSet.getPOIs();
+	for (int i = 0; i < resultPoints.size(); i++) {
+	    APOI aPoint = resultPoints.get(i);
+	    logger.debug("APoint: " + aPoint.getId() + ", [" + aPoint.getCoordinate().toString() + "]");
+		    
+	}
+	
 	Coordinate farthestCoordinate = farthest(resultSet);
 	logger.debug("farthestCoordinate = " + farthestCoordinate.toString());
 	double radius = center.distance(farthestCoordinate);

@@ -49,7 +49,7 @@ public abstract class CrawlerStrategy {
 
     public static DBExternal dbExternal;
 
-    public static final double EPSILON = 0.0001;
+    public static final double EPSILON = 0.00000001;
     
     public static HashMap<Integer, String> categoryIDMap;
     

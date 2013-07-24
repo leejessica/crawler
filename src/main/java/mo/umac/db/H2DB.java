@@ -205,7 +205,11 @@ public class H2DB extends DBExternal {
 	    prepQuery.executeBatch();
 
 	    con.commit();
-
+	    prepItem.close();
+	    prepCategory.close();
+	    prepQuery.close();
+	    prepRelationship.close();
+	    con.close();
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
@@ -524,7 +528,7 @@ public class H2DB extends DBExternal {
 	try {
 	    Class.forName("org.h2.Driver");
 	    conn = DriverManager.getConnection("jdbc:h2:file:" + dbname
-		    + ";AUTO_SERVER=TRUE", "sa", "");
+		    + ";MVCC=true;AUTO_SERVER=TRUE", "sa", "");
 	} catch (ClassNotFoundException e) {
 	    e.printStackTrace();
 	} catch (SQLException e) {
@@ -782,7 +786,7 @@ public class H2DB extends DBExternal {
 
     @Override
     public int numCrawlerPoints() {
-	int c = count(DB_NAME_TARGET, ITEM);
+	int c = count(dbNameTarget, ITEM);
 	return c;
     }
 

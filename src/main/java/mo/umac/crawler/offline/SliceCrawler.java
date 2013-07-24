@@ -1,17 +1,13 @@
 package mo.umac.crawler.offline;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import mo.umac.crawler.CrawlerStrategy;
 import mo.umac.metadata.APOI;
-import mo.umac.metadata.ResultSetYahooOnline;
 import mo.umac.spatial.Circle;
-import mo.umac.spatial.ECEFLLA;
 import mo.umac.spatial.GeoOperator;
-import mo.umac.spatial.MyEnvelope;
 
 import org.apache.log4j.Logger;
 
@@ -90,9 +86,11 @@ public class SliceCrawler extends OfflineStrategy {
 
 	    Envelope leftRemainedEnvelope = leftRemainedRegion(
 		    envelopeStateECEF, leftBoarderLine);
-	    logger.debug("leftRemainedEnvelope = "
-		    + leftRemainedEnvelope.toString());
-	    crawl(state, category, query, leftRemainedEnvelope);
+	    if (leftRemainedEnvelope != null) {
+		logger.debug("leftRemainedEnvelope = "
+			+ leftRemainedEnvelope.toString());
+		crawl(state, category, query, leftRemainedEnvelope);
+	    }
 	}
 	// right
 	Coordinate rightNearestCoordinates = nearestRightCoordinates(
@@ -107,11 +105,13 @@ public class SliceCrawler extends OfflineStrategy {
 	    fillGaps(state, category, query, middleLine, rightBoarderLine,
 		    oneDimensionalResultSet);
 
-	    Envelope rightRemainedEnvelope = leftRemainedRegion(
+	    Envelope rightRemainedEnvelope = rightRemainedRegion(
 		    envelopeStateECEF, rightBoarderLine);
-	    logger.debug("rightRemainedEnvelope = "
-		    + rightRemainedEnvelope.toString());
-	    crawl(state, category, query, rightRemainedEnvelope);
+	    if (rightRemainedEnvelope != null) {
+		logger.debug("rightRemainedEnvelope = "
+			+ rightRemainedEnvelope.toString());
+		crawl(state, category, query, rightRemainedEnvelope);
+	    }
 	}
 
     }
@@ -180,10 +180,13 @@ public class SliceCrawler extends OfflineStrategy {
 	    yBegin = boardLine.p1.y;
 	    yEnd = boardLine.p0.y;
 	}
-	double yFirst = yBegin;
-	logger.debug("yFirst = " + yFirst);
+	double y1 = 0, y2 = 0;
+	double yNewBegin = 0, yNewEnd = 0;
+	double yLastEnd = yBegin;
+	boolean firstCircle = true;
 	List<Circle> circles = oneDimensionalResultSet.getCircles();
 	for (int i = 0; i < circles.size(); i++) {
+	    logger.debug("yLastEnd = " + yLastEnd);
 	    Circle circle = circles.get(i);
 	    List<Coordinate> list = GeoOperator.intersect(circle, boardLine);
 	    logger.debug("intersection of circle: "
@@ -195,33 +198,120 @@ public class SliceCrawler extends OfflineStrategy {
 	    if (list.size() == 0) {
 		logger.debug("Didn't intersect with the circle");
 		// already covered
+
 	    }
-	    double y1 = list.get(0).y;
-	    logger.debug("y1 = " + y1);
-	    if (y1 > yFirst) {
-		// not covered
-		Envelope smallEnvelope = new Envelope(xMiddleLine, xBoardLine,
-			yFirst, y1);
-		logger.debug("smallEnvelope = " + smallEnvelope.toString());
-		crawl(state, category, query, smallEnvelope);
+	    if (list.size() == 1) {
+		y1 = list.get(0).y;
+		logger.debug("Only one intersect point");
+		logger.debug("y1 = " + y1);
+		// whether tangent?
+		if (Math.abs(xBoardLine - y1) < CrawlerStrategy.EPSILON) {
+		    logger.debug("tangent");
+		    // yes
+		    yNewBegin = y1;
+		    yNewEnd = y1;
+		} else {
+		    // not tangent
+		    logger.debug("not tangent");
+		    if (y1 < yEnd && !firstCircle) {// the last circle
+			yNewBegin = y1;
+			yNewEnd = yEnd + 1;
+		    }
+		    if (y1 > yBegin && firstCircle) {// the first circle
+			yNewBegin = yBegin - 1;
+			yNewEnd = y1;
+			firstCircle = false;
+		    }
+		}
 	    }
 	    //
 	    if (list.size() == 2) {
-		yFirst = list.get(1).y;
+		logger.debug("two intersect points");
+		yNewBegin = list.get(0).y;
+		yNewEnd = list.get(1).y;
+		logger.debug("y1 = " + list.get(0).y);
 		logger.debug("y2 = " + list.get(1).y);
-	    } else {
-		yFirst = y1;
 	    }
-	    logger.debug("yFirst = " + yFirst);
+
+	    logger.debug("yNewBegin = " + yNewBegin);
+	    logger.debug("yNewEnd = " + yNewEnd);
+
+	    if (yNewBegin > yLastEnd) {
+		// not covered
+		Envelope smallEnvelope = new Envelope(xMiddleLine, xBoardLine,
+			yLastEnd, yNewBegin);
+		logger.debug("smallEnvelope = " + smallEnvelope.toString());
+		crawl(state, category, query, smallEnvelope);
+	    }
+	    yLastEnd = yNewEnd;
 	}
 	// the last one
-	if (yFirst < yEnd) {
+	if (yLastEnd < yEnd) {
 	    Envelope smallEnvelope = new Envelope(xMiddleLine, xBoardLine,
-		    yFirst, yEnd);
+		    yLastEnd, yEnd);
 	    logger.debug("smallEnvelope = " + smallEnvelope.toString());
 	    crawl(state, category, query, smallEnvelope);
 	}
     }
+
+    // private void fillGaps(String state, int category, String query,
+    // LineSegment middleLine, LineSegment boardLine,
+    // ResultSetOneDimensional oneDimensionalResultSet) {
+    // logger.debug("...............fillGaps................");
+    // // All of these circles are sorted in the line.
+    // double xMiddleLine = middleLine.p0.x;
+    // double xBoardLine = boardLine.p0.x;
+    // double yBegin;
+    // double yEnd;
+    // if (boardLine.p0.y < boardLine.p1.y) {
+    // yBegin = boardLine.p0.y;
+    // yEnd = boardLine.p1.y;
+    // } else {
+    // yBegin = boardLine.p1.y;
+    // yEnd = boardLine.p0.y;
+    // }
+    // double yFirst = yBegin;
+    // logger.debug("yFirst = " + yFirst);
+    // List<Circle> circles = oneDimensionalResultSet.getCircles();
+    // for (int i = 0; i < circles.size(); i++) {
+    // Circle circle = circles.get(i);
+    // List<Coordinate> list = GeoOperator.intersect(circle, boardLine);
+    // logger.debug("intersection of circle: "
+    // + circle.getCenter().toString() + ", " + circle.getRadius()
+    // + " with line: " + boardLine.toString() + " is: ");
+    // for (int j = 0; j < list.size(); j++) {
+    // logger.debug(list.get(j).toString());
+    // }
+    // if (list.size() == 0) {
+    // logger.debug("Didn't intersect with the circle");
+    // // already covered
+    // }
+    // double y1 = list.get(0).y;
+    // logger.debug("y1 = " + y1);
+    // if (y1 > yFirst) {
+    // // not covered
+    // Envelope smallEnvelope = new Envelope(xMiddleLine, xBoardLine,
+    // yFirst, y1);
+    // logger.debug("smallEnvelope = " + smallEnvelope.toString());
+    // crawl(state, category, query, smallEnvelope);
+    // }
+    // //
+    // if (list.size() == 2) {
+    // yFirst = list.get(1).y;
+    // logger.debug("y2 = " + list.get(1).y);
+    // } else {
+    // yFirst = y1;
+    // }
+    // logger.debug("yFirst = " + yFirst);
+    // }
+    // // the last one
+    // if (yFirst < yEnd) {
+    // Envelope smallEnvelope = new Envelope(xMiddleLine, xBoardLine,
+    // yFirst, yEnd);
+    // logger.debug("smallEnvelope = " + smallEnvelope.toString());
+    // crawl(state, category, query, smallEnvelope);
+    // }
+    // }
 
     /**
      * Find the remained envelope need be crawled later
@@ -259,6 +349,11 @@ public class SliceCrawler extends OfflineStrategy {
 	double y1 = envelopeState.getMinY();
 	double y2 = envelopeState.getMaxY();
 
+	logger.debug("--------------rightRemainedRegion");
+	logger.debug("envelopeState = " + envelopeState);
+	if (rightBoraderLine == null) {
+	    logger.debug("rightBoraderLine = null");
+	}
 	Envelope rightRemainedEnvelope;
 	double minXRight = rightBoraderLine.p0.x;
 	if (minXRight < maxX) {

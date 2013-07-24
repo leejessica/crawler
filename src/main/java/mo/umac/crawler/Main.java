@@ -47,14 +47,14 @@ public class Main {
 	if (packaging) {
 	    // for packaging, set the resources folder as
 	    OnlineStrategy.PROPERTY_PATH = "target/crawler.properties";
-	    OnlineStrategy.CATEGORY_ID_PATH = "target//cat_id.txt";
+	    CrawlerStrategy.CATEGORY_ID_PATH = "target/cat_id.txt";
 	    Main.LOG_PROPERTY_PATH = "target/log4j.xml";
 	    UScensusData.STATE_SHP_FILE_NAME = "target/UScensus/tl_2012_us_state/tl_2012_us_state.shp";
 	    UScensusData.STATE_DBF_FILE_NAME = "target/UScensus/tl_2012_us_state/tl_2012_us_state.dbf";
 	} else {
 	    // for debugging, set the resources folder as
 	    OnlineStrategy.PROPERTY_PATH = "./src/main/resources/crawler.properties";
-	    OnlineStrategy.CATEGORY_ID_PATH = "./src/main/resources/cat_id.txt";
+	    CrawlerStrategy.CATEGORY_ID_PATH = "./src/main/resources/cat_id.txt";
 	    Main.LOG_PROPERTY_PATH = "./src/main/resources/log4j.xml";
 	    UScensusData.STATE_SHP_FILE_NAME = "./src/main/resources/UScensus/tl_2012_us_state/tl_2012_us_state.shp";
 	    UScensusData.STATE_SHP_FILE_NAME = "./src/main/resources/UScensus/tl_2012_us_state/tl_2012_us_state.shp";

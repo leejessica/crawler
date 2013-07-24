@@ -2,7 +2,9 @@ package mo.umac.db;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import mo.umac.crawler.CrawlerStrategy;
 import mo.umac.metadata.APOI;
@@ -20,13 +22,15 @@ public class DBInMemory {
 
     protected static Logger logger = Logger.getLogger(DBInMemory.class
 	    .getName());
-    
+
     /**
      * All tuples; Integer is the item's id
      */
     public static HashMap<Integer, APOI> pois;
 
     public static MyRTree rtree;
+
+    public static Set<Integer> poisIDs = new HashSet<Integer>();
 
     /**
      * @param externalDataSet
@@ -68,24 +72,36 @@ public class DBInMemory {
     public ResultSet query(AQuery qc) {
 	Coordinate queryPoint = qc.getPoint();
 	logger.debug("query point = " + queryPoint.toString());
-	
+
 	List<Integer> resultsID = rtree.searchNN(queryPoint, qc.getTopK());
+	//
+	poisIDs.addAll(resultsID);
+
 	// FIXME add re-transfering from the break point.
 	int queryID = CrawlerStrategy.countNumQueries;
-	if(queryID % 500 == 0){
-	    logger.info("countNumQueries = " + CrawlerStrategy.countNumQueries);
-	    logger.info("number of points crawled = " + numCrawlerPoints());
-	}
-	CrawlerStrategy.countNumQueries++;
+
+	logger.debug("countNumQueries = " + CrawlerStrategy.countNumQueries);
 
 	ResultSet resultSet = queryByID(resultsID);
 	int totalResultsReturned = resultsID.size();
 	resultSet.setTotalResultsReturned(totalResultsReturned);
 	//
+	long before = System.currentTimeMillis();
+	System.out.println("Before writing: " + before);
 	writeToExternalDB(queryID, qc, resultSet);
+	long after = System.currentTimeMillis();
+	System.out.println("After writing: " + after);
+	System.out.println("time for writeToExternalDB = " + (after - before) / 1000);
+	logger.debug("number of points crawled = " + numCrawlerPoints());
+
+	if (queryID % 500 == 0) {
+	    logger.info("countNumQueries = " + CrawlerStrategy.countNumQueries);
+	    logger.info("number of points crawled = " + numCrawlerPoints());
+	}
+	CrawlerStrategy.countNumQueries++;
 	return resultSet;
     }
-    
+
     /**
      * @param resultsID
      * @return
@@ -102,8 +118,9 @@ public class DBInMemory {
 	return resultSet;
     }
 
-    public int numCrawlerPoints(){
-	return CrawlerStrategy.dbExternal.numCrawlerPoints();
+    public int numCrawlerPoints() {
+	// return CrawlerStrategy.dbExternal.numCrawlerPoints();
+	return DBInMemory.poisIDs.size();
     }
-    
+
 }

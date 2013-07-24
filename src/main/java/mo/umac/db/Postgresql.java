@@ -356,4 +356,30 @@ public class Postgresql extends DBExternal {
 
     }
 
+    @Override
+    public HashMap<Integer, APOI> readFromExtenalDB(String category,
+	    String state) {
+	// TODO Auto-generated method stub
+	return null;
+    }
+
+    @Override
+    public void writeToExternalDB(int queryID, AQuery query,
+	    mo.umac.metadata.ResultSet resultSet) {
+	// TODO Auto-generated method stub
+	
+    }
+
+    @Override
+    public void createTables(String dbNameTarget) {
+	// TODO Auto-generated method stub
+	
+    }
+
+    @Override
+    public int numCrawlerPoints() {
+	// TODO Auto-generated method stub
+	return 0;
+    }
+
 }
