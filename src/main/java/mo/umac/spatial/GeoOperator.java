@@ -126,10 +126,10 @@ public class GeoOperator {
 	c -= 2 * (sc.x * p1.x + sc.y * p1.y);
 	c -= r * r;
 	bb4ac = b * b - 4 * a * c;
-	logger.debug("a = " + a);
-	logger.debug("b = " + b);
-	logger.debug("c = " + c);
-	logger.debug("bb4ac = " + bb4ac);
+//	logger.debug("a = " + a);
+//	logger.debug("b = " + b);
+//	logger.debug("c = " + c);
+//	logger.debug("bb4ac = " + bb4ac);
 	// for line segment
 	if (Math.abs(a) < CrawlerStrategy.EPSILON || bb4ac < 0) {
 	    return null;

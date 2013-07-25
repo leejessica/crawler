@@ -2,9 +2,9 @@ package mo.umac.db;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import mo.umac.crawler.CrawlerStrategy;
 import mo.umac.metadata.APOI;
@@ -30,7 +30,8 @@ public class DBInMemory {
 
     public static MyRTree rtree;
 
-    public static Set<Integer> poisIDs = new HashSet<Integer>();
+    // TODO treeset is for debugging. change to hashset when running the program 
+    public static Set<Integer> poisIDs = new TreeSet<Integer>();
 
     /**
      * @param externalDataSet

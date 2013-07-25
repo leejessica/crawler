@@ -6,18 +6,19 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 
 import mo.umac.crawler.CrawlerStrategy;
 import mo.umac.crawler.offline.SliceCrawler;
 import mo.umac.db.DBInMemory;
 import mo.umac.db.H2DB;
 import mo.umac.metadata.APOI;
-import mo.umac.parser.Category;
 import mo.umac.parser.Rating;
-import mo.umac.spatial.ECEFLLA;
-import mo.umac.utils.CommonUtils;
 import mo.umac.utils.FileOperator;
 
 import org.apache.log4j.xml.DOMConfigurator;
@@ -52,18 +53,18 @@ public class SlideCrawlerTest extends SliceCrawler {
 	String testSource = "../yahoolocal-h2/test/source";
 	String testTarget = "../yahoolocal-h2/test/target";
 	//
-	int numItems = 100;
-	int topK = 5;
+	int numItems = 10;
+	int topK = 2;
 	CrawlerStrategy.MAX_TOTAL_RESULTS_RETURNED = topK;
 	//
 	CrawlerStrategy.categoryIDMap = FileOperator
 		.readCategoryID(CATEGORY_ID_PATH);
 	// source database
 	CrawlerStrategy.dbExternal = new H2DB(testSource, testTarget);
-	// generate dataset
-	// List<Coordinate> points = generateSimpleCase(testSource, category,
-	// state, numItems);
-	// exportToH2(points, testSource, category, state);
+	// TODO generate dataset
+//	List<Coordinate> points = generateSimpleCase(testSource, category,
+//		state, numItems);
+//	exportToH2(points, testSource, category, state);
 	//
 	CrawlerStrategy.dbInMemory = new DBInMemory();
 	DBInMemory.pois = readFromGeneratedDB(testSource);
@@ -73,6 +74,30 @@ public class SlideCrawlerTest extends SliceCrawler {
 
 	sliceCrawler.crawl(state, categoryID, category, envelopeECEF);
 
+	// important
+	try {
+	    // close all connections
+	    Map connMap = CrawlerStrategy.dbExternal.connMap;
+	    Iterator it = connMap.entrySet().iterator();
+	    while (it.hasNext()) {
+		Entry entry = (Entry) it.next();
+		Connection conn = (Connection) entry.getValue();
+		conn.close();
+	    }
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+	logger.debug("Finished ! Oh ! Yeah! ");
+	logger.debug("number of queries issued = "
+		+ CrawlerStrategy.countNumQueries);
+	logger.debug("number of points crawled = "
+		+ CrawlerStrategy.dbInMemory.poisIDs.size());
+	Set set = CrawlerStrategy.dbInMemory.poisIDs;
+	Iterator<Integer> it = set.iterator();
+	while (it.hasNext()) {
+	    int id = it.next();
+	    logger.debug(id);
+	}
     }
 
     /**
@@ -99,7 +124,7 @@ public class SlideCrawlerTest extends SliceCrawler {
 	String dbName = CrawlerStrategy.dbExternal.dbNameSource;
 	// TODO check sql
 	try {
-	    Connection conn = h2.connect(dbName);
+	    Connection conn = h2.getConnection(dbName);
 	    Statement stat = conn.createStatement();
 
 	    String sql = "SELECT * FROM item";
@@ -139,7 +164,6 @@ public class SlideCrawlerTest extends SliceCrawler {
 		e.printStackTrace();
 	    }
 	    stat.close();
-	    conn.close();
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
@@ -153,7 +177,7 @@ public class SlideCrawlerTest extends SliceCrawler {
 	H2DB h2 = (H2DB) CrawlerStrategy.dbExternal;
 	String dbName = CrawlerStrategy.dbExternal.dbNameSource;
 	try {
-	    Connection conn = h2.connect(dbName);
+	    Connection conn = h2.getConnection(dbName);
 	    Statement stat = conn.createStatement();
 	    // create table
 	    String sqlCreate = "CREATE TABLE IF NOT EXISTS ITEM "
@@ -191,7 +215,6 @@ public class SlideCrawlerTest extends SliceCrawler {
 	    prepItem.executeBatch();
 	    conn.commit();
 	    prepItem.close();
-	    conn.close();
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}

@@ -32,7 +32,8 @@ public class SliceCrawler extends OfflineStrategy {
     @Override
     public void crawl(String state, int category, String query,
 	    Envelope envelopeStateECEF) {
-
+	logger.debug("------------crawling---------");
+	logger.debug(envelopeStateECEF.toString());
 	// finished crawling
 	if (envelopeStateECEF == null) {
 	    return;
@@ -50,6 +51,7 @@ public class SliceCrawler extends OfflineStrategy {
 	// The one dimensional crawler maybe already cover this region
 	if (covered(oneDimensionalResultSet, envelopeStateECEF)) {
 	    logger.debug("this envelope is covered by the one dimensional crawler");
+	    logger.debug(envelopeStateECEF.toString());
 	    return;
 	}
 

@@ -58,6 +58,15 @@ public class H2DB extends DBExternal {
 	super.dbNameTarget = dbNameTarget;
     }
 
+    
+    /****************************** sqls for deleting table ******************************/
+    /**
+     * level: the divided level radius: the radius of the circle want to covered
+     */
+    private String sqlDeleteQueryTable = "DROP TABLE QUERY";
+    private String sqlDeleteItemTable = "DROP TABLE ITEM";
+    private String sqlDeleteCategoryTable = "DROP TABLE CATEGORY";
+    private String sqlDeleteRelationshipTable = "DROP TABLE RELATIONSHIP";
     /****************************** sqls for creating table ******************************/
     /**
      * level: the divided level radius: the radius of the circle want to covered
@@ -148,7 +157,7 @@ public class H2DB extends DBExternal {
     public void writeToExternalDB(int queryID, AQuery aQuery,
 	    ResultSet resultSet) {
 	String dbName = dbNameTarget;
-	Connection con = connect(dbName);
+	Connection con = getConnection(dbName);
 	//
 	// prepared statement
 	PreparedStatement prepItem;
@@ -209,7 +218,6 @@ public class H2DB extends DBExternal {
 	    prepCategory.close();
 	    prepQuery.close();
 	    prepRelationship.close();
-	    con.close();
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
@@ -239,7 +247,7 @@ public class H2DB extends DBExternal {
     private void printQueryTable(String dbName) {
 	String sqlSelectQuery = sqlSelectStar + QUERY;
 	try {
-	    Connection conn = connect(dbName);
+	    Connection conn = getConnection(dbName);
 	    Statement stat = conn.createStatement();
 	    try {
 		java.sql.ResultSet rs = stat.executeQuery(sqlSelectQuery);
@@ -283,7 +291,6 @@ public class H2DB extends DBExternal {
 		e.printStackTrace();
 	    }
 	    stat.close();
-	    conn.close();
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
@@ -292,7 +299,7 @@ public class H2DB extends DBExternal {
     private void printItemTable(String dbName) {
 	String sqlSelectItem = sqlSelectStar + ITEM;
 	try {
-	    Connection conn = connect(dbName);
+	    Connection conn = getConnection(dbName);
 	    Statement stat = conn.createStatement();
 	    try {
 		java.sql.ResultSet rs = stat.executeQuery(sqlSelectItem);
@@ -329,7 +336,6 @@ public class H2DB extends DBExternal {
 		e.printStackTrace();
 	    }
 	    stat.close();
-	    conn.close();
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
@@ -338,7 +344,7 @@ public class H2DB extends DBExternal {
     private void printCategoryTable(String dbName) {
 	String sqlSelectCategory = sqlSelectStar + CATEGORY;
 	try {
-	    Connection conn = connect(dbName);
+	    Connection conn = getConnection(dbName);
 	    Statement stat = conn.createStatement();
 	    try {
 		java.sql.ResultSet rs = stat.executeQuery(sqlSelectCategory);
@@ -359,7 +365,6 @@ public class H2DB extends DBExternal {
 		e.printStackTrace();
 	    }
 	    stat.close();
-	    conn.close();
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
@@ -368,7 +373,7 @@ public class H2DB extends DBExternal {
     private void printRelationshipTable(String dbName) {
 	String sqlSelectRelationship = sqlSelectStar + RELATIONSHIP;
 	try {
-	    Connection conn = connect(dbName);
+	    Connection conn = getConnection(dbName);
 	    Statement stat = conn.createStatement();
 	    try {
 		java.sql.ResultSet rs = stat
@@ -390,7 +395,6 @@ public class H2DB extends DBExternal {
 		e.printStackTrace();
 	    }
 	    stat.close();
-	    conn.close();
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
@@ -400,7 +404,7 @@ public class H2DB extends DBExternal {
 	int count = 0;
 	String sql = sqlSelectCountStar + tableName;
 	try {
-	    Connection conn = connect(dbName);
+	    Connection conn = getConnection(dbName);
 	    Statement stat = conn.createStatement();
 	    try {
 		java.sql.ResultSet rs = stat.executeQuery(sql);
@@ -413,7 +417,6 @@ public class H2DB extends DBExternal {
 		e.printStackTrace();
 	    }
 	    stat.close();
-	    conn.close();
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
@@ -510,31 +513,39 @@ public class H2DB extends DBExternal {
     @Override
     public void createTables(String dbName) {
 	try {
-	    Connection conn = connect(dbName);
+	    Connection conn = getConnection(dbName);
 	    Statement stat = conn.createStatement();
+	    //
+	    stat.execute(sqlDeleteQueryTable);
+	    stat.execute(sqlDeleteItemTable);
+	    stat.execute(sqlDeleteCategoryTable);
+	    stat.execute(sqlDeleteRelationshipTable);
+	    //
 	    stat.execute(sqlCreateQueryTable);
 	    stat.execute(sqlCreateItemTable);
 	    stat.execute(sqlCreateCategoryTable);
 	    stat.execute(sqlCreateRelationshipTable);
 	    stat.close();
-	    conn.close();
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
     }
 
-    public Connection connect(String dbname) {
-	Connection conn = null;
-	try {
-	    Class.forName("org.h2.Driver");
-	    conn = DriverManager.getConnection("jdbc:h2:file:" + dbname
-		    + ";MVCC=true;AUTO_SERVER=TRUE", "sa", "");
-	} catch (ClassNotFoundException e) {
-	    e.printStackTrace();
-	} catch (SQLException e) {
-	    e.printStackTrace();
-	}
-	return conn;
+    public Connection getConnection(String dbname) {
+	if (connMap.get(dbname) == null) {
+	    try {
+		Class.forName("org.h2.Driver");
+		java.sql.Connection conn = DriverManager.getConnection("jdbc:h2:file:" + dbname
+			+ ";MVCC=true;LOCK_TIMEOUT=30000;AUTO_SERVER=TRUE",
+			"sa", "");
+		connMap.put(dbname, conn);
+	    } catch (ClassNotFoundException e) {
+		e.printStackTrace();
+	    } catch (SQLException e) {
+		e.printStackTrace();
+	    }
+	} 
+	return (Connection) connMap.get(dbname);
     }
 
     /**
@@ -554,7 +565,7 @@ public class H2DB extends DBExternal {
 	String queryFile = folderPath + "query";
 	BufferedReader brQuery = null;
 	try {
-	    Connection conn = connect(dbNameSource);
+	    Connection conn = getConnection(dbNameSource);
 	    brQuery = new BufferedReader(new InputStreamReader(
 		    new FileInputStream(queryFile)));
 	    String data = null;
@@ -592,7 +603,6 @@ public class H2DB extends DBExternal {
 	    }
 	    prepQuery.executeBatch();
 	    brQuery.close();
-	    conn.close();
 	} catch (FileNotFoundException e) {
 	    e.printStackTrace();
 	} catch (IOException e) {
@@ -606,7 +616,7 @@ public class H2DB extends DBExternal {
 	String resultsFile = folderPath + "results";
 	BufferedReader brResult = null;
 	try {
-	    Connection conn = connect(dbNameSource);
+	    Connection conn = getConnection(dbNameSource);
 	    brResult = new BufferedReader(new InputStreamReader(
 		    new FileInputStream(resultsFile)));
 	    String data = null;
@@ -683,7 +693,6 @@ public class H2DB extends DBExternal {
 	    prepRelationship.executeBatch();
 
 	    brResult.close();
-	    conn.close();
 	} catch (FileNotFoundException e) {
 	    e.printStackTrace();
 	} catch (IOException e) {
@@ -721,7 +730,7 @@ public class H2DB extends DBExternal {
 	HashMap<Integer, APOI> map = new HashMap<Integer, APOI>();
 	// TODO check sql
 	try {
-	    Connection conn = connect(dbNameSource);
+	    Connection conn = getConnection(dbNameSource);
 	    Statement stat = conn.createStatement();
 
 	    String sql = "SELECT * FROM item where state = '"
@@ -777,7 +786,6 @@ public class H2DB extends DBExternal {
 		e.printStackTrace();
 	    }
 	    stat.close();
-	    conn.close();
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}

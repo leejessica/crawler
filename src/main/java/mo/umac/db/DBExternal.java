@@ -1,16 +1,13 @@
 package mo.umac.db;
 
 import java.util.HashMap;
-import java.util.List;
+import java.util.Map;
 
-import mo.umac.metadata.AQuery;
 import mo.umac.metadata.APOI;
+import mo.umac.metadata.AQuery;
 import mo.umac.metadata.ResultSet;
 import mo.umac.metadata.ResultSetYahooOnline;
 import mo.umac.metadata.YahooLocalQueryFileDB;
-import mo.umac.rtree.MyRTree;
-
-import com.vividsolutions.jts.geom.Coordinate;
 
 public abstract class DBExternal {
 
@@ -36,7 +33,11 @@ public abstract class DBExternal {
 
     public static String dbNameTarget = "";
     
-
+    /**
+     * String represents the name of the database;
+     */
+    public static Map connMap = new HashMap<String, java.sql.Connection>();
+    
     public abstract void writeToExternalDB(int queryID, int level, int parentID,
 	    YahooLocalQueryFileDB qc, ResultSetYahooOnline resultSet);
 
