@@ -5,14 +5,14 @@ package mo.umac.crawler.offline;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
-
 import mo.umac.metadata.APOI;
 import mo.umac.metadata.AQuery;
 import mo.umac.metadata.ResultSet;
-import mo.umac.metadata.ResultSetYahooOnline;
+import mo.umac.paint.PaintShapes;
 import mo.umac.spatial.Circle;
 import mo.umac.spatial.GeoOperator;
+
+import org.apache.log4j.Logger;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
@@ -71,6 +71,9 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 
 	Circle aCircle = new Circle(center, radius);
 	resultSet.addACircle(aCircle);
+	//
+	PaintShapes.paint.addCircle(aCircle);
+	PaintShapes.paint.myRepaint();
 
 	addResults(center, middleLine, finalResultSet, resultSet);
 

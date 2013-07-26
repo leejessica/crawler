@@ -1,4 +1,4 @@
-package mo.umac.crawler.paint;
+package mo.umac.paint.test;
 
 import javax.swing.JFrame;
 

@@ -6,6 +6,7 @@ import java.util.List;
 
 import mo.umac.crawler.CrawlerStrategy;
 import mo.umac.metadata.APOI;
+import mo.umac.paint.PaintShapes;
 import mo.umac.spatial.Circle;
 import mo.umac.spatial.GeoOperator;
 
@@ -34,6 +35,9 @@ public class SliceCrawler extends OfflineStrategy {
 	    Envelope envelopeStateECEF) {
 	logger.debug("------------crawling---------");
 	logger.debug(envelopeStateECEF.toString());
+	PaintShapes.paint.addRectangle(envelopeStateECEF);
+	PaintShapes.paint.myRepaint();
+	//
 	// finished crawling
 	if (envelopeStateECEF == null) {
 	    return;
@@ -42,8 +46,11 @@ public class SliceCrawler extends OfflineStrategy {
 	// first find the middle line, and then use the 1 dimensional method to
 	// issue queries on this line.
 	LineSegment middleLine = middleLine(envelopeStateECEF);
+	//
 	logger.debug("middleLine = " + middleLine.toString());
-
+	PaintShapes.paint.addLine(middleLine);
+	PaintShapes.paint.myRepaint();
+	//
 	ResultSetOneDimensional oneDimensionalResultSet = OneDimensionalCrawler
 		.oneDimCrawl(state, category, query, middleLine);
 	oneDimensionalResultSet.setLine(middleLine);
@@ -83,6 +90,10 @@ public class SliceCrawler extends OfflineStrategy {
 	    leftBoarderLine = GeoOperator.parallel(middleLine,
 		    leftNearestCoordinates);
 	    logger.debug("leftBoarderLine = " + leftBoarderLine.toString());
+	    //
+	    PaintShapes.paint.addLine(leftBoarderLine);
+	    PaintShapes.paint.myRepaint();
+	    //
 	    fillGaps(state, category, query, middleLine, leftBoarderLine,
 		    oneDimensionalResultSet);
 
@@ -106,7 +117,10 @@ public class SliceCrawler extends OfflineStrategy {
 	    logger.debug("rightBoarderLine = " + rightBoarderLine.toString());
 	    fillGaps(state, category, query, middleLine, rightBoarderLine,
 		    oneDimensionalResultSet);
-
+	    //
+	    PaintShapes.paint.addLine(rightBoarderLine);
+	    PaintShapes.paint.myRepaint();
+	    //
 	    Envelope rightRemainedEnvelope = rightRemainedRegion(
 		    envelopeStateECEF, rightBoarderLine);
 	    if (rightRemainedEnvelope != null) {
@@ -382,8 +396,8 @@ public class SliceCrawler extends OfflineStrategy {
 	Coordinate leftNearest = null;
 	List<APOI> leftPOIs = oneDimensionalResultSet.getLeftPOIs();
 	if (leftPOIs.size() > 0) {
-	    double bigX = leftPOIs.get(0).getCoordinate().x;
-	    for (int i = 1; i < leftPOIs.size(); i++) {
+	    double bigX = leftPOIs.get(0).getCoordinate().x - 1;
+	    for (int i = 0; i < leftPOIs.size(); i++) {
 		APOI point = leftPOIs.get(i);
 		double x = point.getCoordinate().x;
 		if (x > bigX /* && x < middleLine.p0.x */) {
@@ -402,8 +416,8 @@ public class SliceCrawler extends OfflineStrategy {
 	List<APOI> rightPOIs = oneDimensionalResultSet.getRightPOIs();
 	Coordinate rightNearest = null;
 	if (rightPOIs.size() > 0) {
-	    double smallX = rightPOIs.get(0).getCoordinate().x;
-	    for (int i = 1; i < rightPOIs.size(); i++) {
+	    double smallX = rightPOIs.get(0).getCoordinate().x + 1;
+	    for (int i = 0; i < rightPOIs.size(); i++) {
 		APOI point = rightPOIs.get(i);
 		double x = point.getCoordinate().x;
 		if (x < smallX /* && x > middleLine.p0.x */) {

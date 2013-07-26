@@ -515,7 +515,7 @@ public class H2DB extends DBExternal {
 	try {
 	    Connection conn = getConnection(dbName);
 	    Statement stat = conn.createStatement();
-	    //
+	    // TODO delete the comments
 	    stat.execute(sqlDeleteQueryTable);
 	    stat.execute(sqlDeleteItemTable);
 	    stat.execute(sqlDeleteCategoryTable);

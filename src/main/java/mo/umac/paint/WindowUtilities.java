@@ -1,4 +1,4 @@
-package mo.umac.crawler.paint;
+package mo.umac.paint;
 
 import javax.swing.*;
 import java.awt.*;

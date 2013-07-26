@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import mo.umac.crawler.CrawlerStrategy;
+import mo.umac.crawler.test.SlideCrawlerTest;
 import mo.umac.metadata.APOI;
 import mo.umac.metadata.AQuery;
 import mo.umac.metadata.ResultSet;
@@ -73,7 +74,10 @@ public class DBInMemory {
     public ResultSet query(AQuery qc) {
 	Coordinate queryPoint = qc.getPoint();
 	logger.debug("query point = " + queryPoint.toString());
-
+//	SlideCrawlerTest.paint.addPoint(queryPoint);
+//	SlideCrawlerTest.paint.repaint();
+	
+	
 	List<Integer> resultsID = rtree.searchNN(queryPoint, qc.getTopK());
 	//
 	poisIDs.addAll(resultsID);

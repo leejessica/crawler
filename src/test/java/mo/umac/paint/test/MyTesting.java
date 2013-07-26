@@ -1,4 +1,4 @@
-package mo.umac.crawler.paint;
+package mo.umac.paint.test;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -48,6 +48,7 @@ public class MyTesting extends JComponent {
 	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 	MyTesting component = new MyTesting();
+//	component.add(comp)
 	frame.add(component);
 	frame.setVisible(true);
     }

@@ -1,5 +1,6 @@
 package mo.umac.crawler.test;
 
+import java.awt.Color;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -18,6 +19,8 @@ import mo.umac.crawler.offline.SliceCrawler;
 import mo.umac.db.DBInMemory;
 import mo.umac.db.H2DB;
 import mo.umac.metadata.APOI;
+import mo.umac.paint.PaintShapes;
+import mo.umac.paint.test.WindowUtilities;
 import mo.umac.parser.Rating;
 import mo.umac.utils.FileOperator;
 
@@ -36,6 +39,7 @@ public class SlideCrawlerTest extends SliceCrawler {
     public static void main(String[] args) {
 	DOMConfigurator.configure(SlideCrawlerTest.LOG_PROPERTY_PATH);
 	SlideCrawlerTest test = new SlideCrawlerTest();
+	WindowUtilities.openInJFrame(PaintShapes.paint, 1000, 1000);
 	test.calling();
 
     }
@@ -48,7 +52,10 @@ public class SlideCrawlerTest extends SliceCrawler {
 	String state = "NY";
 	int categoryID = 96926236;
 	String category = "Restaurants";
-	Envelope envelopeECEF = new Envelope(0, 100, 0, 100);
+	Envelope envelopeECEF = new Envelope(0, 1000, 0, 1000);
+	//
+	PaintShapes.paint.addRectangle(envelopeECEF);
+	PaintShapes.paint.myRepaint();
 	//
 	String testSource = "../yahoolocal-h2/test/source";
 	String testTarget = "../yahoolocal-h2/test/target";
@@ -62,16 +69,27 @@ public class SlideCrawlerTest extends SliceCrawler {
 	// source database
 	CrawlerStrategy.dbExternal = new H2DB(testSource, testTarget);
 	// TODO generate dataset
-//	List<Coordinate> points = generateSimpleCase(testSource, category,
-//		state, numItems);
-//	exportToH2(points, testSource, category, state);
+	// List<Coordinate> points = generateSimpleCase(testSource, category,
+	// state, numItems);
+	// exportToH2(points, testSource, category, state);
+	//
 	//
 	CrawlerStrategy.dbInMemory = new DBInMemory();
 	DBInMemory.pois = readFromGeneratedDB(testSource);
+	//
+	Iterator it2 = DBInMemory.pois.entrySet().iterator();
+	while (it2.hasNext()) {
+	    Entry entry = (Entry) it2.next();
+	    APOI aPoint = (APOI) entry.getValue();
+	    Coordinate coordinate = aPoint.getCoordinate();
+	    PaintShapes.paint.addPoint(coordinate);
+	}
+	PaintShapes.paint.myRepaint();
+	//
 	CrawlerStrategy.dbInMemory.index();
 	// target database
 	CrawlerStrategy.dbExternal.createTables(testTarget);
-
+	
 	sliceCrawler.crawl(state, categoryID, category, envelopeECEF);
 
 	// important
@@ -110,8 +128,8 @@ public class SlideCrawlerTest extends SliceCrawler {
 	List list = new ArrayList<Coordinate>();
 	Random random = new Random(System.currentTimeMillis());
 	for (int i = 0; i < numItems; i++) {
-	    x = random.nextDouble() * 100;
-	    y = random.nextDouble() * 100;
+	    x = random.nextDouble() * 1000;
+	    y = random.nextDouble() * 1000;
 	    Coordinate coordinate = new Coordinate(x, y);
 	    list.add(coordinate);
 	}
@@ -151,10 +169,10 @@ public class SlideCrawlerTest extends SliceCrawler {
 		    rating.setTotalReviews((int) totalReviews);
 		    //
 		    // print query result to console
-		    System.out.println("itemID: " + itemID);
-		    System.out.println("latitude: " + latitude);
-		    System.out.println("longitude: " + longitude);
-		    System.out.println("--------------------------");
+		    logger.debug("itemID: " + itemID);
+		    logger.debug("latitude: " + latitude);
+		    logger.debug("longitude: " + longitude);
+		    logger.debug("--------------------------");
 		    APOI poi = new APOI(itemID, title, city, state, longitude,
 			    latitude, rating, distance, null);
 		    map.put(itemID, poi);

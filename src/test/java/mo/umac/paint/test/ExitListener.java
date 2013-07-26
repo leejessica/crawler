@@ -1,4 +1,4 @@
-package mo.umac.crawler.paint;
+package mo.umac.paint.test;
 
 import java.awt.*;
 import java.awt.event.*;
