@@ -12,8 +12,6 @@ import java.util.List;
 
 import javax.swing.JPanel;
 
-import mo.umac.paint.test.ShapeExample;
-import mo.umac.paint.test.WindowUtilities;
 import mo.umac.spatial.Circle;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -26,11 +24,17 @@ public class PaintShapes extends JPanel {
     public static List<Shape> arrFill = new ArrayList<Shape>();
 
     public static PaintShapes paint = new PaintShapes();
-//    public static Color color;
-    
+
+    public Color redTranslucence = new Color(255, 0, 0, 150);
+    public Color greenTranslucence = new Color(0, 255, 0, 150);
+    public Color blueTranslucence = new Color(0, 0, 255, 150);
+    public Color blackTranslucence = Color.BLACK;
+
+    public static Color color;
+
     public void paintComponent(Graphics g) {
 	// clear(g);
-
+	g.setColor(color);
 	for (Shape i : arrDraw) {
 	    Graphics2D g2d = (Graphics2D) g;
 	    g2d.draw(i);
@@ -41,7 +45,7 @@ public class PaintShapes extends JPanel {
 	}
 	arrDraw.clear();
 	arrFill.clear();
-	
+
     }
 
     /**
@@ -53,8 +57,8 @@ public class PaintShapes extends JPanel {
     protected void clear(Graphics g) {
 	super.paintComponent(g);
     }
-    
-    public static void myRepaint(){
+
+    public static void myRepaint() {
 	paint.repaint();
 	try {
 	    Thread.sleep(1000);
@@ -62,21 +66,21 @@ public class PaintShapes extends JPanel {
 	    // TODO Auto-generated catch block
 	    e.printStackTrace();
 	}
-	
+
     }
 
     public static void addCircle(Circle circle) {
-	arrDraw.add(getCircle(circle));
+	arrFill.add(getCircle(circle));
     }
 
     public static void addRectangle(Envelope envelope) {
-	arrDraw.add(getRectangle(envelope));
+	arrFill.add(getRectangle(envelope));
     }
 
     public static void addPoint(Coordinate p) {
 	arrFill.add(getPoint(p));
     }
-    
+
     public static void addLine(LineSegment line) {
 	arrDraw.add(getLine(line));
     }
@@ -85,8 +89,8 @@ public class PaintShapes extends JPanel {
 	Coordinate center = circle.getCenter();
 	double radius = circle.getRadius();
 	double diameter = 2 * radius;
-	Ellipse2D.Double shape = new Ellipse2D.Double(center.x-radius, center.y-radius,
-		diameter, diameter);
+	Ellipse2D.Double shape = new Ellipse2D.Double(center.x - radius,
+		center.y - radius, diameter, diameter);
 	return shape;
     }
 
@@ -104,7 +108,8 @@ public class PaintShapes extends JPanel {
     }
 
     public static Rectangle2D.Double getPoint(Coordinate p) {
-	Rectangle2D.Double shape = new Rectangle2D.Double(p.x-2.5, p.y-2.5, 5, 5);
+	Rectangle2D.Double shape = new Rectangle2D.Double(p.x - 2.5, p.y - 2.5,
+		5, 5);
 	return shape;
     }
 

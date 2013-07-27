@@ -27,14 +27,19 @@ public class ShapeExample extends JPanel {
     private ArrayList<Shape> myArr = new ArrayList<Shape>();
 
     private ArrayList<Shape> myArrPoints = new ArrayList<Shape>();
+    
+    private Color color;
+    private Color co2 = new Color(255,0,0,150);
 
     public void paintComponent(Graphics g) {
 //	clear(g);
-
+	g.setColor(color);
 	for (Shape i : myArr) {
 	    Graphics2D g2d = (Graphics2D) g;
 	    g2d.draw(i);
 	}
+	g.setColor(co2);
+
 	for (Shape i : myArrPoints) {
 	    Graphics2D g2d = (Graphics2D) g;
 	    g2d.fill(i);
@@ -46,7 +51,8 @@ public class ShapeExample extends JPanel {
 	Ellipse2D.Double circle = new Ellipse2D.Double(10, 10, 350, 350);
 	Rectangle2D.Double rectangle = new Rectangle2D.Double(10, 10, 50, 350);
 	myArr.add(circle);
-	myArr.add(rectangle);
+	myArrPoints.add(rectangle);
+	color = Color.RED;
     }
     
     public void list2() {
@@ -56,6 +62,7 @@ public class ShapeExample extends JPanel {
  	myArr.add(circle);
  	Rectangle2D.Double rectangle = new Rectangle2D.Double(70, 30, 60, 5);
  	myArrPoints.add(rectangle);
+ 	color = Color.GREEN;
      }
 
     // super.paintComponent clears offscreen pixmap,

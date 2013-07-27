@@ -29,7 +29,10 @@ public class DBInMemory {
      */
     public static HashMap<Integer, APOI> pois;
 
-    public static MyRTree rtree;
+    /**
+     * The index for all points in the database
+     */
+    public static MyRTree rtreePoints;
 
     // TODO treeset is for debugging. change to hashset when running the program 
     public static Set<Integer> poisIDs = new TreeSet<Integer>();
@@ -61,14 +64,14 @@ public class DBInMemory {
     }
 
     public void index(List<Coordinate> coordinate) {
-	rtree = new MyRTree(coordinate);
+	rtreePoints = new MyRTree(coordinate);
     }
 
     /**
      * Indexing all pois
      */
     public void index() {
-	rtree = new MyRTree(pois);
+	rtreePoints = new MyRTree(pois);
     }
 
     public ResultSet query(AQuery qc) {
@@ -78,7 +81,7 @@ public class DBInMemory {
 //	SlideCrawlerTest.paint.repaint();
 	
 	
-	List<Integer> resultsID = rtree.searchNN(queryPoint, qc.getTopK());
+	List<Integer> resultsID = rtreePoints.searchNN(queryPoint, qc.getTopK());
 	//
 	poisIDs.addAll(resultsID);
 

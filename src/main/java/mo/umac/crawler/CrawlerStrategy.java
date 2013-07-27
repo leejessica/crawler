@@ -8,6 +8,7 @@ import java.util.Set;
 
 import mo.umac.db.DBExternal;
 import mo.umac.db.DBInMemory;
+import mo.umac.rtree.MyRTree;
 import mo.umac.spatial.UScensusData;
 import mo.umac.utils.FileOperator;
 
@@ -52,6 +53,12 @@ public abstract class CrawlerStrategy {
     public static final double EPSILON = 0.00000001;
     
     public static HashMap<Integer, String> categoryIDMap;
+    
+    /**
+     * The index for all covered rectangles
+     */
+    public static MyRTree rtreeRectangles = new MyRTree();
+    public static int rectangleId = 0;
     
     /**
      * Entrance of the crawler

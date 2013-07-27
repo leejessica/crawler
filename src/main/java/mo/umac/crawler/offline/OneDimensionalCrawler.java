@@ -60,10 +60,11 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 	List<APOI> resultPoints = resultSet.getPOIs();
 	for (int i = 0; i < resultPoints.size(); i++) {
 	    APOI aPoint = resultPoints.get(i);
-	    logger.debug("APoint: " + aPoint.getId() + ", [" + aPoint.getCoordinate().toString() + "]");
-		    
+	    logger.debug("APoint: " + aPoint.getId() + ", ["
+		    + aPoint.getCoordinate().toString() + "]");
+
 	}
-	
+
 	Coordinate farthestCoordinate = farthest(resultSet);
 	logger.debug("farthestCoordinate = " + farthestCoordinate.toString());
 	double radius = center.distance(farthestCoordinate);
@@ -72,6 +73,7 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 	Circle aCircle = new Circle(center, radius);
 	resultSet.addACircle(aCircle);
 	//
+	PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
 	PaintShapes.paint.addCircle(aCircle);
 	PaintShapes.paint.myRepaint();
 
@@ -158,7 +160,8 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 	    }
 	}
 	// TODO check
-	finalResultSet.addAll(finalResultSet.getCircles(), resultSet.getCircles());
+	finalResultSet.addAll(finalResultSet.getCircles(),
+		resultSet.getCircles());
     }
 
     private static void addResults(ResultSetOneDimensional finalResultSet,
