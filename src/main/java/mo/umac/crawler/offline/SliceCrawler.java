@@ -170,7 +170,9 @@ public class SliceCrawler extends OfflineStrategy {
     }
 
     private boolean covered(Envelope envelopeStateECEF) {
-	// TODO check
+	// FIXME check
+	// find from the big rectangle(minY, maxY = envelopeStateECEF's minY,
+	// maxY )
 	return CrawlerStrategy.rtreeRectangles.contains(envelopeStateECEF);
     }
 
