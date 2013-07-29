@@ -284,26 +284,6 @@ public class GeoOperator {
 	return 0.0;
     }
 
-    /**
-     * Compute the line segment which is parallel to the {@value middleLine} and
-     * get through to the {@value outsidePoint}
-     * 
-     * @param middleLine
-     * @param outsidePoint
-     * @return
-     */
-    public static LineSegment parallel(LineSegment middleLine,
-	    Coordinate outsideCoordinate) {
-	Coordinate p0 = middleLine.p0;
-	Coordinate p1 = middleLine.p1;
-	double y0 = p0.y;
-	double y1 = p1.y;
-	double outsidePointX = outsideCoordinate.x;
-	LineSegment lineSeg = new LineSegment(outsidePointX, y0, outsidePointX,
-		y1);
-	return lineSeg;
-    }
-
     public static void logCoordinate(Coordinate coordinate) {
 	logger.info("coordinate: " + coordinate.x + ", " + coordinate.y);
     }

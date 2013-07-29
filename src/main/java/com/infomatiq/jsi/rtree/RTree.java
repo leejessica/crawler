@@ -63,7 +63,7 @@ public class RTree implements SpatialIndex {
   // map of nodeId -> node object
   // TODO eliminate this map - it should not be needed. Nodes
   // can be found by traversing the tree.
-  private TIntObjectHashMap<Node> nodeMap = new TIntObjectHashMap<Node>();
+  public TIntObjectHashMap<Node> nodeMap = new TIntObjectHashMap<Node>();
   
   // internal consistency checking - set to true if debugging tree corruption
   private final static boolean INTERNAL_CONSISTENCY_CHECKING = false;

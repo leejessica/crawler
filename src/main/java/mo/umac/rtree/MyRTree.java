@@ -1,5 +1,6 @@
 package mo.umac.rtree;
 
+import gnu.trove.TIntObjectHashMap;
 import gnu.trove.TIntProcedure;
 import gnu.trove.TIntStack;
 
@@ -10,6 +11,9 @@ import java.util.Random;
 import java.util.Map.Entry;
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
+
+import mo.umac.crawler.offline.SliceCrawler;
 import mo.umac.metadata.APOI;
 
 import com.infomatiq.jsi.Point;
@@ -21,8 +25,13 @@ import com.vividsolutions.jts.geom.Envelope;
 
 public class MyRTree extends RTree {
 
+    public static Logger logger = Logger.getLogger(MyRTree.class.getName());
+
+    public static MyRTree rtree = new MyRTree();
+
     public MyRTree() {
 	Properties props = new Properties();
+	// FIXME change to 50, 20
 	props.setProperty("MaxNodeEntries", "4");
 	props.setProperty("MinNodeEntries", "2");
 	this.init(props);
@@ -122,23 +131,37 @@ public class MyRTree extends RTree {
 		(float) envelope.getMaxY());
 	//
 	AddToListProcedure v = new AddToListProcedure();
-	myContains(r, v);
+	boolean contain = myContains(r, v);
+	if (!contain) {
+	    return contain;
+	}
 	List<Integer> list = v.getList();
-	System.out.println(list.size());
-	if (list != null && list.size() > 0) {
+	logger.debug(list.size());
+	if (list != null && list.size() == 0) {
 	    return true;
+	}
+	// FIXME judge from these intersected rectangles
+	// sorting the list
+	for (int i = 0; i < list.size(); i++) {
+	    int id = list.get(i);
+	    logger.debug("id = " + id);
+	    Node node = getNode(id);
+	    if (node == null) {
+		logger.debug("null node");
+	    } else {
+		logger.debug(node.mbrMinX + ", " + node.mbrMaxX + ", "
+			+ node.mbrMinY + ", " + node.mbrMaxY);
+	    }
 	}
 
 	return false;
     }
 
-    public void myContains(Rectangle r, TIntProcedure v) {
+    public boolean myContains(Rectangle r, TIntProcedure v) {
 	// stacks used to store nodeId and entry index of each node
 	// from the root down to the leaf. Enables fast lookup
 	// of nodes when a split is propagated up the tree.
 	TIntStack parents = new TIntStack();
-	TIntStack parentsEntry = new TIntStack();
-
 	// find a rectangle in the tree that contains the passed
 	// rectangle
 	// written to be non-recursive (should model other searches on this?)
@@ -147,92 +170,166 @@ public class MyRTree extends RTree {
 
 	parents.reset();
 	parents.push(rootNodeId);
-
-	parentsEntry.reset();
-	parentsEntry.push(-1);
-
-	// TODO: possible shortcut here - could test for intersection with the
-	// MBR of the root node. If no intersection, return immediately.
-
+	boolean contain = false;
+	Rectangle rN;
 	while (parents.size() > 0) {
-	    Node n = getNode(parents.peek());
-	    int startIndex = parentsEntry.peek() + 1;
-
+	    Node n = getNode(parents.pop());
+	    if (logger.isDebugEnabled()) {
+		rN = new Rectangle(n.mbrMinX, n.mbrMinY, n.mbrMaxX, n.mbrMaxY);
+		System.out.println("");
+		System.out.println(rN.toString());
+		System.out.println("-------");
+	    }
 	    if (!n.isLeaf()) {
+		// The children of n are not the leaves
 		// go through every entry in the index node to check
 		// if it intersects the passed rectangle. If so, it
 		// could contain entries that are contained.
-		boolean intersects = false;
-		for (int i = startIndex; i < n.entryCount; i++) {
+		contain = false;
+		for (int i = 0; i < n.entryCount; i++) {
+		    if (logger.isDebugEnabled()) {
+			rN = new Rectangle(n.entriesMinX[i], n.entriesMinY[i],
+				n.entriesMaxX[i], n.entriesMaxY[i]);
+			System.out.println(rN.toString());
+		    }
 
-		    Rectangle rN = new Rectangle(n.entriesMinX[i],
-			    n.entriesMinY[i], n.entriesMaxX[i],
-			    n.entriesMaxY[i]);
-
-		    // System.out.println(rN.toString());
-
-		    // if (rN.contains(r)) {
-		    if (Rectangle.intersects(r.minX, r.minY, r.maxX, r.maxY,
-			    n.entriesMinX[i], n.entriesMinY[i],
-			    n.entriesMaxX[i], n.entriesMaxY[i])) {
-			// System.out.println("this contains");
+		    if (Rectangle.contains(n.entriesMinX[i], n.entriesMinY[i],
+			    n.entriesMaxX[i], n.entriesMaxY[i], r.minX, r.minY,
+			    r.maxX, r.maxY)) {
+			// the first one contains the second one
+			if (logger.isDebugEnabled()) {
+			    logger.debug("contained by a non-leaf node");
+			}
 			parents.push(n.ids[i]);
-			parentsEntry.pop();
-			parentsEntry.push(i); // this becomes the start index
-					      // when the child has been
-					      // searched
-			parentsEntry.push(-1);
-			intersects = true;
-			break; // ie go to next iteration of while()
+			contain = true;
+			break;
 		    }
 		}
-		if (intersects) {
+		if (contain) {
 		    continue;
+		} else {
+		    return false;
 		}
 	    } else {
 		// go through every entry in the leaf to check if
 		// it is contained by the passed rectangle
 		for (int i = 0; i < n.entryCount; i++) {
-		    Rectangle rN = new Rectangle(n.entriesMinX[i],
-			    n.entriesMinY[i], n.entriesMaxX[i],
-			    n.entriesMaxY[i]);
-		    // System.out.println(rN.toString());
-
-		    // if (rN.contains(r)) {
-		    if (Rectangle.intersects(r.minX, r.minY, r.maxX, r.maxY,
-			    n.entriesMinX[i], n.entriesMinY[i],
-			    n.entriesMaxX[i], n.entriesMaxY[i])) {
-			// System.out.println("this contains");
-			if (!v.execute(n.ids[i])) {
-			    return;
+		    if (logger.isDebugEnabled()) {
+			rN = new Rectangle(n.entriesMinX[i], n.entriesMinY[i],
+				n.entriesMaxX[i], n.entriesMaxY[i]);
+			System.out.println(rN.toString());
+		    }
+		    if (Rectangle.contains(n.entriesMinX[i], n.entriesMinY[i],
+			    n.entriesMaxX[i], n.entriesMaxY[i], r.minX, r.minY,
+			    r.maxX, r.maxY)) {
+			// the objective rectangle is contained by a single
+			// rectangle
+			if (logger.isDebugEnabled()) {
+			    logger.debug("contained by a leaf node");
+			}
+			return true;
+		    } else {
+			if (Rectangle.intersects(r.minX, r.minY, r.maxX,
+				r.maxY, n.entriesMinX[i], n.entriesMinY[i],
+				n.entriesMaxX[i], n.entriesMaxY[i])) {
+			    if (logger.isDebugEnabled()) {
+				logger.debug("intersect");
+			    }
+			    logger.debug("n.ids[i] = " + n.ids[i]);
+			    if (!v.execute(n.ids[i])) {
+				// maybe
+				logger.debug(!v.execute(n.ids[i]));
+			    }
 			}
 		    }
 		}
+		return true;
 	    }
-	    parents.pop();
-	    parentsEntry.pop();
 	}
+	return false;
     }
 
     public static Point coordinateToPoint(Coordinate v) {
 	return new Point((float) v.x, (float) v.y);
     }
 
-    public static void main(String[] args) {
-	MyRTree rtree = new MyRTree();
-	Envelope e1 = new Envelope(1, 10, 1, 10);
-	rtree.addRectangle(0, e1);
-	Random random = new Random(System.currentTimeMillis());
-	for (int i = 1; i < 7; i++) {
-	    e1 = new Envelope(random.nextInt(100), random.nextInt(100),
-		    random.nextInt(100), random.nextInt(100));
-	    System.out.println(i + ": ");
-	    System.out.println(e1.toString());
-	    rtree.addRectangle(0, e1);
-	}
+    /**
+     * print the rtree
+     */
+    public void print() {
+	TIntStack parents = new TIntStack();
+	int rootNodeId = this.getRootNodeId();
 
-	Envelope e2 = new Envelope(2, 3, 2, 3);
-	boolean b = rtree.contains(e2);
-	System.out.println(b);
+	parents.reset();
+	parents.push(rootNodeId);
+
+	while (parents.size() > 0) {
+	    Node n = getNode(parents.pop());
+	    Rectangle rN = new Rectangle(n.mbrMinX, n.mbrMinY, n.mbrMaxX,
+		    n.mbrMaxY);
+	    System.out.println("");
+	    System.out.println(rN.toString());
+	    System.out.println("-------");
+
+	    if (!n.isLeaf()) {// The children of n are not the leaves
+		System.out.println("not leaf");
+		// go through every entry in the index node to check
+		// if it intersects the passed rectangle. If so, it
+		// could contain entries that are contained.
+		for (int i = 0; i < n.entryCount; i++) {
+		    rN = new Rectangle(n.entriesMinX[i], n.entriesMinY[i],
+			    n.entriesMaxX[i], n.entriesMaxY[i]);
+
+		    System.out.println(rN.toString());
+
+		    // if (rN.contains(r)) {
+		    // System.out.println("this contains");
+		    parents.push(n.ids[i]);
+		}
+	    } else {
+		// go through every entry in the leaf to check if
+		// it is contained by the passed rectangle
+		System.out.println("leaf");
+		for (int i = 0; i < n.entryCount; i++) {
+		    rN = new Rectangle(n.entriesMinX[i], n.entriesMinY[i],
+			    n.entriesMaxX[i], n.entriesMaxY[i]);
+		    System.out.println(rN.toString());
+
+		}
+	    }
+	}
+    }
+
+    public static void main(String[] args) {
+	// MyRTree rtree = new MyRTree();
+	int i = 0;
+	Envelope e1 = new Envelope(2, 4, 0, 10);
+	rtree.addRectangle(i++, e1);
+
+	e1 = new Envelope(3, 6, 0, 10);
+	rtree.addRectangle(i++, e1);
+
+	e1 = new Envelope(7, 9, 3, 5);
+	rtree.addRectangle(i++, e1);
+
+	e1 = new Envelope(8, 10, 1, 4);
+	rtree.addRectangle(i++, e1);
+
+	e1 = new Envelope(8, 10, 6, 7);
+	rtree.addRectangle(i++, e1);
+
+	// 1. whether the first two have been merged?
+	// 2. whether the envelope below is covered by the previous rectangle?
+
+	// FIXME print nodeMap
+	TIntObjectHashMap<Node> map = rtree.nodeMap;
+	// 
+	
+	e1 = new Envelope(8.1, 8.5, 2, 4.5);
+
+	boolean contain = rtree.contains(e1);
+	logger.debug(contain);
+	// boolean b = rtree.contains(e1);
+	// System.out.println(b);
     }
 }

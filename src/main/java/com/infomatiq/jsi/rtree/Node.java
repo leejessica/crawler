@@ -26,10 +26,10 @@ package com.infomatiq.jsi.rtree;
  */
 public class Node {
     int nodeId = 0;
-    float mbrMinX = Float.MAX_VALUE;
-    float mbrMinY = Float.MAX_VALUE;
-    float mbrMaxX = -Float.MAX_VALUE;
-    float mbrMaxY = -Float.MAX_VALUE;
+    public float mbrMinX = Float.MAX_VALUE;
+    public float mbrMinY = Float.MAX_VALUE;
+    public float mbrMaxX = -Float.MAX_VALUE;
+    public float mbrMaxY = -Float.MAX_VALUE;
 
     public float[] entriesMinX = null;
     public float[] entriesMinY = null;
