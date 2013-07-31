@@ -37,28 +37,25 @@ public class SliceCrawler extends OfflineStrategy {
 	    logger.debug("------------crawling---------");
 	    logger.debug(envelopeStateECEF.toString());
 	}
-
 	// finished crawling
 	if (envelopeStateECEF == null) {
 	    return;
 	}
-
 	if (covered(envelopeStateECEF)) {
 	    if (logger.isDebugEnabled()) {
 		logger.debug("This region has been covered");
 	    }
 	    return;
 	}
-
 	// first find the middle line, and then use the 1 dimensional method to
 	// issue queries on this line.
 	LineSegment middleLine = middleLine(envelopeStateECEF);
 	//
 	if (logger.isDebugEnabled()) {
 	    logger.debug("middleLine = " + middleLine.toString());
+	    // PaintShapes.paint.addLine(middleLine);
+	    // PaintShapes.paint.myRepaint();
 	}
-	// PaintShapes.paint.addLine(middleLine);
-	// PaintShapes.paint.myRepaint();
 	//
 	ResultSetOneDimensional oneDimensionalResultSet = OneDimensionalCrawler
 		.oneDimCrawl(state, category, query, middleLine);
@@ -68,91 +65,159 @@ public class SliceCrawler extends OfflineStrategy {
 
 	double distanceX = distanceCovered(envelopeStateECEF,
 		oneDimensionalResultSet);
-
+	if (logger.isDebugEnabled()) {
+	    logger.debug("distanceX = " + distanceX);
+	}
 	if (distanceX >= (envelopeStateECEF.getMaxX() - envelopeStateECEF
 		.getMinX()) / 2) {
 	    // this envelope has been covered, finished crawling;
 	    if (logger.isDebugEnabled()) {
 		logger.debug("this envelope is covered by the one dimensional crawler");
 		logger.debug(envelopeStateECEF.toString());
+		PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+		PaintShapes.paint.addRectangle(envelopeStateECEF);
+		PaintShapes.paint.myRepaint();
 	    }
-	    PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-	    PaintShapes.paint.addRectangle(envelopeStateECEF);
-	    PaintShapes.paint.myRepaint();
 	    CrawlerStrategy.rtreeRectangles.addRectangle(rectangleId++,
 		    envelopeStateECEF);
-	    //
-	    //
 	    return;
+	} else {
+	    double middle = middleLine.p0.x;
+	    Envelope envelopeDistanceX = new Envelope(middle - distanceX,
+		    middle + distanceX, envelopeStateECEF.getMinY(),
+		    envelopeStateECEF.getMaxY());
+	    if (logger.isDebugEnabled()) {
+		logger.debug("envelopeDistanceX is covered by the one dimensional crawler");
+		logger.debug(envelopeDistanceX.toString());
+		PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+		PaintShapes.paint.addRectangle(envelopeDistanceX);
+		PaintShapes.paint.myRepaint();
+	    }
+	    CrawlerStrategy.rtreeRectangles.addRectangle(rectangleId++,
+		    envelopeDistanceX);
 	}
 
 	// left
 	double xLeftNearestCoordinates = xNearestLeftCoordinates(
 		envelopeStateECEF, middleLine, oneDimensionalResultSet);
+	// boarder line of the left region
 	LineSegment leftBoarderLine = null;
+	LineSegment leftDistanceXLine = parallel(middleLine, middleLine.p0.x
+		- distanceX);
 	if (xLeftNearestCoordinates >= envelopeStateECEF.getMinX()) {
-	    logger.debug("xLeftNearestCoordinates = " + xLeftNearestCoordinates);
-	    // boarder line of the left region
+	    // has left coordinates
+	    if (logger.isDebugEnabled()) {
+		logger.debug("xLeftNearestCoordinates = "
+			+ xLeftNearestCoordinates);
+	    }
 	    if (xLeftNearestCoordinates < middleLine.p0.x - distanceX) {
 		leftBoarderLine = parallel(middleLine, xLeftNearestCoordinates);
-		fillGaps(state, category, query, middleLine, leftBoarderLine,
+		fillGaps(state, category, query, /* middleLine */
+			leftDistanceXLine, leftBoarderLine,
 			oneDimensionalResultSet);
+		Envelope e = new Envelope(leftBoarderLine.p0,
+			leftDistanceXLine.p1);
+		if (logger.isDebugEnabled()) {
+		    logger.debug("finished covering the left region");
+		    logger.debug(e.toString());
+		    PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+		    PaintShapes.paint.addRectangle(envelopeStateECEF);
+		    PaintShapes.paint.myRepaint();
+		}
+		CrawlerStrategy.rtreeRectangles.addRectangle(rectangleId++, e);
 	    } else {
-		leftBoarderLine = parallel(middleLine, middleLine.p0.x
-			- distanceX);
+		leftBoarderLine = leftDistanceXLine;
 	    }
+	} else {
+	    if (logger.isDebugEnabled()) {
+		logger.debug("no xLeftNearestCoordinates!");
+	    }
+	    leftBoarderLine = parallel(middleLine, middleLine.p0.x - distanceX);
+	}
 
+	if (logger.isDebugEnabled()) {
 	    logger.debug("leftBoarderLine = " + leftBoarderLine.toString());
 	    PaintShapes.paint.color = PaintShapes.paint.blackTranslucence;
 	    PaintShapes.paint.addLine(leftBoarderLine);
 	    PaintShapes.paint.myRepaint();
+	}
 
-	    // FIXME record this covered region & combine with previous covered
-	    // regions
-
-	    Envelope leftRemainedEnvelope = leftRemainedRegion(
-		    envelopeStateECEF, leftBoarderLine);
-	    if (leftRemainedEnvelope != null) {
+	Envelope leftRemainedEnvelope = leftRemainedRegion(envelopeStateECEF,
+		leftBoarderLine);
+	if (leftRemainedEnvelope != null) {
+	    if (logger.isDebugEnabled()) {
 		logger.debug("leftRemainedEnvelope = "
 			+ leftRemainedEnvelope.toString());
-		crawl(state, category, query, leftRemainedEnvelope);
 	    }
+	    crawl(state, category, query, leftRemainedEnvelope);
 	}
 	// right
 	double xRightNearestCoordinates = xNearestRightCoordinates(
 		envelopeStateECEF, middleLine, oneDimensionalResultSet);
 	LineSegment rightBoarderLine = null;
+	LineSegment rightDistanceXLine = parallel(middleLine, middleLine.p0.x
+		+ distanceX);
 	if (xRightNearestCoordinates <= envelopeStateECEF.getMaxX()) {
-	    logger.debug("xRightNearestCoordinates = "
-		    + xRightNearestCoordinates);
+	    if (logger.isDebugEnabled()) {
+		logger.debug("xRightNearestCoordinates = "
+			+ xRightNearestCoordinates);
+	    }
 	    // boarder line of the right region
 	    if (xRightNearestCoordinates > middleLine.p0.x + distanceX) {
 		rightBoarderLine = parallel(middleLine,
 			xRightNearestCoordinates);
-		fillGaps(state, category, query, middleLine, rightBoarderLine,
+		fillGaps(state, category, query, /* middleLine */
+			rightDistanceXLine, rightBoarderLine,
 			oneDimensionalResultSet);
+		Envelope e = new Envelope(rightDistanceXLine.p0,
+			rightBoarderLine.p1);
+		if (logger.isDebugEnabled()) {
+		    logger.debug("finished covering the right region");
+		    logger.debug(e.toString());
+		    PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+		    PaintShapes.paint.addRectangle(e);
+		    PaintShapes.paint.myRepaint();
+		}
+		CrawlerStrategy.rtreeRectangles.addRectangle(rectangleId++, e);
 	    } else {
 		rightBoarderLine = parallel(middleLine, middleLine.p0.x
 			+ distanceX);
 	    }
-
+	} else {
+	    if (logger.isDebugEnabled()) {
+		logger.debug("no xRightNearestCoordinates!");
+	    }
+	    rightBoarderLine = rightDistanceXLine;
+	}
+	if (logger.isDebugEnabled()) {
 	    logger.debug("rightBoarderLine = " + rightBoarderLine.toString());
 	    PaintShapes.paint.color = PaintShapes.paint.blackTranslucence;
 	    PaintShapes.paint.addLine(rightBoarderLine);
 	    PaintShapes.paint.myRepaint();
-	    // FIXME record this covered region & combine with previous covered
-	    // regions
+	}
+	// FIXME record this covered region & combine with previous covered
+	// regions
 
-	    //
-	    Envelope rightRemainedEnvelope = rightRemainedRegion(
-		    envelopeStateECEF, rightBoarderLine);
-	    if (rightRemainedEnvelope != null) {
+	//
+	Envelope rightRemainedEnvelope = rightRemainedRegion(envelopeStateECEF,
+		rightBoarderLine);
+	if (rightRemainedEnvelope != null) {
+	    if (logger.isDebugEnabled()) {
 		logger.debug("rightRemainedEnvelope = "
 			+ rightRemainedEnvelope.toString());
-		crawl(state, category, query, rightRemainedEnvelope);
 	    }
+	    crawl(state, category, query, rightRemainedEnvelope);
 	}
-
+	// TODO combine small rectangles in this region
+	if (logger.isDebugEnabled()) {
+	    logger.debug("finished covering this region");
+	    logger.debug(envelopeStateECEF.toString());
+	    PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+	    PaintShapes.paint.addRectangle(envelopeStateECEF);
+	    PaintShapes.paint.myRepaint();
+	}
+	CrawlerStrategy.rtreeRectangles.addRectangle(rectangleId++,
+		envelopeStateECEF);
     }
 
     /**
@@ -161,59 +226,30 @@ public class SliceCrawler extends OfflineStrategy {
      * @param oneDimensionalResultSet
      */
     private void sortingCircles(ResultSetOneDimensional oneDimensionalResultSet) {
-	// print
-	logger.debug("before sorting the circles: ");
-	for (int i = 0; i < oneDimensionalResultSet.getCircles().size(); i++) {
-	    Circle circle = oneDimensionalResultSet.getCircles().get(i);
-	    logger.debug(circle.getCenter().toString());
+	if (logger.isDebugEnabled()) {
+	    // print
+	    logger.debug("before sorting the circles: ");
+	    for (int i = 0; i < oneDimensionalResultSet.getCircles().size(); i++) {
+		Circle circle = oneDimensionalResultSet.getCircles().get(i);
+		logger.debug(circle.getCenter().toString());
+	    }
 	}
-
 	// sort all circles in the middle line
 	Collections.sort(oneDimensionalResultSet.getCircles(),
 		new CircleComparable());
-
-	// print sorting results
-	logger.debug("After sorting the circles: ");
-	for (int i = 0; i < oneDimensionalResultSet.getCircles().size(); i++) {
-	    Circle circle = oneDimensionalResultSet.getCircles().get(i);
-	    logger.debug(circle.getCenter().toString());
-	}
-
-    }
-
-    /**
-     * The one dimensional crawler maybe already cover this region
-     * 
-     * @param oneDimensionalResultSet
-     * @param envelopeStateECEF
-     * @return
-     * @deprecated
-     */
-    private boolean covered(ResultSetOneDimensional oneDimensionalResultSet,
-	    Envelope envelopeStateECEF) {
-	// FIXME wrong!!!
-	// XXX Not exactly.
-	List<Circle> circles = oneDimensionalResultSet.getCircles();
-	// this envelope is covered by one query circle
-	if (circles.size() == 1) {
-	    Circle circle = circles.get(0);
-	    double rCircle = circle.getRadius();
-	    double rEnvelope = envelopeStateECEF.centre().distance(
-		    new Coordinate(envelopeStateECEF.getMinX(),
-			    envelopeStateECEF.getMinY()));
-	    if (rCircle > rEnvelope) {
-		return true;
+	if (logger.isDebugEnabled()) {
+	    // print sorting results
+	    logger.debug("After sorting the circles: ");
+	    for (int i = 0; i < oneDimensionalResultSet.getCircles().size(); i++) {
+		Circle circle = oneDimensionalResultSet.getCircles().get(i);
+		logger.debug(circle.getCenter().toString());
 	    }
 	}
-	return false;
+
     }
 
     private boolean covered(Envelope envelopeStateECEF) {
-	// FIXME check
-	// find from the big rectangle(minY, maxY = envelopeStateECEF's minY,
-	// maxY )
-	// return CrawlerStrategy.rtreeRectangles.contains(envelopeStateECEF);
-	return false;
+	return CrawlerStrategy.rtreeRectangles.contains(envelopeStateECEF);
     }
 
     public class CircleComparable implements Comparator<Circle> {
@@ -242,7 +278,9 @@ public class SliceCrawler extends OfflineStrategy {
     private void fillGaps(String state, int category, String query,
 	    LineSegment middleLine, LineSegment boardLine,
 	    ResultSetOneDimensional oneDimensionalResultSet) {
-	logger.debug("...............fillGaps................");
+	if (logger.isDebugEnabled()) {
+	    logger.debug("...............fillGaps................");
+	}
 	// All of these circles are sorted in the line.
 	double xMiddleLine = middleLine.p0.x;
 	double xBoardLine = boardLine.p0.x;
@@ -261,76 +299,102 @@ public class SliceCrawler extends OfflineStrategy {
 	boolean firstCircle = true;
 	List<Circle> circles = oneDimensionalResultSet.getCircles();
 	for (int i = 0; i < circles.size(); i++) {
-	    logger.debug("yLastEnd = " + yLastEnd);
+	    if (logger.isDebugEnabled()) {
+		logger.debug("yLastEnd = " + yLastEnd);
+	    }
 	    Circle circle = circles.get(i);
 	    List<Coordinate> list = GeoOperator.intersect(circle, boardLine);
-	    logger.debug("intersection of circle: "
-		    + circle.getCenter().toString() + ", " + circle.getRadius()
-		    + " with line: " + boardLine.toString() + " is: ");
-	    for (int j = 0; j < list.size(); j++) {
-		logger.debug(list.get(j).toString());
-	    }
-	    if (list.size() == 0) {
-		logger.debug("Didn't intersect with the circle");
-		// already covered
-
-	    }
-	    if (list.size() == 1) {
-		y1 = list.get(0).y;
-		logger.debug("Only one intersect point");
-		logger.debug("y1 = " + y1);
-		// whether tangent?
-		if (Math.abs(xBoardLine - y1) < CrawlerStrategy.EPSILON) {
-		    logger.debug("tangent");
-		    // yes
-		    yNewBegin = y1;
-		    yNewEnd = y1;
+	    if (logger.isDebugEnabled()) {
+		logger.debug("intersection of circle: "
+			+ circle.getCenter().toString() + ", "
+			+ circle.getRadius() + " with line: "
+			+ boardLine.toString() + " is: ");
+		if (list == null) {
+		    logger.error("not intersect with a circle");
 		} else {
-		    // not tangent
-		    logger.debug("not tangent");
-		    if (y1 < yEnd && !firstCircle) {// the last circle
-			yNewBegin = y1;
-			yNewEnd = yEnd + 1;
+		    for (int j = 0; j < list.size(); j++) {
+			logger.debug(list.get(j).toString());
 		    }
-		    if (y1 > yBegin && firstCircle) {// the first circle
-			yNewBegin = yBegin - 1;
-			yNewEnd = y1;
-			firstCircle = false;
+		    if (list.size() == 0) {
+			logger.debug("Didn't intersect with the circle");
+			// already covered
 		    }
 		}
 	    }
-	    //
-	    if (list.size() == 2) {
-		logger.debug("two intersect points");
-		yNewBegin = list.get(0).y;
-		yNewEnd = list.get(1).y;
-		logger.debug("y1 = " + list.get(0).y);
-		logger.debug("y2 = " + list.get(1).y);
-	    }
+	    if (list != null) {
 
-	    logger.debug("yNewBegin = " + yNewBegin);
-	    logger.debug("yNewEnd = " + yNewEnd);
-
-	    if (yNewBegin > yLastEnd) {
-		// not covered
-		Envelope smallEnvelope = new Envelope(xMiddleLine, xBoardLine,
-			yLastEnd, yNewBegin);
-		logger.debug("smallEnvelope = " + smallEnvelope.toString());
-		PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
-		PaintShapes.paint.addRectangle(smallEnvelope);
-		PaintShapes.paint.myRepaint();
-		crawl(state, category, query, smallEnvelope);
+		if (list.size() == 1) {
+		    y1 = list.get(0).y;
+		    if (logger.isDebugEnabled()) {
+			logger.debug("Only one intersect point");
+			logger.debug("y1 = " + y1);
+		    }
+		    // whether tangent?
+		    if (Math.abs(xBoardLine - y1) < CrawlerStrategy.EPSILON) {
+			if (logger.isDebugEnabled()) {
+			    logger.debug("tangent");
+			}
+			// yes
+			yNewBegin = y1;
+			yNewEnd = y1;
+		    } else {
+			// not tangent
+			if (logger.isDebugEnabled()) {
+			    logger.debug("not tangent");
+			}
+			if (y1 < yEnd && !firstCircle) {// the last circle
+			    yNewBegin = y1;
+			    yNewEnd = yEnd + 1;
+			}
+			if (y1 > yBegin && firstCircle) {// the first circle
+			    yNewBegin = yBegin - 1;
+			    yNewEnd = y1;
+			    firstCircle = false;
+			}
+		    }
+		}
+		//
+		if (list.size() == 2) {
+		    if (logger.isDebugEnabled()) {
+			logger.debug("two intersect points");
+		    }
+		    yNewBegin = list.get(0).y;
+		    yNewEnd = list.get(1).y;
+		    if (logger.isDebugEnabled()) {
+			logger.debug("y1 = " + list.get(0).y);
+			logger.debug("y2 = " + list.get(1).y);
+		    }
+		}
+		if (logger.isDebugEnabled()) {
+		    logger.debug("yNewBegin = " + yNewBegin);
+		    logger.debug("yNewEnd = " + yNewEnd);
+		}
+		if (yNewBegin > yLastEnd) {
+		    // not covered
+		    Envelope smallEnvelope = new Envelope(xMiddleLine,
+			    xBoardLine, yLastEnd, yNewBegin);
+		    if (logger.isDebugEnabled()) {
+			logger.debug("smallEnvelope = "
+				+ smallEnvelope.toString());
+			PaintShapes.paint.color = PaintShapes.paint.greenTranslucence;
+			PaintShapes.paint.addRectangle(smallEnvelope);
+			PaintShapes.paint.myRepaint();
+		    }
+		    crawl(state, category, query, smallEnvelope);
+		}
+		yLastEnd = yNewEnd;
 	    }
-	    yLastEnd = yNewEnd;
 	}
 	// the last one
 	if (yLastEnd < yEnd) {
 	    Envelope smallEnvelope = new Envelope(xMiddleLine, xBoardLine,
 		    yLastEnd, yEnd);
-	    logger.debug("smallEnvelope = " + smallEnvelope.toString());
-	    PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
-	    PaintShapes.paint.addRectangle(smallEnvelope);
-	    PaintShapes.paint.myRepaint();
+	    if (logger.isDebugEnabled()) {
+		logger.debug("smallEnvelope = " + smallEnvelope.toString());
+		PaintShapes.paint.color = PaintShapes.paint.greenTranslucence;
+		PaintShapes.paint.addRectangle(smallEnvelope);
+		PaintShapes.paint.myRepaint();
+	    }
 	    crawl(state, category, query, smallEnvelope);
 	}
     }
@@ -348,10 +412,12 @@ public class SliceCrawler extends OfflineStrategy {
 	double y1 = envelopeState.getMinY();
 	double y2 = envelopeState.getMaxY();
 	//
-	logger.debug("--------------leftRemainedRegion");
-	logger.debug("envelopeState = " + envelopeState);
-	if (leftBoraderLine == null) {
-	    logger.debug("leftBoraderLine = null");
+	if (logger.isDebugEnabled()) {
+	    logger.debug("--------------leftRemainedRegion");
+	    logger.debug("envelopeState = " + envelopeState);
+	    if (leftBoraderLine == null) {
+		logger.debug("leftBoraderLine = null");
+	    }
 	}
 	//
 	Envelope leftRemainedEnvelope;
@@ -370,11 +436,12 @@ public class SliceCrawler extends OfflineStrategy {
 	double maxX = envelopeState.getMaxX();
 	double y1 = envelopeState.getMinY();
 	double y2 = envelopeState.getMaxY();
-
-	logger.debug("--------------rightRemainedRegion");
-	logger.debug("envelopeState = " + envelopeState);
-	if (rightBoraderLine == null) {
-	    logger.debug("rightBoraderLine = null");
+	if (logger.isDebugEnabled()) {
+	    logger.debug("--------------rightRemainedRegion");
+	    logger.debug("envelopeState = " + envelopeState);
+	    if (rightBoraderLine == null) {
+		logger.debug("rightBoraderLine = null");
+	    }
 	}
 	Envelope rightRemainedEnvelope;
 	double minXRight = rightBoraderLine.p0.x;
@@ -435,7 +502,7 @@ public class SliceCrawler extends OfflineStrategy {
      * 
      * @return
      */
-    public double distanceCovered(Envelope envelopeState,
+    private double distanceCovered(Envelope envelopeState,
 	    ResultSetOneDimensional oneDimensionalResultSet) {
 	// TODO need check
 	List<Circle> circleList = oneDimensionalResultSet.getCircles();

@@ -25,8 +25,8 @@ public class PaintShapes extends JPanel {
 
     public static PaintShapes paint = new PaintShapes();
 
-    public Color redTranslucence = new Color(255, 0, 0, 150);
-    public Color greenTranslucence = new Color(0, 255, 0, 150);
+    public Color redTranslucence = new Color(255, 0, 0, 50);
+    public Color greenTranslucence = new Color(0, 255, 0, 50);
     public Color blueTranslucence = new Color(0, 0, 255, 150);
     public Color blackTranslucence = Color.BLACK;
 
@@ -63,10 +63,8 @@ public class PaintShapes extends JPanel {
 	try {
 	    Thread.sleep(1000);
 	} catch (InterruptedException e) {
-	    // TODO Auto-generated catch block
 	    e.printStackTrace();
 	}
-
     }
 
     public static void addCircle(Circle circle) {

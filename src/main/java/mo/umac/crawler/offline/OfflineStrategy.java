@@ -10,6 +10,7 @@ import mo.umac.db.DBInMemory;
 import mo.umac.db.H2DB;
 import mo.umac.metadata.AQuery;
 import mo.umac.metadata.ResultSet;
+import mo.umac.rtree.MyRTree;
 import mo.umac.spatial.GeoOperator;
 import mo.umac.utils.CommonUtils;
 import mo.umac.utils.FileOperator;
@@ -29,6 +30,7 @@ public abstract class OfflineStrategy extends CrawlerStrategy {
     protected static Logger logger = Logger.getLogger(OfflineStrategy.class
 	    .getName());
 
+
     /**
      * This is the crawling algorithm
      */
@@ -44,7 +46,7 @@ public abstract class OfflineStrategy extends CrawlerStrategy {
     }
 
     protected void prepareData(String category, String state) {
-	// 
+	//
 	CrawlerStrategy.categoryIDMap = FileOperator
 		.readCategoryID(CATEGORY_ID_PATH);
 	// source database

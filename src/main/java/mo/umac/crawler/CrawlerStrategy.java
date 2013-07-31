@@ -58,6 +58,7 @@ public abstract class CrawlerStrategy {
      * The index for all covered rectangles
      */
     public static MyRTree rtreeRectangles = new MyRTree();
+    
     public static int rectangleId = 0;
     
     /**
