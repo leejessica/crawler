@@ -30,6 +30,127 @@ public class OneDimensionalCrawler extends OfflineStrategy {
     public static Logger logger = Logger.getLogger(OneDimensionalCrawler.class
 	    .getName());
 
+    public static ResultSetOneDimensional oneDimCrawl(String state,
+	    int category, String query, LineSegment middleLine) {
+	ResultSetOneDimensional finalResultSet = new ResultSetOneDimensional();
+	Coordinate up = middleLine.p0;
+	Coordinate down = middleLine.p1;
+	if (logger.isDebugEnabled()) {
+	    logger.debug("up = " + up.toString());
+	    logger.debug("down = " + down.toString());
+	}
+	// query the one end point
+	// TODO only return
+	AQuery aQuery = new AQuery(up, state, category, query,
+		MAX_TOTAL_RESULTS_RETURNED);
+	ResultSet resultSet = query(aQuery);
+	if (logger.isDebugEnabled()) {
+	    logger.debug("resultSet.getPOIs().size() = "
+		    + resultSet.getPOIs().size());
+	}
+	List<APOI> resultPoints = resultSet.getPOIs();
+
+	if (logger.isDebugEnabled()) {
+	    for (int i = 0; i < resultPoints.size(); i++) {
+		APOI aPoint = resultPoints.get(i);
+		logger.debug("APoint: " + aPoint.getId() + ", ["
+			+ aPoint.getCoordinate().toString() + "]");
+	    }
+	}
+
+	// farthest point lower than the up point
+	Coordinate farthestCoordinate = farthest(resultSet, up, true);
+	if(farthestCoordinate == null){
+	    logger.error("farestest point is null");
+	    farthestCoordinate = farthest(resultSet, up, true);
+	}
+	double radius = up.distance(farthestCoordinate);
+	if (logger.isDebugEnabled()) {
+	    logger.debug("farthestCoordinate = "
+		    + farthestCoordinate.toString());
+	    logger.debug("radius = " + radius);
+	}
+	Circle aCircle = new Circle(up, radius);
+	resultSet.addACircle(aCircle);
+	double newUp = up.y + radius;
+	if (logger.isDebugEnabled()) {
+	    logger.debug("new up = " + newUp);
+	}
+	//
+	if (logger.isDebugEnabled()) {
+	    PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
+	    PaintShapes.paint.addCircle(aCircle);
+	    PaintShapes.paint.myRepaint();
+	}
+	addResults(up, middleLine, finalResultSet, resultSet);
+	if (logger.isDebugEnabled()) {
+	    logger.debug("middleLine.getLength() = " + middleLine.getLength());
+	}
+	if (radius >= middleLine.getLength()) {
+	    // finished crawling
+	    if (logger.isDebugEnabled()) {
+		logger.debug("finished crawling");
+	    }
+	    return finalResultSet;
+	}
+
+	// query another end point
+	aQuery = new AQuery(down, state, category, query,
+		MAX_TOTAL_RESULTS_RETURNED);
+	resultSet = query(aQuery);
+	if (logger.isDebugEnabled()) {
+	    logger.debug("resultSet.getPOIs().size() = "
+		    + resultSet.getPOIs().size());
+	}
+	resultPoints = resultSet.getPOIs();
+
+	if (logger.isDebugEnabled()) {
+	    for (int i = 0; i < resultPoints.size(); i++) {
+		APOI aPoint = resultPoints.get(i);
+		logger.debug("APoint: " + aPoint.getId() + ", ["
+			+ aPoint.getCoordinate().toString() + "]");
+	    }
+	}
+
+	// farthest point lower than the up point
+	farthestCoordinate = farthest(resultSet, down, false);
+	radius = down.distance(farthestCoordinate);
+	if (logger.isDebugEnabled()) {
+	    logger.debug("farthestCoordinate = "
+		    + farthestCoordinate.toString());
+	    logger.debug("radius = " + radius);
+	}
+	aCircle = new Circle(down, radius);
+	resultSet.addACircle(aCircle);
+	double newDown = down.y - radius;
+	if (logger.isDebugEnabled()) {
+	    logger.debug("new down = " + newDown);
+	}
+	//
+	if (logger.isDebugEnabled()) {
+	    PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
+	    PaintShapes.paint.addCircle(aCircle);
+	    PaintShapes.paint.myRepaint();
+	}
+	addResults(down, middleLine, finalResultSet, resultSet);
+	if (logger.isDebugEnabled()) {
+	    logger.debug("middleLine.getLength() = " + middleLine.getLength());
+	}
+	if (radius >= down.y - newUp) {
+	    // finished crawling
+	    if (logger.isDebugEnabled()) {
+		logger.debug("finished crawling");
+	    }
+	    return finalResultSet;
+	}
+
+	LineSegment newMiddleLine = new LineSegment(up.x, newUp, up.x, newDown);
+	ResultSetOneDimensional middleResultSet = oneDimCrawlFromMiddle(state,
+		category, query, newMiddleLine);
+	addResults(finalResultSet, middleResultSet);
+	return finalResultSet;
+    }
+
     /**
      * Begin at the center of the line
      * 
@@ -41,12 +162,14 @@ public class OneDimensionalCrawler extends OfflineStrategy {
      * @param middleLine
      * @return
      */
-    public static ResultSetOneDimensional oneDimCrawl(String state,
+    public static ResultSetOneDimensional oneDimCrawlFromMiddle(String state,
 	    int category, String query, LineSegment middleLine) {
 	ResultSetOneDimensional finalResultSet = new ResultSetOneDimensional();
 	Coordinate up = middleLine.p0;
 	Coordinate down = middleLine.p1;
 	Coordinate center = middleLine.midPoint();
+	// add at 2013-08-21
+
 	if (logger.isDebugEnabled()) {
 	    logger.debug("up = " + up.toString());
 	    logger.debug("down = " + down.toString());
@@ -60,13 +183,13 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 		    + resultSet.getPOIs().size());
 	}
 	List<APOI> resultPoints = resultSet.getPOIs();
-	for (int i = 0; i < resultPoints.size(); i++) {
-	    APOI aPoint = resultPoints.get(i);
-	    if (logger.isDebugEnabled()) {
+
+	if (logger.isDebugEnabled()) {
+	    for (int i = 0; i < resultPoints.size(); i++) {
+		APOI aPoint = resultPoints.get(i);
 		logger.debug("APoint: " + aPoint.getId() + ", ["
 			+ aPoint.getCoordinate().toString() + "]");
 	    }
-
 	}
 
 	Coordinate farthestCoordinate = farthest(resultSet);
@@ -106,7 +229,7 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 	    logger.debug("newDown: " + newDown.toString());
 	    logger.debug("upperLine: " + upperLine.toString());
 	}
-	ResultSetOneDimensional newLeftResultSet = oneDimCrawl(state, category,
+	ResultSetOneDimensional newLeftResultSet = oneDimCrawlFromMiddle(state, category,
 		query, upperLine);
 	addResults(finalResultSet, newLeftResultSet);
 	// lower
@@ -117,7 +240,7 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 	    logger.debug("newUp: " + newUp.toString());
 	    logger.debug("lowerLine: " + lowerLine.toString());
 	}
-	ResultSetOneDimensional newRightResultSet = oneDimCrawl(state,
+	ResultSetOneDimensional newRightResultSet = oneDimCrawlFromMiddle(state,
 		category, query, lowerLine);
 	addResults(finalResultSet, newRightResultSet);
 
@@ -154,6 +277,40 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 	return farthestCoordinate;
     }
 
+    /**
+     * Find the farthest point which is lower/higher than the point p
+     * 
+     * @param resultSet
+     * @param p
+     * @param lower
+     * @return
+     */
+    private static Coordinate farthest(ResultSet resultSet, Coordinate p,
+	    boolean lower) {
+	Coordinate farthestCoordinate;
+	int size = resultSet.getPOIs().size();
+	// farthest
+	if (size == 0) {
+	    return null;
+	} else {
+	    for (int i = size - 1; i > 0; i--) {
+		APOI farthestPOI = resultSet.getPOIs().get(size - 1);
+		Coordinate c = farthestPOI.getCoordinate();
+		if (lower) {
+		    if (c.y > p.y) {
+			return c;
+		    }
+		} else {
+		    if (c.y < p.y) {
+			return c;
+		    }
+		}
+
+	    }
+	}
+	return null;
+    }
+
     private static void addResults(Coordinate center, LineSegment line,
 	    ResultSetOneDimensional finalResultSet, ResultSet resultSet) {
 	List<APOI> pois = resultSet.getPOIs();
@@ -172,7 +329,6 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 		break;
 	    }
 	}
-	// TODO check
 	finalResultSet.addAll(finalResultSet.getCircles(),
 		resultSet.getCircles());
     }

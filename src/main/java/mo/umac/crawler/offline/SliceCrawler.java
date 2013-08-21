@@ -41,6 +41,121 @@ public class SliceCrawler extends OfflineStrategy {
 	if (envelopeStateECEF == null) {
 	    return;
 	}
+	// left
+	LineSegment leftLine = leftLine(envelopeStateECEF);
+	//
+	if (logger.isDebugEnabled()) {
+	    logger.debug("leftLine = " + leftLine.toString());
+	    // PaintShapes.paint.addLine(middleLine);
+	    // PaintShapes.paint.myRepaint();
+	}
+	//
+	ResultSetOneDimensional oneDimensionalResultSet = OneDimensionalCrawler
+		.oneDimCrawl(state, category, query, leftLine);
+	oneDimensionalResultSet.setLine(leftLine);
+
+	sortingCircles(oneDimensionalResultSet);
+
+	double distanceX1 = distanceCovered(envelopeStateECEF,
+		oneDimensionalResultSet);
+	if (logger.isDebugEnabled()) {
+	    logger.debug("distanceX1 = " + distanceX1);
+	}
+	//
+	if (distanceX1 >= envelopeStateECEF.getMaxX()
+		- envelopeStateECEF.getMinX()) {
+	    // this envelope has been covered, finished crawling;
+	    if (logger.isDebugEnabled()) {
+		logger.debug("this envelope is covered by the one dimensional crawler");
+		logger.debug(envelopeStateECEF.toString());
+		PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+		PaintShapes.paint.addRectangle(envelopeStateECEF);
+		PaintShapes.paint.myRepaint();
+	    }
+	    CrawlerStrategy.rtreeRectangles.addRectangle(rectangleId++,
+		    envelopeStateECEF);
+	    return;
+	} else {
+	    Envelope envelopeDistanceX = new Envelope(
+		    envelopeStateECEF.getMinX(), envelopeStateECEF.getMinX()
+			    + distanceX1, envelopeStateECEF.getMinY(),
+		    envelopeStateECEF.getMaxY());
+	    if (logger.isDebugEnabled()) {
+		logger.debug("envelopeDistanceX is covered by the one dimensional crawler");
+		logger.debug(envelopeDistanceX.toString());
+		PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+		PaintShapes.paint.addRectangle(envelopeDistanceX);
+		PaintShapes.paint.myRepaint();
+	    }
+	    CrawlerStrategy.rtreeRectangles.addRectangle(rectangleId++,
+		    envelopeDistanceX);
+	}
+
+	// right
+	LineSegment rightLine = rightLine(envelopeStateECEF);
+	//
+	if (logger.isDebugEnabled()) {
+	    logger.debug("rightLine = " + rightLine.toString());
+	    // PaintShapes.paint.addLine(middleLine);
+	    // PaintShapes.paint.myRepaint();
+	}
+	//
+	oneDimensionalResultSet = OneDimensionalCrawler.oneDimCrawl(state,
+		category, query, rightLine);
+	oneDimensionalResultSet.setLine(rightLine);
+
+	sortingCircles(oneDimensionalResultSet);
+
+	double distanceX2 = distanceCovered(envelopeStateECEF,
+		oneDimensionalResultSet);
+	if (logger.isDebugEnabled()) {
+	    logger.debug("distanceX2 = " + distanceX2);
+	}
+	//
+	if (distanceX2 >= envelopeStateECEF.getMaxX()
+		- envelopeStateECEF.getMinX()) {
+	    // this envelope has been covered, finished crawling;
+	    if (logger.isDebugEnabled()) {
+		logger.debug("this envelope is covered by the one dimensional crawler");
+		logger.debug(envelopeStateECEF.toString());
+		PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+		PaintShapes.paint.addRectangle(envelopeStateECEF);
+		PaintShapes.paint.myRepaint();
+	    }
+	    CrawlerStrategy.rtreeRectangles.addRectangle(rectangleId++,
+		    envelopeStateECEF);
+	    return;
+	} else {
+	    Envelope envelopeDistanceX = new Envelope(
+		    envelopeStateECEF.getMaxX() - distanceX2,
+		    envelopeStateECEF.getMaxX(), envelopeStateECEF.getMinY(),
+		    envelopeStateECEF.getMaxY());
+	    if (logger.isDebugEnabled()) {
+		logger.debug("envelopeDistanceX is covered by the one dimensional crawler");
+		logger.debug(envelopeDistanceX.toString());
+		PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+		PaintShapes.paint.addRectangle(envelopeDistanceX);
+		PaintShapes.paint.myRepaint();
+	    }
+	    CrawlerStrategy.rtreeRectangles.addRectangle(rectangleId++,
+		    envelopeDistanceX);
+	}
+
+	Envelope middleEnvelope = new Envelope(envelopeStateECEF.getMinX()
+		+ distanceX1, envelopeStateECEF.getMaxX() - distanceX2,
+		envelopeStateECEF.getMinY(), envelopeStateECEF.getMaxY());
+
+	crawlFromMiddle(state, category, query, middleEnvelope);
+
+    }
+
+    public void crawlFromMiddle(String state, int category, String query,
+	    Envelope envelopeStateECEF) {
+
+	// finished crawling
+	if (envelopeStateECEF == null) {
+	    return;
+	}
 	if (covered(envelopeStateECEF)) {
 	    if (logger.isDebugEnabled()) {
 		logger.debug("This region has been covered");
@@ -504,12 +619,16 @@ public class SliceCrawler extends OfflineStrategy {
      */
     private double distanceCovered(Envelope envelopeState,
 	    ResultSetOneDimensional oneDimensionalResultSet) {
-	// TODO need check
 	List<Circle> circleList = oneDimensionalResultSet.getCircles();
 	if (circleList == null) {
 	    logger.error(circleList == null);
 	}
-	double minDistance = (envelopeState.getMaxX() - envelopeState.getMinX()) / 2;
+	// double minDistance = (envelopeState.getMaxX() -
+	// envelopeState.getMinX()) / 2;
+	// revised at 2013-08-21
+	// It doesn't matter if we set a bigger distance initially. Mainly for
+	// the left and the right line segment
+	double minDistance = envelopeState.getMaxX() - envelopeState.getMinX();
 	// intersect with the boarder line of the envelope
 	Circle c1 = circleList.get(0);
 	double r1 = c1.getRadius();
@@ -558,6 +677,24 @@ public class SliceCrawler extends OfflineStrategy {
 	double x0 = envelopeState.getMinX();
 	double x1 = envelopeState.getMaxX();
 	double x = (x0 + x1) / 2;
+	double y0 = envelopeState.getMinY();
+	double y1 = envelopeState.getMaxY();
+
+	LineSegment middleLine = new LineSegment(x, y0, x, y1);
+	return middleLine;
+    }
+
+    private LineSegment leftLine(Envelope envelopeState) {
+	double x = envelopeState.getMinX();
+	double y0 = envelopeState.getMinY();
+	double y1 = envelopeState.getMaxY();
+
+	LineSegment middleLine = new LineSegment(x, y0, x, y1);
+	return middleLine;
+    }
+
+    private LineSegment rightLine(Envelope envelopeState) {
+	double x = envelopeState.getMaxX();
 	double y0 = envelopeState.getMinY();
 	double y1 = envelopeState.getMaxY();
 
