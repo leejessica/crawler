@@ -50,17 +50,17 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 	}
 	List<APOI> resultPoints = resultSet.getPOIs();
 
-	if (logger.isDebugEnabled()) {
-	    for (int i = 0; i < resultPoints.size(); i++) {
-		APOI aPoint = resultPoints.get(i);
-		logger.debug("APoint: " + aPoint.getId() + ", ["
-			+ aPoint.getCoordinate().toString() + "]");
-	    }
-	}
+//	if (logger.isDebugEnabled()) {
+//	    for (int i = 0; i < resultPoints.size(); i++) {
+//		APOI aPoint = resultPoints.get(i);
+//		logger.debug("APoint: " + aPoint.getId() + ", ["
+//			+ aPoint.getCoordinate().toString() + "]");
+//	    }
+//	}
 
 	// farthest point lower than the up point
 	Coordinate farthestCoordinate = farthest(resultSet, up, true);
-	if(farthestCoordinate == null){
+	if (farthestCoordinate == null) {
 	    logger.error("farestest point is null");
 	    farthestCoordinate = farthest(resultSet, up, true);
 	}
@@ -77,7 +77,8 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 	    logger.debug("new up = " + newUp);
 	}
 	//
-	if (logger.isDebugEnabled()) {
+	if (logger.isDebugEnabled() && PaintShapes.painting) {
+
 	    PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
 	    PaintShapes.paint.addCircle(aCircle);
 	    PaintShapes.paint.myRepaint();
@@ -104,13 +105,13 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 	}
 	resultPoints = resultSet.getPOIs();
 
-	if (logger.isDebugEnabled()) {
-	    for (int i = 0; i < resultPoints.size(); i++) {
-		APOI aPoint = resultPoints.get(i);
-		logger.debug("APoint: " + aPoint.getId() + ", ["
-			+ aPoint.getCoordinate().toString() + "]");
-	    }
-	}
+//	if (logger.isDebugEnabled()) {
+//	    for (int i = 0; i < resultPoints.size(); i++) {
+//		APOI aPoint = resultPoints.get(i);
+//		logger.debug("APoint: " + aPoint.getId() + ", ["
+//			+ aPoint.getCoordinate().toString() + "]");
+//	    }
+//	}
 
 	// farthest point lower than the up point
 	farthestCoordinate = farthest(resultSet, down, false);
@@ -127,7 +128,7 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 	    logger.debug("new down = " + newDown);
 	}
 	//
-	if (logger.isDebugEnabled()) {
+	if (logger.isDebugEnabled() && PaintShapes.painting) {
 	    PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
 	    PaintShapes.paint.addCircle(aCircle);
 	    PaintShapes.paint.myRepaint();
@@ -184,13 +185,13 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 	}
 	List<APOI> resultPoints = resultSet.getPOIs();
 
-	if (logger.isDebugEnabled()) {
-	    for (int i = 0; i < resultPoints.size(); i++) {
-		APOI aPoint = resultPoints.get(i);
-		logger.debug("APoint: " + aPoint.getId() + ", ["
-			+ aPoint.getCoordinate().toString() + "]");
-	    }
-	}
+//	if (logger.isDebugEnabled()) {
+//	    for (int i = 0; i < resultPoints.size(); i++) {
+//		APOI aPoint = resultPoints.get(i);
+//		logger.debug("APoint: " + aPoint.getId() + ", ["
+//			+ aPoint.getCoordinate().toString() + "]");
+//	    }
+//	}
 
 	Coordinate farthestCoordinate = farthest(resultSet);
 	double radius = center.distance(farthestCoordinate);
@@ -202,7 +203,7 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 	Circle aCircle = new Circle(center, radius);
 	resultSet.addACircle(aCircle);
 	//
-	if (logger.isDebugEnabled()) {
+	if (logger.isDebugEnabled() && PaintShapes.painting) {
 	    PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
 	    PaintShapes.paint.addCircle(aCircle);
 	    PaintShapes.paint.myRepaint();
@@ -229,8 +230,8 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 	    logger.debug("newDown: " + newDown.toString());
 	    logger.debug("upperLine: " + upperLine.toString());
 	}
-	ResultSetOneDimensional newLeftResultSet = oneDimCrawlFromMiddle(state, category,
-		query, upperLine);
+	ResultSetOneDimensional newLeftResultSet = oneDimCrawlFromMiddle(state,
+		category, query, upperLine);
 	addResults(finalResultSet, newLeftResultSet);
 	// lower
 	// Coordinate newLeft = middleLine.pointAlongOffset(0.5, radius);
@@ -240,8 +241,8 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 	    logger.debug("newUp: " + newUp.toString());
 	    logger.debug("lowerLine: " + lowerLine.toString());
 	}
-	ResultSetOneDimensional newRightResultSet = oneDimCrawlFromMiddle(state,
-		category, query, lowerLine);
+	ResultSetOneDimensional newRightResultSet = oneDimCrawlFromMiddle(
+		state, category, query, lowerLine);
 	addResults(finalResultSet, newRightResultSet);
 
 	return finalResultSet;
@@ -280,21 +281,19 @@ public class OneDimensionalCrawler extends OfflineStrategy {
     /**
      * Find the farthest point which is lower/higher than the point p
      * 
-     * @param resultSet
+     * @param resultSet, already ranged by the distance
      * @param p
      * @param lower
      * @return
      */
     private static Coordinate farthest(ResultSet resultSet, Coordinate p,
 	    boolean lower) {
-	Coordinate farthestCoordinate;
 	int size = resultSet.getPOIs().size();
-	// farthest
 	if (size == 0) {
 	    return null;
 	} else {
-	    for (int i = size - 1; i > 0; i--) {
-		APOI farthestPOI = resultSet.getPOIs().get(size - 1);
+	    for (int i = size - 1; i >= 0; i--) {
+		APOI farthestPOI = resultSet.getPOIs().get(i);
 		Coordinate c = farthestPOI.getCoordinate();
 		if (lower) {
 		    if (c.y > p.y) {

@@ -2,22 +2,22 @@ package mo.umac.crawler;
 
 import java.util.LinkedList;
 import java.util.List;
-
 import mo.umac.crawler.offline.SliceCrawler;
 import mo.umac.crawler.online.OnlineStrategy;
-import mo.umac.db.DBExternal;
-import mo.umac.db.H2DB;
+import mo.umac.paint.PaintShapes;
 import mo.umac.spatial.UScensusData;
-
+import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 
 public class Main {
+
+    public static Logger logger = Logger.getLogger(Main.class.getName());
 
     public static String LOG_PROPERTY_PATH = "./src/main/resources/log4j.xml";
 
     public static void main(String[] args) {
 	DOMConfigurator.configure(Main.LOG_PROPERTY_PATH);
-
+	
 	/************************* Change these lines *************************/
 	initForServer(false);
 	// YahooLocalCrawlerStrategy crawlerStrategy = new QuadTreeCrawler();
@@ -35,6 +35,7 @@ public class Main {
 	// listCategoryNames.add(category1);
 	listCategoryNames.add(category2);
 	//
+	PaintShapes.painting = false;
 	crawlerContext.callCrawling(listNameStates, listCategoryNames);
     }
 

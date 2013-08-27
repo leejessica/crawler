@@ -58,11 +58,7 @@ public class H2DB extends DBExternal {
 	super.dbNameTarget = dbNameTarget;
     }
 
-    
     /****************************** sqls for deleting table ******************************/
-    /**
-     * level: the divided level radius: the radius of the circle want to covered
-     */
     private String sqlDeleteQueryTable = "DROP TABLE QUERY";
     private String sqlDeleteItemTable = "DROP TABLE ITEM";
     private String sqlDeleteCategoryTable = "DROP TABLE CATEGORY";
@@ -71,23 +67,53 @@ public class H2DB extends DBExternal {
     /**
      * level: the divided level radius: the radius of the circle want to covered
      */
+    // private String sqlCreateQueryTable = "CREATE TABLE IF NOT EXISTS QUERY "
+    // +
+    // "(QUERYID INT PRIMARY KEY, QUERY VARCHAR(100), ZIP INT, RESULTS INT, START INT, "
+    // +
+    // "LATITUDE DOUBLE, LONGITUDE DOUBLE, RADIUS DOUBLE, LEVEL INT, PARENTID INT, "
+    // +
+    // "TOTALRESULTSAVAILABLE INT, TOTALRESULTSRETURNED INT, FIRSTRESULTPOSITION INT)";
+    // private String sqlCreateItemTable = "CREATE TABLE IF NOT EXISTS ITEM "
+    // +
+    // "(ITEMID INT PRIMARY KEY, TITLE VARCHAR(200), CITY VARCHAR(200), STATE VARCHAR(10), "
+    // + "LATITUDE DOUBLE, LONGITUDE DOUBLE, DISTANCE DOUBLE, "
+    // + "AVERAGERATING DOUBLE, TOTALRATINGS DOUBLE, TOTALREVIEWS DOUBLE)";
+    // private String sqlCreateCategoryTable =
+    // "CREATE TABLE IF NOT EXISTS CATEGORY (ITEMID INT, "
+    // +
+    // "CATEGORYID INT, CATEGORYNAME VARCHAR(200), CONSTRAINT pk_itemCategory PRIMARY KEY (ITEMID,CATEGORYID))";
+    //
+    // /**
+    // * This table records that the item is returned by which query in which
+    // * position.
+    // */
+    // private String sqlCreateRelationshipTable =
+    // "CREATE TABLE IF NOT EXISTS RELATIONSHIP "
+    // +
+    // "(ITEMID INT, QEURYID INT, POSITION INT, CONSTRAINT pk_itemquery PRIMARY KEY (ITEMID,QEURYID))";
+
+    /****************************** sqls for creating table ******************************/
+    /**
+     * level: the divided level radius: the radius of the circle want to covered
+     */
     private String sqlCreateQueryTable = "CREATE TABLE IF NOT EXISTS QUERY "
-	    + "(QUERYID INT PRIMARY KEY, QUERY VARCHAR(100), ZIP INT, RESULTS INT, START INT, "
+	    + "(QUERYID INT, QUERY VARCHAR(100), ZIP INT, RESULTS INT, START INT, "
 	    + "LATITUDE DOUBLE, LONGITUDE DOUBLE, RADIUS DOUBLE, LEVEL INT, PARENTID INT, "
 	    + "TOTALRESULTSAVAILABLE INT, TOTALRESULTSRETURNED INT, FIRSTRESULTPOSITION INT)";
     private String sqlCreateItemTable = "CREATE TABLE IF NOT EXISTS ITEM "
-	    + "(ITEMID INT PRIMARY KEY, TITLE VARCHAR(200), CITY VARCHAR(200), STATE VARCHAR(10), "
+	    + "(ITEMID INT, TITLE VARCHAR(200), CITY VARCHAR(200), STATE VARCHAR(10), "
 	    + "LATITUDE DOUBLE, LONGITUDE DOUBLE, DISTANCE DOUBLE, "
 	    + "AVERAGERATING DOUBLE, TOTALRATINGS DOUBLE, TOTALREVIEWS DOUBLE)";
     private String sqlCreateCategoryTable = "CREATE TABLE IF NOT EXISTS CATEGORY (ITEMID INT, "
-	    + "CATEGORYID INT, CATEGORYNAME VARCHAR(200), CONSTRAINT pk_itemCategory PRIMARY KEY (ITEMID,CATEGORYID))";
+	    + "CATEGORYID INT, CATEGORYNAME VARCHAR(200))";
 
     /**
      * This table records that the item is returned by which query in which
      * position.
      */
     private String sqlCreateRelationshipTable = "CREATE TABLE IF NOT EXISTS RELATIONSHIP "
-	    + "(ITEMID INT, QEURYID INT, POSITION INT, CONSTRAINT pk_itemquery PRIMARY KEY (ITEMID,QEURYID))";
+	    + "(ITEMID INT, QEURYID INT, POSITION INT)";
 
     /****************************** sqls preparation for insertion ******************************/
     private String sqlPrepInsertItem = "INSERT INTO ITEM (ITEMID, TITLE, CITY, STATE, "
@@ -214,6 +240,7 @@ public class H2DB extends DBExternal {
 	    prepQuery.executeBatch();
 
 	    con.commit();
+	    con.setAutoCommit(true);
 	    prepItem.close();
 	    prepCategory.close();
 	    prepQuery.close();
@@ -515,7 +542,7 @@ public class H2DB extends DBExternal {
 	try {
 	    Connection conn = getConnection(dbName);
 	    Statement stat = conn.createStatement();
-	    // TODO delete the comments
+	    //
 	    stat.execute(sqlDeleteQueryTable);
 	    stat.execute(sqlDeleteItemTable);
 	    stat.execute(sqlDeleteCategoryTable);
@@ -535,16 +562,19 @@ public class H2DB extends DBExternal {
 	if (connMap.get(dbname) == null) {
 	    try {
 		Class.forName("org.h2.Driver");
-		java.sql.Connection conn = DriverManager.getConnection("jdbc:h2:file:" + dbname
-			+ ";MVCC=true;LOCK_TIMEOUT=30000;AUTO_SERVER=TRUE",
-			"sa", "");
+		java.sql.Connection conn = DriverManager
+			.getConnection(
+				"jdbc:h2:file:"
+					+ dbname
+					+ ";MVCC=true;LOCK_TIMEOUT=3000000;AUTO_SERVER=TRUE;DB_CLOSE_ON_EXIT=FALSE",
+				"sa", "");
 		connMap.put(dbname, conn);
 	    } catch (ClassNotFoundException e) {
 		e.printStackTrace();
 	    } catch (SQLException e) {
 		e.printStackTrace();
 	    }
-	} 
+	}
 	return (Connection) connMap.get(dbname);
     }
 
@@ -728,7 +758,6 @@ public class H2DB extends DBExternal {
     public HashMap<Integer, APOI> readFromExtenalDB(String categoryQ,
 	    String stateQ) {
 	HashMap<Integer, APOI> map = new HashMap<Integer, APOI>();
-	// TODO check sql
 	try {
 	    Connection conn = getConnection(dbNameSource);
 	    Statement stat = conn.createStatement();
@@ -768,7 +797,6 @@ public class H2DB extends DBExternal {
 			Category category = new Category(categoryID, categoryQ);
 			categories.add(category);
 		    }
-		    // TODO need check
 		    // transfer from lla to ecef
 		    Coordinate lla = new Coordinate(longitude, latitude);
 		    Coordinate ecef = ECEFLLA.lla2ecef(lla);

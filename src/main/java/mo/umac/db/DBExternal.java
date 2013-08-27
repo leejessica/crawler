@@ -1,7 +1,10 @@
 package mo.umac.db;
 
+import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import mo.umac.metadata.APOI;
 import mo.umac.metadata.AQuery;
@@ -27,31 +30,49 @@ public abstract class DBExternal {
      * A file stores the xml file's name and the detailed results of a query.
      */
     public static final String RESULT_FILE_NAME = "results";
-    
-    
+
     public static String dbNameSource = "";
 
     public static String dbNameTarget = "";
-    
+
     /**
      * String represents the name of the database;
      */
     public static Map connMap = new HashMap<String, java.sql.Connection>();
-    
-    public abstract void writeToExternalDB(int queryID, int level, int parentID,
-	    YahooLocalQueryFileDB qc, ResultSetYahooOnline resultSet);
+
+    public abstract void writeToExternalDB(int queryID, int level,
+	    int parentID, YahooLocalQueryFileDB qc,
+	    ResultSetYahooOnline resultSet);
 
     public abstract void init();
 
     /**
      * Read dataset from external database.
      */
-    public abstract HashMap<Integer, APOI> readFromExtenalDB(String category, String state);
+    public abstract HashMap<Integer, APOI> readFromExtenalDB(String category,
+	    String state);
 
-    public abstract void writeToExternalDB(
-	    int queryID, AQuery query, ResultSet resultSet) ;
+    public abstract void writeToExternalDB(int queryID, AQuery query,
+	    ResultSet resultSet);
 
     public abstract void createTables(String dbNameTarget);
 
     public abstract int numCrawlerPoints();
+
+    /**
+     * 
+     */
+    public static void distroyConn() {
+	Iterator it = connMap.entrySet().iterator();
+	while (it.hasNext()) {
+	    Entry entry = (Entry) it.next();
+	    java.sql.Connection conn = (java.sql.Connection) entry.getValue();
+	    try {
+		conn.commit();
+		conn.close();
+	    } catch (SQLException e) {
+		e.printStackTrace();
+	    }
+	}
+    }
 }

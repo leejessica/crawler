@@ -222,9 +222,9 @@ public class MyRTree extends RTree {
 	    Node n = getNode(parents.pop());
 	    if (logger.isDebugEnabled()) {
 		rN = new Rectangle(n.mbrMinX, n.mbrMinY, n.mbrMaxX, n.mbrMaxY);
-		System.out.println("");
-		System.out.println(rN.toString());
-		System.out.println("-------");
+		logger.debug("");
+		logger.debug(rN.toString());
+		logger.debug("-------");
 	    }
 	    if (!n.isLeaf()) {
 		// The children of n are not the leaves
@@ -236,7 +236,7 @@ public class MyRTree extends RTree {
 		    if (logger.isDebugEnabled()) {
 			rN = new Rectangle(n.entriesMinX[i], n.entriesMinY[i],
 				n.entriesMaxX[i], n.entriesMaxY[i]);
-			System.out.println(rN.toString());
+			logger.debug(rN.toString());
 		    }
 
 		    if (Rectangle.contains(n.entriesMinX[i], n.entriesMinY[i],
@@ -263,7 +263,7 @@ public class MyRTree extends RTree {
 		    if (logger.isDebugEnabled()) {
 			rN = new Rectangle(n.entriesMinX[i], n.entriesMinY[i],
 				n.entriesMaxX[i], n.entriesMaxY[i]);
-			System.out.println(rN.toString());
+			logger.debug(rN.toString());
 		    }
 		    if (Rectangle.contains(n.entriesMinX[i], n.entriesMinY[i],
 			    n.entriesMaxX[i], n.entriesMaxY[i], r.minX, r.minY,

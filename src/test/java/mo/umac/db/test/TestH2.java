@@ -8,8 +8,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.sql.DataSource;
+
+import mo.umac.crawler.Main;
+import mo.umac.db.H2DB;
 
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.h2.tools.DeleteDbFiles;
@@ -28,7 +33,7 @@ public class TestH2 {
      */
     public static void main(String[] args) {
 	TestH2 test = new TestH2();
-	test.example3();
+	 test.example3();
     }
 
     private void example1() {
@@ -43,7 +48,6 @@ public class TestH2 {
 	    // ... populate with data, test etc
 	    conn.close();
 	} catch (SQLException e) {
-	    // TODO Auto-generated catch block
 	    e.printStackTrace();
 	}
     }
@@ -119,6 +123,23 @@ public class TestH2 {
 	}
     }
 
+    public int checkExample3(){
+	int num = 0;
+//	Class.forName("org.h2.Driver");
+//
+//	    Connection con = DriverManager.getConnection(
+//		    "jdbc:h2:file:../example-folder/example3;AUTO_SERVER=TRUE",
+//		    "sa", "");
+//
+//	    Statement stat = con.createStatement();
+//
+//	    // create table
+//	    stat.execute("select count(*) from ACTIVITY");
+
+	    
+	    return num;
+    }
+    
     private void readOnlyMode() {
 	try {
 	    Class.forName("org.h2.Driver");
@@ -175,4 +196,7 @@ public class TestH2 {
 	    e.printStackTrace();
 	}
     }
+
+
+
 }

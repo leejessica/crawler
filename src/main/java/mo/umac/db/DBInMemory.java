@@ -1,13 +1,16 @@
 package mo.umac.db;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
 import mo.umac.crawler.CrawlerStrategy;
-import mo.umac.crawler.test.SlideCrawlerTest;
 import mo.umac.metadata.APOI;
 import mo.umac.metadata.AQuery;
 import mo.umac.metadata.ResultSet;
@@ -34,7 +37,7 @@ public class DBInMemory {
      */
     public static MyRTree rtreePoints;
 
-    // TODO treeset is for debugging. change to hashset when running the program 
+    // TODO treeset is for debugging. change to hashset when running the program
     public static Set<Integer> poisIDs = new TreeSet<Integer>();
 
     /**
@@ -76,38 +79,89 @@ public class DBInMemory {
 
     public ResultSet query(AQuery qc) {
 	Coordinate queryPoint = qc.getPoint();
-	logger.debug("query point = " + queryPoint.toString());
-//	SlideCrawlerTest.paint.addPoint(queryPoint);
-//	SlideCrawlerTest.paint.repaint();
-	
-	
-	List<Integer> resultsID = rtreePoints.searchNN(queryPoint, qc.getTopK());
+	if (logger.isDebugEnabled()) {
+	    logger.debug("query point = " + queryPoint.toString());
+	}
+	List<Integer> resultsID = rtreePoints
+		.searchNN(queryPoint, qc.getTopK());
 	//
 	poisIDs.addAll(resultsID);
 
-	// FIXME add re-transfering from the break point.
+	// FIXME add re-transfer from the break point.
 	int queryID = CrawlerStrategy.countNumQueries;
 
-	logger.debug("countNumQueries = " + CrawlerStrategy.countNumQueries);
+	if (logger.isDebugEnabled()) {
+	    logger.debug("countNumQueries = " + CrawlerStrategy.countNumQueries);
+	}
 
 	ResultSet resultSet = queryByID(resultsID);
-	int totalResultsReturned = resultsID.size();
-	resultSet.setTotalResultsReturned(totalResultsReturned);
-	//
-	long before = System.currentTimeMillis();
-	System.out.println("Before writing: " + before);
-	writeToExternalDB(queryID, qc, resultSet);
-	long after = System.currentTimeMillis();
-	System.out.println("After writing: " + after);
-	System.out.println("time for writeToExternalDB = " + (after - before) / 1000);
-	logger.debug("number of points crawled = " + numCrawlerPoints());
+	resultSet.setTotalResultsReturned(resultsID.size());
 
-	if (queryID % 500 == 0) {
+	if (logger.isDebugEnabled()) {
+	    int size1 = resultsID.size();
+	    int size2 = resultSet.getPOIs().size();
+	    if (size1 != size2) {
+		logger.error("size1 != size2");
+	    }
+	}
+	writeToExternalDB(queryID, qc, resultSet);
+
+	//
+	if (logger.isDebugEnabled()) {
+	    logger.debug("countNumQueries = " + CrawlerStrategy.countNumQueries);
+	    logger.debug("number of points crawled = " + numCrawlerPoints());
+
+	    int size1 = numCrawlerPoints();
+	    Set set = new TreeSet();
+	    int size2 = numOfTuplesInExternalDB(set);
+	    logger.debug("numCrawlerPoints in memory = " + size1);
+	    logger.debug("numCrawlerPoints in db = " + size2);
+	    // ...
+	    // Iterator it = set.iterator();
+	    // while (it.hasNext()) {
+	    // int id = (Integer) it.next();
+	    // logger.debug(id);
+	    // }
+
+	    if (size1 != size2) {
+		logger.error("size1 != size2");
+		logger.error("countNumQueries = "
+			+ CrawlerStrategy.countNumQueries);
+		logger.error("numCrawlerPoints in memory = " + size1);
+		logger.error("numCrawlerPoints in db = " + size2);
+	    }
+
+	}
+
+	if (queryID % 100 == 0) {
 	    logger.info("countNumQueries = " + CrawlerStrategy.countNumQueries);
 	    logger.info("number of points crawled = " + numCrawlerPoints());
 	}
 	CrawlerStrategy.countNumQueries++;
 	return resultSet;
+    }
+
+    /**
+     * Only for debugging
+     * 
+     * @return
+     */
+    public int numOfTuplesInExternalDB(Set set) {
+	H2DB h2db = new H2DB();
+	String dbName = H2DB.DB_NAME_TARGET;
+	Connection conn = h2db.getConnection(dbName);
+	try {
+	    Statement stat = conn.createStatement();
+	    String sql = "select distinct itemid from item";
+	    java.sql.ResultSet rs = stat.executeQuery(sql);
+	    while (rs.next()) {
+		int id = rs.getInt(1);
+		set.add(id);
+	    }
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+	return set.size();
     }
 
     /**
@@ -127,7 +181,6 @@ public class DBInMemory {
     }
 
     public int numCrawlerPoints() {
-	// return CrawlerStrategy.dbExternal.numCrawlerPoints();
 	return DBInMemory.poisIDs.size();
     }
 

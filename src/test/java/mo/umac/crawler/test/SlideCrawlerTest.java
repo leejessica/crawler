@@ -1,6 +1,5 @@
 package mo.umac.crawler.test;
 
-import java.awt.Color;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -39,6 +38,7 @@ public class SlideCrawlerTest extends SliceCrawler {
     public static void main(String[] args) {
 	DOMConfigurator.configure(SlideCrawlerTest.LOG_PROPERTY_PATH);
 	SlideCrawlerTest test = new SlideCrawlerTest();
+	PaintShapes.painting = true;
 	WindowUtilities.openInJFrame(PaintShapes.paint, 1000, 1000);
 	test.calling();
 
@@ -54,25 +54,21 @@ public class SlideCrawlerTest extends SliceCrawler {
 	String category = "Restaurants";
 	Envelope envelopeECEF = new Envelope(0, 1000, 0, 1000);
 	//
-	PaintShapes.paint.addRectangle(envelopeECEF);
-	PaintShapes.paint.myRepaint();
-	//
 	String testSource = "../yahoolocal-h2/test/source";
 	String testTarget = "../yahoolocal-h2/test/target";
 	//
-	int numItems = 10;
-	int topK = 2;
+	int numItems = 50;
+	int topK = 10;
 	CrawlerStrategy.MAX_TOTAL_RESULTS_RETURNED = topK;
 	//
 	CrawlerStrategy.categoryIDMap = FileOperator
 		.readCategoryID(CATEGORY_ID_PATH);
 	// source database
 	CrawlerStrategy.dbExternal = new H2DB(testSource, testTarget);
-	// TODO generate dataset
-	// List<Coordinate> points = generateSimpleCase(testSource, category,
-	// state, numItems);
-	// exportToH2(points, testSource, category, state);
-	//
+	// generate dataset
+	List<Coordinate> points = generateSimpleCase(testSource, category,
+		state, numItems);
+	exportToH2(points, testSource, category, state);
 	//
 	CrawlerStrategy.dbInMemory = new DBInMemory();
 	DBInMemory.pois = readFromGeneratedDB(testSource);

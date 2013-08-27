@@ -20,6 +20,8 @@ import com.vividsolutions.jts.geom.LineSegment;
 
 public class PaintShapes extends JPanel {
 
+    public static boolean painting = false;
+    
     public static List<Shape> arrDraw = new ArrayList<Shape>();
     public static List<Shape> arrFill = new ArrayList<Shape>();
 

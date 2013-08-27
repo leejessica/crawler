@@ -3,15 +3,12 @@ package mo.umac.crawler.offline;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
 import mo.umac.crawler.CrawlerStrategy;
 import mo.umac.metadata.APOI;
 import mo.umac.paint.PaintShapes;
 import mo.umac.spatial.Circle;
 import mo.umac.spatial.GeoOperator;
-
 import org.apache.log4j.Logger;
-
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.LineSegment;
@@ -20,6 +17,11 @@ public class SliceCrawler extends OfflineStrategy {
 
     public static Logger logger = Logger
 	    .getLogger(SliceCrawler.class.getName());
+
+    public SliceCrawler() {
+	super();
+	logger.info("------------SliceCrawler------------");
+    }
 
     /*
      * (non-Javadoc)
@@ -34,8 +36,8 @@ public class SliceCrawler extends OfflineStrategy {
     public void crawl(String state, int category, String query,
 	    Envelope envelopeStateECEF) {
 	if (logger.isDebugEnabled()) {
-	    logger.debug("------------crawling---------");
-	    logger.debug(envelopeStateECEF.toString());
+	    logger.info("------------crawling---------");
+	    logger.info(envelopeStateECEF.toString());
 	}
 	// finished crawling
 	if (envelopeStateECEF == null) {
@@ -46,8 +48,6 @@ public class SliceCrawler extends OfflineStrategy {
 	//
 	if (logger.isDebugEnabled()) {
 	    logger.debug("leftLine = " + leftLine.toString());
-	    // PaintShapes.paint.addLine(middleLine);
-	    // PaintShapes.paint.myRepaint();
 	}
 	//
 	ResultSetOneDimensional oneDimensionalResultSet = OneDimensionalCrawler
@@ -68,9 +68,11 @@ public class SliceCrawler extends OfflineStrategy {
 	    if (logger.isDebugEnabled()) {
 		logger.debug("this envelope is covered by the one dimensional crawler");
 		logger.debug(envelopeStateECEF.toString());
-		PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-		PaintShapes.paint.addRectangle(envelopeStateECEF);
-		PaintShapes.paint.myRepaint();
+		if (PaintShapes.painting) {
+		    PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+		    PaintShapes.paint.addRectangle(envelopeStateECEF);
+		    PaintShapes.paint.myRepaint();
+		}
 	    }
 	    CrawlerStrategy.rtreeRectangles.addRectangle(rectangleId++,
 		    envelopeStateECEF);
@@ -83,9 +85,12 @@ public class SliceCrawler extends OfflineStrategy {
 	    if (logger.isDebugEnabled()) {
 		logger.debug("envelopeDistanceX is covered by the one dimensional crawler");
 		logger.debug(envelopeDistanceX.toString());
-		PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-		PaintShapes.paint.addRectangle(envelopeDistanceX);
-		PaintShapes.paint.myRepaint();
+		if (PaintShapes.painting) {
+
+		    PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+		    PaintShapes.paint.addRectangle(envelopeDistanceX);
+		    PaintShapes.paint.myRepaint();
+		}
 	    }
 	    CrawlerStrategy.rtreeRectangles.addRectangle(rectangleId++,
 		    envelopeDistanceX);
@@ -96,8 +101,6 @@ public class SliceCrawler extends OfflineStrategy {
 	//
 	if (logger.isDebugEnabled()) {
 	    logger.debug("rightLine = " + rightLine.toString());
-	    // PaintShapes.paint.addLine(middleLine);
-	    // PaintShapes.paint.myRepaint();
 	}
 	//
 	oneDimensionalResultSet = OneDimensionalCrawler.oneDimCrawl(state,
@@ -118,9 +121,12 @@ public class SliceCrawler extends OfflineStrategy {
 	    if (logger.isDebugEnabled()) {
 		logger.debug("this envelope is covered by the one dimensional crawler");
 		logger.debug(envelopeStateECEF.toString());
-		PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-		PaintShapes.paint.addRectangle(envelopeStateECEF);
-		PaintShapes.paint.myRepaint();
+		if (PaintShapes.painting) {
+
+		    PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+		    PaintShapes.paint.addRectangle(envelopeStateECEF);
+		    PaintShapes.paint.myRepaint();
+		}
 	    }
 	    CrawlerStrategy.rtreeRectangles.addRectangle(rectangleId++,
 		    envelopeStateECEF);
@@ -133,9 +139,12 @@ public class SliceCrawler extends OfflineStrategy {
 	    if (logger.isDebugEnabled()) {
 		logger.debug("envelopeDistanceX is covered by the one dimensional crawler");
 		logger.debug(envelopeDistanceX.toString());
-		PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-		PaintShapes.paint.addRectangle(envelopeDistanceX);
-		PaintShapes.paint.myRepaint();
+		if (PaintShapes.painting) {
+
+		    PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+		    PaintShapes.paint.addRectangle(envelopeDistanceX);
+		    PaintShapes.paint.myRepaint();
+		}
 	    }
 	    CrawlerStrategy.rtreeRectangles.addRectangle(rectangleId++,
 		    envelopeDistanceX);
@@ -168,8 +177,6 @@ public class SliceCrawler extends OfflineStrategy {
 	//
 	if (logger.isDebugEnabled()) {
 	    logger.debug("middleLine = " + middleLine.toString());
-	    // PaintShapes.paint.addLine(middleLine);
-	    // PaintShapes.paint.myRepaint();
 	}
 	//
 	ResultSetOneDimensional oneDimensionalResultSet = OneDimensionalCrawler
@@ -189,9 +196,12 @@ public class SliceCrawler extends OfflineStrategy {
 	    if (logger.isDebugEnabled()) {
 		logger.debug("this envelope is covered by the one dimensional crawler");
 		logger.debug(envelopeStateECEF.toString());
-		PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-		PaintShapes.paint.addRectangle(envelopeStateECEF);
-		PaintShapes.paint.myRepaint();
+		if (PaintShapes.painting) {
+
+		    PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+		    PaintShapes.paint.addRectangle(envelopeStateECEF);
+		    PaintShapes.paint.myRepaint();
+		}
 	    }
 	    CrawlerStrategy.rtreeRectangles.addRectangle(rectangleId++,
 		    envelopeStateECEF);
@@ -204,9 +214,12 @@ public class SliceCrawler extends OfflineStrategy {
 	    if (logger.isDebugEnabled()) {
 		logger.debug("envelopeDistanceX is covered by the one dimensional crawler");
 		logger.debug(envelopeDistanceX.toString());
-		PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-		PaintShapes.paint.addRectangle(envelopeDistanceX);
-		PaintShapes.paint.myRepaint();
+		if (PaintShapes.painting) {
+
+		    PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+		    PaintShapes.paint.addRectangle(envelopeDistanceX);
+		    PaintShapes.paint.myRepaint();
+		}
 	    }
 	    CrawlerStrategy.rtreeRectangles.addRectangle(rectangleId++,
 		    envelopeDistanceX);
@@ -235,9 +248,12 @@ public class SliceCrawler extends OfflineStrategy {
 		if (logger.isDebugEnabled()) {
 		    logger.debug("finished covering the left region");
 		    logger.debug(e.toString());
-		    PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-		    PaintShapes.paint.addRectangle(envelopeStateECEF);
-		    PaintShapes.paint.myRepaint();
+		    if (PaintShapes.painting) {
+
+			PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+			PaintShapes.paint.addRectangle(envelopeStateECEF);
+			PaintShapes.paint.myRepaint();
+		    }
 		}
 		CrawlerStrategy.rtreeRectangles.addRectangle(rectangleId++, e);
 	    } else {
@@ -252,9 +268,12 @@ public class SliceCrawler extends OfflineStrategy {
 
 	if (logger.isDebugEnabled()) {
 	    logger.debug("leftBoarderLine = " + leftBoarderLine.toString());
-	    PaintShapes.paint.color = PaintShapes.paint.blackTranslucence;
-	    PaintShapes.paint.addLine(leftBoarderLine);
-	    PaintShapes.paint.myRepaint();
+	    if (PaintShapes.painting) {
+
+		PaintShapes.paint.color = PaintShapes.paint.blackTranslucence;
+		PaintShapes.paint.addLine(leftBoarderLine);
+		PaintShapes.paint.myRepaint();
+	    }
 	}
 
 	Envelope leftRemainedEnvelope = leftRemainedRegion(envelopeStateECEF,
@@ -264,7 +283,7 @@ public class SliceCrawler extends OfflineStrategy {
 		logger.debug("leftRemainedEnvelope = "
 			+ leftRemainedEnvelope.toString());
 	    }
-	    crawl(state, category, query, leftRemainedEnvelope);
+	    crawlFromMiddle(state, category, query, leftRemainedEnvelope);
 	}
 	// right
 	double xRightNearestCoordinates = xNearestRightCoordinates(
@@ -289,9 +308,12 @@ public class SliceCrawler extends OfflineStrategy {
 		if (logger.isDebugEnabled()) {
 		    logger.debug("finished covering the right region");
 		    logger.debug(e.toString());
-		    PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-		    PaintShapes.paint.addRectangle(e);
-		    PaintShapes.paint.myRepaint();
+		    if (PaintShapes.painting) {
+
+			PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+			PaintShapes.paint.addRectangle(e);
+			PaintShapes.paint.myRepaint();
+		    }
 		}
 		CrawlerStrategy.rtreeRectangles.addRectangle(rectangleId++, e);
 	    } else {
@@ -306,9 +328,12 @@ public class SliceCrawler extends OfflineStrategy {
 	}
 	if (logger.isDebugEnabled()) {
 	    logger.debug("rightBoarderLine = " + rightBoarderLine.toString());
-	    PaintShapes.paint.color = PaintShapes.paint.blackTranslucence;
-	    PaintShapes.paint.addLine(rightBoarderLine);
-	    PaintShapes.paint.myRepaint();
+	    if (PaintShapes.painting) {
+
+		PaintShapes.paint.color = PaintShapes.paint.blackTranslucence;
+		PaintShapes.paint.addLine(rightBoarderLine);
+		PaintShapes.paint.myRepaint();
+	    }
 	}
 	// FIXME record this covered region & combine with previous covered
 	// regions
@@ -321,15 +346,17 @@ public class SliceCrawler extends OfflineStrategy {
 		logger.debug("rightRemainedEnvelope = "
 			+ rightRemainedEnvelope.toString());
 	    }
-	    crawl(state, category, query, rightRemainedEnvelope);
+	    crawlFromMiddle(state, category, query, rightRemainedEnvelope);
 	}
-	// TODO combine small rectangles in this region
 	if (logger.isDebugEnabled()) {
 	    logger.debug("finished covering this region");
 	    logger.debug(envelopeStateECEF.toString());
-	    PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-	    PaintShapes.paint.addRectangle(envelopeStateECEF);
-	    PaintShapes.paint.myRepaint();
+	    if (PaintShapes.painting) {
+
+		PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
+		PaintShapes.paint.addRectangle(envelopeStateECEF);
+		PaintShapes.paint.myRepaint();
+	    }
 	}
 	CrawlerStrategy.rtreeRectangles.addRectangle(rectangleId++,
 		envelopeStateECEF);
@@ -491,9 +518,12 @@ public class SliceCrawler extends OfflineStrategy {
 		    if (logger.isDebugEnabled()) {
 			logger.debug("smallEnvelope = "
 				+ smallEnvelope.toString());
-			PaintShapes.paint.color = PaintShapes.paint.greenTranslucence;
-			PaintShapes.paint.addRectangle(smallEnvelope);
-			PaintShapes.paint.myRepaint();
+			if (PaintShapes.painting) {
+
+			    PaintShapes.paint.color = PaintShapes.paint.greenTranslucence;
+			    PaintShapes.paint.addRectangle(smallEnvelope);
+			    PaintShapes.paint.myRepaint();
+			}
 		    }
 		    crawl(state, category, query, smallEnvelope);
 		}
@@ -506,9 +536,12 @@ public class SliceCrawler extends OfflineStrategy {
 		    yLastEnd, yEnd);
 	    if (logger.isDebugEnabled()) {
 		logger.debug("smallEnvelope = " + smallEnvelope.toString());
-		PaintShapes.paint.color = PaintShapes.paint.greenTranslucence;
-		PaintShapes.paint.addRectangle(smallEnvelope);
-		PaintShapes.paint.myRepaint();
+		if (PaintShapes.painting) {
+
+		    PaintShapes.paint.color = PaintShapes.paint.greenTranslucence;
+		    PaintShapes.paint.addRectangle(smallEnvelope);
+		    PaintShapes.paint.myRepaint();
+		}
 	    }
 	    crawl(state, category, query, smallEnvelope);
 	}

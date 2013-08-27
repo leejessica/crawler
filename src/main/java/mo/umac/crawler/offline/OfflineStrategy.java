@@ -1,15 +1,20 @@
 package mo.umac.crawler.offline;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.Map.Entry;
 
 import mo.umac.crawler.CrawlerStrategy;
 import mo.umac.db.DBExternal;
 import mo.umac.db.DBInMemory;
 import mo.umac.db.H2DB;
+import mo.umac.metadata.APOI;
 import mo.umac.metadata.AQuery;
 import mo.umac.metadata.ResultSet;
+import mo.umac.paint.PaintShapes;
 import mo.umac.rtree.MyRTree;
 import mo.umac.spatial.GeoOperator;
 import mo.umac.utils.CommonUtils;
@@ -17,6 +22,7 @@ import mo.umac.utils.FileOperator;
 
 import org.apache.log4j.Logger;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 
 /**
@@ -29,7 +35,6 @@ import com.vividsolutions.jts.geom.Envelope;
 public abstract class OfflineStrategy extends CrawlerStrategy {
     protected static Logger logger = Logger.getLogger(OfflineStrategy.class
 	    .getName());
-
 
     /**
      * This is the crawling algorithm
@@ -45,8 +50,13 @@ public abstract class OfflineStrategy extends CrawlerStrategy {
 	return CrawlerStrategy.dbInMemory.query(aQuery);
     }
 
+    /**
+     * @param category
+     * @param state
+     */
     protected void prepareData(String category, String state) {
 	//
+	logger.info("preparing data...");
 	CrawlerStrategy.categoryIDMap = FileOperator
 		.readCategoryID(CATEGORY_ID_PATH);
 	// source database
@@ -55,6 +65,8 @@ public abstract class OfflineStrategy extends CrawlerStrategy {
 	CrawlerStrategy.dbInMemory = new DBInMemory();
 	CrawlerStrategy.dbInMemory.readFromExtenalDB(category, state);
 	CrawlerStrategy.dbInMemory.index();
+	logger.info("There are in total "
+		+ CrawlerStrategy.dbInMemory.pois.size() + " points.");
 	// target database
 	CrawlerStrategy.dbExternal.createTables(H2DB.DB_NAME_TARGET);
     }
@@ -63,9 +75,11 @@ public abstract class OfflineStrategy extends CrawlerStrategy {
      * (non-Javadoc)
      * 
      * @see mo.umac.crawler.YahooLocalCrawlerStrategy#endData()
+     * 
+     * shut down the connection
      */
     protected void endData() {
-	// TODO shut down the connection
+	DBExternal.distroyConn();
     }
 
     /*
@@ -80,6 +94,10 @@ public abstract class OfflineStrategy extends CrawlerStrategy {
 	    LinkedList<Envelope> listEnvelopeStates,
 	    List<String> listCategoryNames, LinkedList<String> nameStates,
 	    HashMap<Integer, String> categoryIDMap) {
+
+	long before = System.currentTimeMillis();
+	logger.info("Start at : " + before);
+
 	for (int i = 0; i < nameStates.size(); i++) {
 	    String state = nameStates.get(i);
 	    logger.info("crawling in the state: " + state);
@@ -98,19 +116,39 @@ public abstract class OfflineStrategy extends CrawlerStrategy {
 		    category = (Integer) searchingResult;
 		    //
 		    Envelope envelopeStateLLA = listEnvelopeStates.get(i);
-
-		    logger.debug(envelopeStateLLA.toString());
 		    Envelope envelopeStateECEF = GeoOperator
 			    .lla2ecef(envelopeStateLLA);
-		    logger.debug(envelopeStateECEF.toString());
-
+		    if (logger.isDebugEnabled()) {
+			logger.debug(envelopeStateLLA.toString());
+			logger.debug(envelopeStateECEF.toString());
+		    }
 		    crawl(state, category, query, envelopeStateECEF);
 		    //
 		} else {
 		    logger.error("Cannot find category id for query: " + query
 			    + " in categoryIDMap");
 		}
+
+		endData();
 	    }
 	}
+
+	/**************************************************************************/
+	long after = System.currentTimeMillis();
+	logger.info("Stop at: " + after);
+	logger.info("time for crawling = " + (after - before) / 1000);
+	//
+	logger.info("countNumQueries = " + CrawlerStrategy.countNumQueries);
+	logger.info("number of points crawled = "
+		+ CrawlerStrategy.dbInMemory.poisIDs.size());
+	logger.info("Finished ! Oh ! Yeah! ");
+	// delete
+	Set set = CrawlerStrategy.dbInMemory.poisIDs;
+	Iterator<Integer> it = set.iterator();
+	while (it.hasNext()) {
+	    int id = it.next();
+	    logger.info(id);
+	}
+
     }
 }
