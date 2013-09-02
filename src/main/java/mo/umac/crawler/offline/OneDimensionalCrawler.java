@@ -265,10 +265,9 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 	return newDown;
     }
 
-    private static Coordinate farthest(ResultSet resultSet) {
+    public static Coordinate farthest(ResultSet resultSet) {
 	Coordinate farthestCoordinate;
 	int size = resultSet.getPOIs().size();
-	// farthest
 	if (size == 0) {
 	    return null;
 	} else {
