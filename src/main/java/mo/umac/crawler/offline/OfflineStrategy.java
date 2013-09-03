@@ -128,7 +128,6 @@ public abstract class OfflineStrategy extends CrawlerStrategy {
 		    logger.error("Cannot find category id for query: " + query
 			    + " in categoryIDMap");
 		}
-
 		endData();
 	    }
 	}
