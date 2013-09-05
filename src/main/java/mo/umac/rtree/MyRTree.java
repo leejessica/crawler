@@ -134,6 +134,108 @@ public class MyRTree extends RTree {
     }
 
     /**
+     * whether this point is contained by a rectangle
+     * 
+     * @param p
+     * @return
+     */
+    public boolean contains(Coordinate p) {
+	// FIXME here
+	// stacks used to store nodeId and entry index of each node
+	// from the root down to the leaf. Enables fast lookup
+	// of nodes when a split is propagated up the tree.
+	TIntStack parents = new TIntStack();
+	// find a rectangle in the tree that contains the passed
+	// rectangle
+	// written to be non-recursive (should model other searches on this?)
+
+	AddToListProcedure v = new AddToListProcedure();
+
+	int rootNodeId = this.getRootNodeId();
+
+	parents.reset();
+	parents.push(rootNodeId);
+	boolean contain = false;
+	Rectangle rN;
+	// CrawlerStrategy.rectangleId > 0 means that there are relative
+	// rectangles
+	while (CrawlerStrategy.rectangleId > 0 && parents.size() > 0) {
+	    Node n = getNode(parents.pop());
+	    if (logger.isDebugEnabled()) {
+		rN = new Rectangle(n.mbrMinX, n.mbrMinY, n.mbrMaxX, n.mbrMaxY);
+		logger.debug("");
+		logger.debug(rN.toString());
+		logger.debug("-------");
+	    }
+	    if (!n.isLeaf()) {
+		// The children of n are not the leaves
+		// go through every entry in the index node to check
+		// if it intersects the passed rectangle. If so, it
+		// could contain entries that are contained.
+		contain = false;
+		for (int i = 0; i < n.entryCount; i++) {
+		    if (logger.isDebugEnabled()) {
+			rN = new Rectangle(n.entriesMinX[i], n.entriesMinY[i],
+				n.entriesMaxX[i], n.entriesMaxY[i]);
+			logger.debug(rN.toString());
+		    }
+		    Envelope nEnvelope = new Envelope(n.entriesMinX[i],
+			    n.entriesMaxX[i], n.entriesMinY[i],
+			    n.entriesMaxY[i]);
+		    if (nEnvelope.contains(p)) {
+			// the first one contains the second one
+			if (logger.isDebugEnabled()) {
+			    logger.debug("contained by a non-leaf node");
+			}
+			parents.push(n.ids[i]);
+			contain = true;
+			break;
+		    }
+		}
+		if (contain) {
+		    continue;
+		} else {
+		    return false;
+		}
+	    } else {
+		// go through every entry in the leaf to check if
+		// it is contained by the passed rectangle
+		for (int i = 0; i < n.entryCount; i++) {
+		    if (logger.isDebugEnabled()) {
+			rN = new Rectangle(n.entriesMinX[i], n.entriesMinY[i],
+				n.entriesMaxX[i], n.entriesMaxY[i]);
+			logger.debug(rN.toString());
+		    }
+		    Envelope nEnvelope = new Envelope(n.entriesMinX[i],
+			    n.entriesMaxX[i], n.entriesMinY[i],
+			    n.entriesMaxY[i]);
+		    if (nEnvelope.contains(p)) {
+			// the objective rectangle is contained by a single
+			// rectangle
+			if (logger.isDebugEnabled()) {
+			    logger.debug("contained by a leaf node");
+			}
+			return true;
+		    } else {
+			if (!nEnvelope.contains(p)) {
+			    if (logger.isDebugEnabled()) {
+				logger.debug("intersect");
+			    }
+			    logger.debug("n.ids[i] = " + n.ids[i]);
+			    if (!v.execute(n.ids[i])) {
+				// maybe
+				logger.debug(!v.execute(n.ids[i]));
+			    }
+			}
+		    }
+		}
+		return false;
+	    }
+	}
+	return false;
+    }
+
+    /**
      * whether this envelope has been contained by any other envelope indexed
      * before
      * 

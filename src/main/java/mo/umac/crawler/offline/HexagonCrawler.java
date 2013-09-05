@@ -50,8 +50,6 @@ public class HexagonCrawler extends OfflineStrategy {
     @Override
     public void crawl(String state, int category, String query,
 	    Envelope envelopeStateECEF) {
-	// FIXME store the data to the database!!!
-	
 	if (logger.isDebugEnabled()) {
 	    logger.info("------------crawling---------");
 	    logger.info(envelopeStateECEF.toString());
@@ -78,9 +76,9 @@ public class HexagonCrawler extends OfflineStrategy {
 	    Coordinate start = random(envelopeStateECEF);
 	    if (!coveredPoint(CrawlerStrategy.rtreeRectangles, start)) {
 		Envelope aRectangle = expand(state, category, query, start);
-		// TODO SliceCrawler
+		// SliceCrawler
 		SliceCrawler sliceCrawler = new SliceCrawler();
-		sliceCrawler.crawl(state, category, query, envelopeStateECEF);
+		sliceCrawler.crawl(state, category, query, aRectangle);
 	    }
 	    //
 	    heuristic = covered(CrawlerStrategy.rtreeRectangles,
