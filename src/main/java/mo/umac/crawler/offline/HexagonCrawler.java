@@ -114,14 +114,14 @@ public class HexagonCrawler extends OfflineStrategy {
     }
 
     /**
-     * whether this point is covered by a region
+     * whether this point is covered by the rectangles which are already being crawled
      * 
      * @param rtreeRectangles
      * @param start
      * @return
      */
     private boolean coveredPoint(MyRTree rtreeRectangles, Coordinate start) {
-	// TODO Auto-generated method stub
+	rtreeRectangles.contains(envelope);
 	return false;
     }
 
