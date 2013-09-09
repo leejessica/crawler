@@ -29,7 +29,6 @@ import mo.umac.parser.StaXParser;
 import mo.umac.parser.YahooXmlType;
 import mo.umac.spatial.Circle;
 import mo.umac.spatial.Coverage;
-import mo.umac.spatial.UScensusData;
 import mo.umac.utils.CommonUtils;
 import mo.umac.utils.FileOperator;
 

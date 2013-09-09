@@ -140,7 +140,6 @@ public class MyRTree extends RTree {
      * @return
      */
     public boolean contains(Coordinate p) {
-	// FIXME here
 	// stacks used to store nodeId and entry index of each node
 	// from the root down to the leaf. Enables fast lookup
 	// of nodes when a split is propagated up the tree.
@@ -216,17 +215,6 @@ public class MyRTree extends RTree {
 			    logger.debug("contained by a leaf node");
 			}
 			return true;
-		    } else {
-			if (!nEnvelope.contains(p)) {
-			    if (logger.isDebugEnabled()) {
-				logger.debug("intersect");
-			    }
-			    logger.debug("n.ids[i] = " + n.ids[i]);
-			    if (!v.execute(n.ids[i])) {
-				// maybe
-				logger.debug(!v.execute(n.ids[i]));
-			    }
-			}
 		    }
 		}
 		return false;
@@ -869,32 +857,4 @@ public class MyRTree extends RTree {
 	}
     }
 
-    public static void main(String[] args) {
-	// MyRTree rtree = new MyRTree();
-	int i = 0;
-	Envelope e1 = new Envelope(2, 4, 0, 10);
-	rtree.addRectangle(i++, e1);
-
-	e1 = new Envelope(3, 6, 0, 10);
-	rtree.addRectangle(i++, e1);
-
-	e1 = new Envelope(7, 9, 3, 5);
-	rtree.addRectangle(i++, e1);
-
-	e1 = new Envelope(8, 10, 1, 4);
-	rtree.addRectangle(i++, e1);
-
-	e1 = new Envelope(8, 10, 6, 7);
-	rtree.addRectangle(i++, e1);
-
-	// 1. whether the first two have been merged?
-	// 2. whether the envelope below is covered by the previous rectangle?
-
-	e1 = new Envelope(8.1, 8.5, 2, 4.5);
-
-	boolean contain = rtree.contains(e1);
-	logger.debug(contain);
-	// boolean b = rtree.contains(e1);
-	// System.out.println(b);
-    }
 }

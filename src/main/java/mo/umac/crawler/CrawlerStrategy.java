@@ -51,16 +51,16 @@ public abstract class CrawlerStrategy {
     public static DBExternal dbExternal;
 
     public static final double EPSILON = 0.00000001;
-    
+
     public static HashMap<Integer, String> categoryIDMap;
-    
+
     /**
      * The index for all covered rectangles
      */
     public static MyRTree rtreeRectangles = new MyRTree();
-    
+
     public static int rectangleId = 0;
-    
+
     /**
      * Entrance of the crawler
      * 

@@ -9,15 +9,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.log4j.xml.DOMConfigurator;
+import org.apache.xerces.dom3.DOMConfiguration;
 import org.postgis.Geometry;
 import org.postgis.PGgeometry;
 import org.postgis.Point;
 import org.postgresql.geometric.PGpoint;
 
+import mo.umac.crawler.CrawlerStrategy;
+import mo.umac.crawler.Main;
 import mo.umac.db.Postgresql;
 import mo.umac.rtree.MyRTree;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Envelope;
 
 public class MyRTreeTest {
 
@@ -27,9 +32,22 @@ public class MyRTreeTest {
      * @param args
      */
     public static void main(String[] args) {
+	DOMConfigurator.configure(Main.LOG_PROPERTY_PATH);
+ 
 	MyRTreeTest test = new MyRTreeTest();
+
+	// test 1
+	// test.testKNNQuery();
+	// testing 2
+	// test.testContainsEnvelope();
+	// test 3
+	test.testContainsPoint();
+
+    }
+
+    public void testKNNQuery() {
 	// List<Coordinate> coors = test.generatePoints();
-	List<Coordinate> coors = test.importPoints();
+	List<Coordinate> coors = importPoints();
 
 	// System.out.println(coors.size());
 	// for (int i = 0; i < coors.size(); i++) {
@@ -45,7 +63,66 @@ public class MyRTreeTest {
 	for (int i = 0; i < results.size(); i++) {
 	    System.out.println(results.get(i).toString());
 	}
+    }
 
+    public void testContainsEnvelope() {
+	// MyRTree rtree = new MyRTree();
+	int i = 0;
+	Envelope e1 = new Envelope(2, 4, 0, 10);
+	MyRTree.rtree.addRectangle(i++, e1);
+
+	e1 = new Envelope(3, 6, 0, 10);
+	MyRTree.rtree.addRectangle(i++, e1);
+
+	e1 = new Envelope(7, 9, 3, 5);
+	MyRTree.rtree.addRectangle(i++, e1);
+
+	e1 = new Envelope(8, 10, 1, 4);
+	MyRTree.rtree.addRectangle(i++, e1);
+
+	e1 = new Envelope(8, 10, 6, 7);
+	MyRTree.rtree.addRectangle(i++, e1);
+
+	// 1. whether the first two have been merged?
+	// 2. whether the envelope below is covered by the previous rectangle?
+
+	e1 = new Envelope(8.1, 8.5, 2, 4.5);
+
+	boolean contain = MyRTree.rtree.contains(e1);
+	System.out.println(contain);
+	// boolean b = rtree.contains(e1);
+	// System.out.println(b);
+    }
+
+    public void testContainsPoint() {
+	int i = 0;
+	Envelope e1 = new Envelope(2, 4, 0, 10);
+	MyRTree.rtree.addRectangle(i++, e1);
+	CrawlerStrategy.rectangleId++;
+	
+	e1 = new Envelope(3, 6, 0, 10);
+	MyRTree.rtree.addRectangle(i++, e1);
+	CrawlerStrategy.rectangleId++;
+
+	e1 = new Envelope(7, 9, 3, 5);
+	MyRTree.rtree.addRectangle(i++, e1);
+	CrawlerStrategy.rectangleId++;
+
+	e1 = new Envelope(8, 10, 1, 4);
+	MyRTree.rtree.addRectangle(i++, e1);
+	CrawlerStrategy.rectangleId++;
+
+	e1 = new Envelope(8, 10, 6, 7);
+	MyRTree.rtree.addRectangle(i++, e1);
+	CrawlerStrategy.rectangleId++;
+
+	// 1. whether the first two have been merged?
+	// 2. whether the envelope below is covered by the previous rectangle?
+	
+	Coordinate p = new Coordinate(7, 2.5);
+
+	boolean contain = MyRTree.rtree.contains(p);
+	System.out.println(contain);
     }
 
     private List<Coordinate> importPoints() {

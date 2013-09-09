@@ -121,7 +121,7 @@ public class HexagonCrawler extends OfflineStrategy {
      * @return
      */
     private boolean coveredPoint(MyRTree rtreeRectangles, Coordinate start) {
-	rtreeRectangles.contains(envelope);
+	rtreeRectangles.contains(start);
 	return false;
     }
 
