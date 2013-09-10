@@ -169,7 +169,6 @@ public abstract class OnlineStrategy extends CrawlerStrategy {
     //
     // }
 
-
     /*
      * (non-Javadoc)
      * 
@@ -189,6 +188,19 @@ public abstract class OnlineStrategy extends CrawlerStrategy {
 	    for (int i = 0; i < nameStates.size(); i++) {
 		String state = nameStates.get(i);
 		logger.info("crawling in the state: " + state);
+		// Do not crawl these two off-islands
+		if (state.equals("AK")) {
+		    logger.info("stop crawling AK");
+		    continue;
+		}
+		if (state.equals("HI")) {
+		    logger.info("stop crawling HI");
+		    continue;
+		}
+		if (state.equals("NY")) {
+		    logger.info("stop crawling NY");
+		    continue;
+		}
 		for (int j = 0; j < listCategoryNames.size(); j++) {
 		    String query = listCategoryNames.get(j);
 		    logger.info("crawling the category: " + query);

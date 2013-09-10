@@ -69,9 +69,13 @@ public abstract class CrawlerStrategy {
      */
     public void callCrawling(LinkedList<String> listNameStates,
 	    List<String> listCategoryNames) {
-	LinkedList<Envelope> listEnvelopeStates = selectEnvelopes(
-		listNameStates, listCategoryNames);
+	LinkedList<Envelope> listEnvelopeStates = selectEnvelopes(listNameStates);
 
+	if(listNameStates.size() == 0){
+	    listNameStates = (LinkedList<String>) UScensusData
+			.stateName(UScensusData.STATE_DBF_FILE_NAME);
+	}
+	
 	HashMap<Integer, String> categoryIDMap = FileOperator
 		.readCategoryID(CATEGORY_ID_PATH);
 
@@ -85,14 +89,14 @@ public abstract class CrawlerStrategy {
 	    HashMap<Integer, String> categoryIDMap);
 
     /**
-     * Select the envelope information from UScensus data
+     * Select the envelope information from UScensus data, if listNameStates is
+     * empty, then return all envelopes in the U.S.
      * 
      * @param listNameStates
-     * @param listCategoryNames
      * @return
      */
     private LinkedList<Envelope> selectEnvelopes(
-	    LinkedList<String> listNameStates, List<String> listCategoryNames) {
+	    LinkedList<String> listNameStates) {
 	// State's information provided by UScensus
 	// FIXME check envelope
 	LinkedList<Envelope> allEnvelopeStates = (LinkedList<Envelope>) UScensusData
@@ -111,6 +115,10 @@ public abstract class CrawlerStrategy {
 		    listEnvelopeStates.add(allEnvelopeStates.get(j));
 		}
 	    }
+	}
+	// revised at 2013-09-10
+	if (listNameStates.size() == 0) {
+	    listEnvelopeStates = allEnvelopeStates;
 	}
 	return listEnvelopeStates;
     }

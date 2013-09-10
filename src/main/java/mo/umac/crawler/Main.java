@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 import mo.umac.crawler.offline.SliceCrawler;
 import mo.umac.crawler.online.OnlineStrategy;
+import mo.umac.crawler.online.QuadTreeCrawler;
 import mo.umac.paint.PaintShapes;
 import mo.umac.spatial.UScensusData;
 import org.apache.log4j.Logger;
@@ -17,22 +18,23 @@ public class Main {
 
     public static void main(String[] args) {
 	DOMConfigurator.configure(Main.LOG_PROPERTY_PATH);
-	
+
 	/************************* Change these lines *************************/
 	initForServer(false);
-	// YahooLocalCrawlerStrategy crawlerStrategy = new QuadTreeCrawler();
-	CrawlerStrategy crawlerStrategy = new SliceCrawler();
+	CrawlerStrategy crawlerStrategy = new QuadTreeCrawler();
+	// CrawlerStrategy crawlerStrategy = new SliceCrawler();
 	/**************************************************************************/
 	CrawlerContext crawlerContext = new CrawlerContext(crawlerStrategy);
-	//
+	// specify the states to be crawled
 	LinkedList<String> listNameStates = new LinkedList<String>();
-	String city1 = "NY";
-	listNameStates.add(city1);
+	// String city1 = "NY";
+	// listNameStates.add(city1);
+	// if the listNameStates is empty, then crawl all states.
 
 	List<String> listCategoryNames = new LinkedList<String>();
 	// String category1 = "Hotels & Motels";
-	String category2 = "Restaurants";
 	// listCategoryNames.add(category1);
+	String category2 = "Restaurants";
 	listCategoryNames.add(category2);
 	//
 	PaintShapes.painting = false;
