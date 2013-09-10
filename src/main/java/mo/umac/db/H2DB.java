@@ -36,9 +36,11 @@ import mo.umac.utils.CommonUtils;
  */
 public class H2DB extends DBExternal {
 
-    public final static String DB_NAME_SOURCE = "../yahoolocal-h2/source/datasets";
+    public final static String DB_NAME_SOURCE = "../crawler-data/yahoolocal-h2/source/datasets";
 
-    public final static String DB_NAME_TARGET = "../yahoolocal-h2/target/datasets";
+    public final static String DB_NAME_TARGET = "../crawler-data/yahoolocal-h2/target/datasets";
+    
+    public final static String DB_NAME_CRAWL = "../crawler-data/yahoolocal-h2/crawl/datasets";
 
     // table names
     private final String QUERY = "QUERY";
@@ -135,7 +137,7 @@ public class H2DB extends DBExternal {
     private String sqlSelectCountStar = "SELECT COUNT(*) FROM ";
 
     @Override
-    public void writeToExternalDB(int queryID, int level, int parentID,
+    public void writeToExternalDBFromOnline(int queryID, int level, int parentID,
 	    YahooLocalQueryFileDB qc, ResultSetYahooOnline resultSet) {
 	Connection con = qc.getCon();
 	// prepared statement

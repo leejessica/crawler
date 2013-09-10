@@ -22,6 +22,7 @@ import java.util.Map;
 
 import mo.umac.crawler.CrawlerStrategy;
 import mo.umac.db.DBExternal;
+import mo.umac.db.FileDB;
 import mo.umac.db.H2DB;
 import mo.umac.metadata.ResultSetYahooOnline;
 import mo.umac.metadata.YahooLocalQueryFileDB;
@@ -61,15 +62,9 @@ public abstract class OnlineStrategy extends CrawlerStrategy {
 
     protected boolean firstCrawl = false;
 
-    // protected String query = "restaurants";
-
-    /* abbr. of the city name */
-    // protected String state = "";
-    //
-    // protected int category = 0;
-
     protected Envelope firstEnvelope = null;
 
+    private String appid;
     /**
      * @deprecated The maximum radius (in miles) of the query.
      */
@@ -111,64 +106,6 @@ public abstract class OnlineStrategy extends CrawlerStrategy {
 	    BufferedWriter queryOutput, String resultsFile,
 	    BufferedWriter resultsOutput);
 
-    /**
-     * Entrance of the crawler
-     * 
-     * @param listNameStates
-     * @param listCategoryNames
-     */
-    // public void callCrawling(LinkedList<String> listNameStates,
-    // List<String> listCategoryNames) {
-    // // State's information provided by UScensus
-    // LinkedList<Envelope> allEnvelopeStates = (LinkedList<Envelope>)
-    // UScensusData
-    // .MBR(UScensusData.STATE_SHP_FILE_NAME);
-    // LinkedList<String> allNameStates = (LinkedList<String>) UScensusData
-    // .stateName(UScensusData.STATE_DBF_FILE_NAME);
-    //
-    // LinkedList<Envelope> listEnvelopeStates = new LinkedList<Envelope>();
-    //
-    // // crawl all states
-    // // listEnvelopeStates = allEnvelopeStates;
-    // // listNameStates = allNameStates;
-    //
-    // // select the specified states according to the listNameStates
-    // for (int i = 0; i < listNameStates.size(); i++) {
-    // String specifiedName = listNameStates.get(i);
-    // for (int j = 0; j < allNameStates.size(); j++) {
-    // String name = allNameStates.get(j);
-    // if (name.equals(specifiedName)) {
-    // listEnvelopeStates.add(allEnvelopeStates.get(j));
-    // }
-    // }
-    // }
-    //
-    // // Create the parent folder for all data
-    // FileOperator.createFolder("", DataSet.FOLDER_NAME);
-    // httpClient = createHttpClient();
-    // HashMap<Integer, String> categoryIDMap = FileOperator
-    // .readCategoryID(CATEGORY_ID_PATH);
-    //
-    // // int category = -1;
-    // // if (categoryName != null) {
-    // // Object searchingResult;
-    // // searchingResult = CommonUtils.getKeyByValue(categoryIDMap,
-    // // categoryName);
-    // // if (searchingResult != null) {
-    // // category = (Integer) searchingResult;
-    // // }
-    // // crawlOneCategoryInUS(envelopeStates, nameStates, category,
-    // // categoryName);
-    // // } else {
-    // // crawlAllCategoriesInUS(envelopeStates, nameStates, categoryIDMap);
-    // // }
-    // crawlByCategoriesStates(listEnvelopeStates, listCategoryNames,
-    // listNameStates, categoryIDMap);
-    //
-    // httpClient.getConnectionManager().shutdown();
-    //
-    // }
-
     /*
      * (non-Javadoc)
      * 
@@ -181,31 +118,24 @@ public abstract class OnlineStrategy extends CrawlerStrategy {
 	    LinkedList<Envelope> listEnvelopeStates,
 	    List<String> listCategoryNames, LinkedList<String> nameStates,
 	    HashMap<Integer, String> categoryIDMap) {
+
 	FileOperator.createFolder("", DBExternal.FOLDER_NAME);
 	httpClient = createHttpClient();
+	appid = FileOperator.readAppid(OnlineStrategy.PROPERTY_PATH);
+
+	long before = System.currentTimeMillis();
+	logger.info("Start at : " + before);
+
 	try {
-	    String appid = FileOperator.readAppid(OnlineStrategy.PROPERTY_PATH);
 	    for (int i = 0; i < nameStates.size(); i++) {
 		String state = nameStates.get(i);
 		logger.info("crawling in the state: " + state);
-		// Do not crawl these two off-islands
-		if (state.equals("AK")) {
-		    logger.info("stop crawling AK");
-		    continue;
-		}
-		if (state.equals("HI")) {
-		    logger.info("stop crawling HI");
-		    continue;
-		}
-		if (state.equals("NY")) {
-		    logger.info("stop crawling NY");
-		    continue;
-		}
 		for (int j = 0; j < listCategoryNames.size(); j++) {
 		    String query = listCategoryNames.get(j);
 		    logger.info("crawling the category: " + query);
 		    // initial category
 		    int category = -1;
+
 		    Object searchingResult = CommonUtils.getKeyByValue(
 			    categoryIDMap, query);
 		    if (searchingResult != null) {
@@ -550,20 +480,21 @@ public abstract class OnlineStrategy extends CrawlerStrategy {
 	if (resultSet.getXmlType() == YahooXmlType.VALID) {
 	    resultSet.setResultsOutput(qc.getResultsOutput());
 	    // revised at 2013-5-22
-	    // DataSet.writeQueryFile(xmlFile.getName(), qc.getQueryOutput(),
-	    // qc.queryInfo(), resultSet);
-	    // if (resultSet.getTotalResultsReturned() > 0) {
-	    // DataSet.writeResultsFile(xmlFile.getName(), resultSet);
-	    // }
+	    FileDB.writeQueryFile(xmlFile.getName(), qc.getQueryOutput(),
+		    qc.queryInfo(), resultSet);
+	    if (resultSet.getTotalResultsReturned() > 0) {
+		FileDB.writeResultsFile(xmlFile.getName(), resultSet);
+	    }
 	    // FIXME record all results in the database. add the connection into
 	    // the qc, need check!!
-	    String queryIDString = xmlFile.getName();
-	    int dotIndex = queryIDString.indexOf(".xml");
-	    queryIDString = queryIDString.substring(0, dotIndex);
-	    // FIXME change the query id to integer!!!
-	    int queryID = Integer.parseInt(queryIDString);
-	    DBExternal dataset = new H2DB();
-	    dataset.writeToExternalDB(queryID, 0, 0, qc, resultSet);
+	    // String queryIDString = xmlFile.getName();
+	    // int dotIndex = queryIDString.indexOf(".xml");
+	    // queryIDString = queryIDString.substring(0, dotIndex);
+	    // // FIXME change the query id to integer!!!
+	    // int queryID = Integer.parseInt(queryIDString);
+	    // DBExternal dataset = new H2DB();
+	    // dataset.writeToExternalDBFromOnline(queryID, 0, 0, qc,
+	    // resultSet);
 	}
 	limitedPageCount = 0;
 	return resultSet;

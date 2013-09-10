@@ -49,7 +49,7 @@ public class DBInMemory {
 
     public void writeToExternalDB(int queryID, int level, int parentID,
 	    YahooLocalQueryFileDB qc, ResultSetYahooOnline resultSet) {
-	CrawlerStrategy.dbExternal.writeToExternalDB(queryID, level, parentID,
+	CrawlerStrategy.dbExternal.writeToExternalDBFromOnline(queryID, level, parentID,
 		qc, resultSet);
     }
 

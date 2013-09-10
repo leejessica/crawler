@@ -37,7 +37,7 @@ import mo.umac.spatial.GeoOperator;
  */
 public class H2DBGeo extends DBExternal {
 
-    public final static String GEO_DB_NAME = "../yahoolocal-h2-geo/datasets";
+    public final static String GEO_DB_NAME = "../crawler-data/yahoolocal-h2-geo/datasets";
 
     public static Connection conn = null;
 
@@ -254,7 +254,7 @@ public class H2DBGeo extends DBExternal {
     }
 
     @Override
-    public void writeToExternalDB(int queryID, int level, int parentID,
+    public void writeToExternalDBFromOnline(int queryID, int level, int parentID,
 	    YahooLocalQueryFileDB qc, ResultSetYahooOnline resultSet) {
 	conn = createConnection();
 	// prepared statement

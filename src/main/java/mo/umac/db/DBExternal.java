@@ -18,7 +18,7 @@ public abstract class DBExternal {
      * A folder stores all crawled .xml file from Yahoo Local.
      * 
      */
-    public static final String FOLDER_NAME = "../yahoolocal/";
+    public static final String FOLDER_NAME = "../crawler-data/yahoolocal/";
 
     /**
      * A file stores the xml file's name, query condition, and the count
@@ -40,9 +40,6 @@ public abstract class DBExternal {
      */
     public static Map connMap = new HashMap<String, java.sql.Connection>();
 
-    public abstract void writeToExternalDB(int queryID, int level,
-	    int parentID, YahooLocalQueryFileDB qc,
-	    ResultSetYahooOnline resultSet);
 
     public abstract void init();
 
@@ -55,6 +52,10 @@ public abstract class DBExternal {
     public abstract void writeToExternalDB(int queryID, AQuery query,
 	    ResultSet resultSet);
 
+    public abstract void writeToExternalDBFromOnline(int queryID, int level,
+	    int parentID, YahooLocalQueryFileDB qc,
+	    ResultSetYahooOnline resultSet);
+    
     public abstract void createTables(String dbNameTarget);
 
     public abstract int numCrawlerPoints();

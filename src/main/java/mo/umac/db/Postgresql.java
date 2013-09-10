@@ -289,7 +289,7 @@ public class Postgresql extends DBExternal {
     }
 
     @Override
-    public void writeToExternalDB(int queryID, int level, int parentID,
+    public void writeToExternalDBFromOnline(int queryID, int level, int parentID,
 	    YahooLocalQueryFileDB qc, ResultSetYahooOnline resultSet) {
 	// TODO Auto-generated method stub
 

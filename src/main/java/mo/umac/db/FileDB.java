@@ -23,7 +23,7 @@ import mo.umac.parser.Rating;
 public class FileDB extends DBExternal {
 
     @Override
-    public void writeToExternalDB(int queryID, int level, int parentID,
+    public void writeToExternalDBFromOnline(int queryID, int level, int parentID,
 	    YahooLocalQueryFileDB qc, ResultSetYahooOnline resultSet) {
 	writeQueryFile(Integer.toString(queryID), qc.getQueryOutput(),
 		qc.queryInfo(), resultSet);
@@ -38,7 +38,7 @@ public class FileDB extends DBExternal {
      * @param queryInfo
      * @param resultSet
      */
-    private void writeQueryFile(String partFileName, BufferedWriter dbOutput,
+    public static void writeQueryFile(String partFileName, BufferedWriter dbOutput,
 	    String queryInfo, ResultSetYahooOnline resultSet) {
 	try {
 	    dbOutput.write(partFileName);
@@ -105,7 +105,7 @@ public class FileDB extends DBExternal {
 	}
     }
 
-    private void writeResultsFile(String partFileName, ResultSetYahooOnline resultSet) {
+    public static void writeResultsFile(String partFileName, ResultSetYahooOnline resultSet) {
 	BufferedWriter resultsOutput = resultSet.getResultsOutput();
 	List<APOI> results = resultSet.getPOIs();
 	for (int i = 0; i < results.size(); i++) {

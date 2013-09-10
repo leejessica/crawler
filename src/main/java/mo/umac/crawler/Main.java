@@ -17,13 +17,13 @@ public class Main {
     public static String LOG_PROPERTY_PATH = "./src/main/resources/log4j.xml";
 
     public static void main(String[] args) {
-	DOMConfigurator.configure(Main.LOG_PROPERTY_PATH);
-
 	/************************* Change these lines *************************/
 	initForServer(false);
+	DOMConfigurator.configure(Main.LOG_PROPERTY_PATH);
+	/*************************Crawling Algorithm***************************/
 	CrawlerStrategy crawlerStrategy = new QuadTreeCrawler();
 	// CrawlerStrategy crawlerStrategy = new SliceCrawler();
-	/**************************************************************************/
+	/**********************************************************************/
 	CrawlerContext crawlerContext = new CrawlerContext(crawlerStrategy);
 	// specify the states to be crawled
 	LinkedList<String> listNameStates = new LinkedList<String>();
