@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -40,6 +41,12 @@ public class DBInMemory {
     // TODO treeset is for debugging. change to hashset when running the program
     public static Set<Integer> poisIDs = new TreeSet<Integer>();
 
+    /**
+     * add at 2013-9-23
+     * Stores the number of times a points being crawled 
+     */
+    public static Map poisCrawledTimes;;
+    
     /**
      * @param externalDataSet
      */
@@ -84,6 +91,17 @@ public class DBInMemory {
 	}
 	List<Integer> resultsID = rtreePoints
 		.searchNN(queryPoint, qc.getTopK());
+	// for each point: recording how many times it has been crawled
+	for (int i = 0; i < resultsID.size(); i++) {
+	    int id = resultsID.get(i);
+	    int times = 0;
+	    if (poisCrawledTimes.containsKey(id)) {
+		times = (Integer) poisCrawledTimes.get(id);
+//		logger.info("times for " + id + " = " + times+1);
+	    }
+	    times += 1;
+	    poisCrawledTimes.put(id, times);
+	}
 	//
 	poisIDs.addAll(resultsID);
 
@@ -116,13 +134,6 @@ public class DBInMemory {
 	    int size2 = numOfTuplesInExternalDB(set);
 	    logger.debug("numCrawlerPoints in memory = " + size1);
 	    logger.debug("numCrawlerPoints in db = " + size2);
-	    // ...
-	    // Iterator it = set.iterator();
-	    // while (it.hasNext()) {
-	    // int id = (Integer) it.next();
-	    // logger.debug(id);
-	    // }
-
 	    if (size1 != size2) {
 		logger.error("size1 != size2");
 		logger.error("countNumQueries = "

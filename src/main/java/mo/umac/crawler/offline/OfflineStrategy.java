@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
@@ -63,6 +64,8 @@ public abstract class OfflineStrategy extends CrawlerStrategy {
 	CrawlerStrategy.dbExternal = new H2DB(H2DB.DB_NAME_SOURCE,
 		H2DB.DB_NAME_TARGET);
 	CrawlerStrategy.dbInMemory = new DBInMemory();
+	// add at 2013-9-23
+	CrawlerStrategy.dbInMemory.poisCrawledTimes = new HashMap<Integer, Integer>();
 	CrawlerStrategy.dbInMemory.readFromExtenalDB(category, state);
 	CrawlerStrategy.dbInMemory.index();
 	logger.info("There are in total "
@@ -141,6 +144,18 @@ public abstract class OfflineStrategy extends CrawlerStrategy {
 	logger.info("number of points crawled = "
 		+ CrawlerStrategy.dbInMemory.poisIDs.size());
 	logger.info("Finished ! Oh ! Yeah! ");
+	logger.info("poisCrawledTimes:");
+	Iterator it1 = CrawlerStrategy.dbInMemory.poisCrawledTimes.entrySet().iterator();
+	while (it1.hasNext()) {
+	    Entry entry = (Entry) it1.next();
+	    int poiID = (Integer) entry.getKey();
+	    int times = (Integer) entry.getValue();
+	    APOI aPOI = CrawlerStrategy.dbInMemory.pois.get(poiID);
+	    double longitude = aPOI.getCoordinate().x;
+	    double latitude = aPOI.getCoordinate().y;
+	    logger.info(poiID + ": " + times + ", " + "[" + longitude + ", "
+		    + latitude + "]");
+	}
 	// delete
 	Set set = CrawlerStrategy.dbInMemory.poisIDs;
 	Iterator<Integer> it = set.iterator();

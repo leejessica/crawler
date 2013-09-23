@@ -20,17 +20,16 @@ public class Main {
 	/************************* Change these lines *************************/
 	initForServer(false);
 	DOMConfigurator.configure(Main.LOG_PROPERTY_PATH);
-	/*************************Crawling Algorithm***************************/
-	CrawlerStrategy crawlerStrategy = new QuadTreeCrawler();
-	// CrawlerStrategy crawlerStrategy = new SliceCrawler();
+	/************************* Crawling Algorithm ***************************/
+	// CrawlerStrategy crawlerStrategy = new QuadTreeCrawler();
+	CrawlerStrategy crawlerStrategy = new SliceCrawler();
 	/**********************************************************************/
 	CrawlerContext crawlerContext = new CrawlerContext(crawlerStrategy);
 	// specify the states to be crawled
 	LinkedList<String> listNameStates = new LinkedList<String>();
-	// String city1 = "NY";
-	// listNameStates.add(city1);
 	// if the listNameStates is empty, then crawl all states.
-
+	String city1 = "NY";
+	listNameStates.add(city1);
 	List<String> listCategoryNames = new LinkedList<String>();
 	// String category1 = "Hotels & Motels";
 	// listCategoryNames.add(category1);

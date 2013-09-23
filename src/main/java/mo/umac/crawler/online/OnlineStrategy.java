@@ -130,6 +130,22 @@ public abstract class OnlineStrategy extends CrawlerStrategy {
 	    for (int i = 0; i < nameStates.size(); i++) {
 		String state = nameStates.get(i);
 		logger.info("crawling in the state: " + state);
+		//add at 2013-9-23
+		if(state.equals("AR")){
+		    continue;
+		}
+		if(state.equals("HI")){
+		    continue;
+		}
+		if(state.equals("MT")){
+		    continue;
+		}
+		if(state.equals("NM")){
+		    continue;
+		}
+		if(state.equals("NY")){
+		    continue;
+		}
 		for (int j = 0; j < listCategoryNames.size(); j++) {
 		    String query = listCategoryNames.get(j);
 		    logger.info("crawling the category: " + query);
