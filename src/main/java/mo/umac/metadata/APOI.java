@@ -15,141 +15,146 @@ import com.vividsolutions.jts.geom.Coordinate;
  * 
  */
 public class APOI {
-    private int id;
-    private String title;
-    private String city;
-    private String state;
-    private Coordinate coordinate = new Coordinate();
-    private Rating rating = new Rating();
+	private int id;
+	private String title;
+	private String city;
+	private String state;
+	private Coordinate coordinate = new Coordinate();
+	private Rating rating = new Rating();
 
-    /**
-     * The distance parsed by the returned web pages. The unit is mile.
-     */
-    private double distanceInMiles;
+	// add at 2013-9-26
+	private int numCrawled;
 
-    private List<Category> categories;
+	/**
+	 * The distance parsed by the returned web pages. The unit is mile.
+	 */
+	private double distanceInMiles;
 
-    public APOI() {
+	private List<Category> categories;
 
-    }
+	public APOI() {
 
-    public APOI(int id, String title, String city, String state,
-	    Coordinate coordinate, Rating rating, double distanceInMiles,
-	    List<Category> categories) {
-	super();
-	this.id = id;
-	this.title = title;
-	this.city = city;
-	this.state = state;
-	this.coordinate = coordinate;
-	this.rating = rating;
-	this.distanceInMiles = distanceInMiles;
-	this.categories = categories;
-    }
+	}
 
-    public APOI(int id, String title, String city, String state,
-	    Double longitude, Double latitude, Rating rating, double distance,
-	    List<Category> categories) {
-	super();
-	this.id = id;
-	this.title = title;
-	this.city = city;
-	this.state = state;
-	this.coordinate.x = longitude;
-	this.coordinate.y = latitude;
-	this.rating = rating;
-	this.distanceInMiles = distance;
-	this.categories = categories;
-    }
+	public APOI(int id, String title, String city, String state, Coordinate coordinate, Rating rating, double distanceInMiles, List<Category> categories, int numCrawled) {
+		super();
+		this.id = id;
+		this.title = title;
+		this.city = city;
+		this.state = state;
+		this.coordinate = coordinate;
+		this.rating = rating;
+		this.distanceInMiles = distanceInMiles;
+		this.categories = categories;
+	}
 
-    @Override
-    public String toString() {
-	StringBuffer sb = new StringBuffer();
-	sb.append("Result [id=" + id + ", title=" + title + ", city=" + city
-		+ ", state=" + state + ", longitude=" + coordinate.x
-		+ ", latitude=" + coordinate.y + ", distance="
-		+ distanceInMiles + "]");
-	return sb.toString();
-    }
+	public APOI(int id, String title, String city, String state, Double longitude, Double latitude, Rating rating, double distance, List<Category> categories, int numCrawled) {
+		super();
+		this.id = id;
+		this.title = title;
+		this.city = city;
+		this.state = state;
+		this.coordinate.x = longitude;
+		this.coordinate.y = latitude;
+		this.rating = rating;
+		this.distanceInMiles = distance;
+		this.categories = categories;
+	}
 
-    public int getId() {
-	return id;
-    }
+	@Override
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("Result [id =" + id + ", title =" + title + ", city =" + city + ", state =" + state + ", longitude =" + coordinate.x + ", latitude =" + coordinate.y + ", distance ="
+				+ distanceInMiles + ", numCrawled = " + numCrawled + "]");
+		return sb.toString();
+	}
 
-    public void setId(int id) {
-	this.id = id;
-    }
+	public int getId() {
+		return id;
+	}
 
-    public String getTitle() {
-	return title;
-    }
+	public void setId(int id) {
+		this.id = id;
+	}
 
-    public void setTitle(String title) {
-	this.title = title;
-    }
+	public String getTitle() {
+		return title;
+	}
 
-    public String getCity() {
-	return city;
-    }
+	public void setTitle(String title) {
+		this.title = title;
+	}
 
-    public void setCity(String city) {
-	this.city = city;
-    }
+	public String getCity() {
+		return city;
+	}
 
-    public String getState() {
-	return state;
-    }
+	public void setCity(String city) {
+		this.city = city;
+	}
 
-    public void setState(String state) {
-	this.state = state;
-    }
+	public String getState() {
+		return state;
+	}
 
-    public double getLongitude() {
-	return coordinate.x;
-    }
+	public void setState(String state) {
+		this.state = state;
+	}
 
-    public void setLongitude(double longitude) {
-	this.coordinate.x = longitude;
-    }
+	public double getLongitude() {
+		return coordinate.x;
+	}
 
-    public double getLatitude() {
-	return coordinate.y;
-    }
+	public void setLongitude(double longitude) {
+		this.coordinate.x = longitude;
+	}
 
-    public void setLatitude(double latitude) {
-	this.coordinate.y = latitude;
-    }
+	public double getLatitude() {
+		return coordinate.y;
+	}
 
-    public Coordinate getCoordinate() {
-	return coordinate;
-    }
+	public void setLatitude(double latitude) {
+		this.coordinate.y = latitude;
+	}
 
-    public void setCoordinate(Coordinate coordinate) {
-	this.coordinate = coordinate;
-    }
+	public Coordinate getCoordinate() {
+		return coordinate;
+	}
 
-    public Rating getRating() {
-	return rating;
-    }
+	public void setCoordinate(Coordinate coordinate) {
+		this.coordinate = coordinate;
+	}
 
-    public void setRating(Rating rating) {
-	this.rating = rating;
-    }
+	public Rating getRating() {
+		return rating;
+	}
 
-    public double getDistance() {
-	return distanceInMiles;
-    }
+	public void setRating(Rating rating) {
+		this.rating = rating;
+	}
 
-    public void setDistance(double distance) {
-	this.distanceInMiles = distance;
-    }
+	public double getDistance() {
+		return distanceInMiles;
+	}
 
-    public List<Category> getCategories() {
-	return categories;
-    }
+	public void setDistance(double distance) {
+		this.distanceInMiles = distance;
+	}
 
-    public void setCategories(List<Category> categories) {
-	this.categories = categories;
-    }
+	public List<Category> getCategories() {
+		return categories;
+	}
+
+	public void setCategories(List<Category> categories) {
+		this.categories = categories;
+	}
+
+	public int getNumCrawled() {
+		return numCrawled;
+	}
+
+	public void setNumCrawled(int numCrawled) {
+		this.numCrawled = numCrawled;
+	}
 
 }

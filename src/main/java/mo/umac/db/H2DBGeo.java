@@ -187,7 +187,7 @@ public class H2DBGeo extends DBExternal {
 			    prepCategory.addBatch();
 			}
 			APOI result = new APOI(itemID, title, city, state,
-				longitude, latitude, null, distance, categories);
+				longitude, latitude, null, distance, categories, 0);
 			setPrepItem(result, prepItem);
 			prepItem.addBatch();
 		    } else {
@@ -207,7 +207,7 @@ public class H2DBGeo extends DBExternal {
 			    prepCategory.addBatch();
 			}
 			APOI result = new APOI(itemID, title, city, state,
-				longitude, latitude, null, distance, categories);
+				longitude, latitude, null, distance, categories, 0);
 			setPrepItem(result, prepItem);
 			prepItem.addBatch();
 		    }

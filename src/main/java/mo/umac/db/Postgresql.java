@@ -335,7 +335,7 @@ public class Postgresql extends DBExternal {
 		double longitude = r.getDouble(5);
 		double latitude = r.getDouble(6);
 		APOI poi = new APOI(id, title, city, stateInResult, longitude,
-			latitude, null, -1, null);
+			latitude, null, -1, null, 0);
 		poiList.add(poi);
 	    }
 	    int totalResultsReturned = poiList.size();

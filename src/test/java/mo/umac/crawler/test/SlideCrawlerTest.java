@@ -170,7 +170,7 @@ public class SlideCrawlerTest extends SliceCrawler {
 		    logger.debug("longitude: " + longitude);
 		    logger.debug("--------------------------");
 		    APOI poi = new APOI(itemID, title, city, state, longitude,
-			    latitude, rating, distance, null);
+			    latitude, rating, distance, null, 0);
 		    map.put(itemID, poi);
 		}
 		rs.close();
