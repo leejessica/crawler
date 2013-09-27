@@ -34,135 +34,123 @@ import com.vividsolutions.jts.geom.Envelope;
  * 
  */
 public abstract class OfflineStrategy extends CrawlerStrategy {
-    protected static Logger logger = Logger.getLogger(OfflineStrategy.class
-	    .getName());
+	protected static Logger logger = Logger.getLogger(OfflineStrategy.class.getName());
 
-    /**
-     * This is the crawling algorithm
-     */
-    public abstract void crawl(String state, int category, String query,
-	    Envelope envelopeState);
+	/**
+	 * This is the crawling algorithm
+	 */
+	public abstract void crawl(String state, int category, String query, Envelope envelopeState);
 
-    /**
-     * @param aQuery
-     * @return
-     */
-    public static ResultSet query(AQuery aQuery) {
-	return CrawlerStrategy.dbInMemory.query(aQuery);
-    }
+	/**
+	 * @param aQuery
+	 * @return
+	 */
+	public static ResultSet query(AQuery aQuery) {
+		return CrawlerStrategy.dbInMemory.query(aQuery);
+	}
 
-    /**
-     * @param category
-     * @param state
-     */
-    protected void prepareData(String category, String state) {
-	//
-	logger.info("preparing data...");
-	CrawlerStrategy.categoryIDMap = FileOperator
-		.readCategoryID(CATEGORY_ID_PATH);
-	// source database
-	CrawlerStrategy.dbExternal = new H2DB(H2DB.DB_NAME_SOURCE,
-		H2DB.DB_NAME_TARGET);
-	CrawlerStrategy.dbInMemory = new DBInMemory();
-	// add at 2013-9-23
-	CrawlerStrategy.dbInMemory.poisCrawledTimes = new HashMap<Integer, Integer>();
-	CrawlerStrategy.dbInMemory.readFromExtenalDB(category, state);
-	CrawlerStrategy.dbInMemory.index();
-	logger.info("There are in total "
-		+ CrawlerStrategy.dbInMemory.pois.size() + " points.");
-	// target database
-	CrawlerStrategy.dbExternal.createTables(H2DB.DB_NAME_TARGET);
-    }
+	/**
+	 * @param category
+	 * @param state
+	 */
+	protected void prepareData(String category, String state) {
+		//
+		logger.info("preparing data...");
+		CrawlerStrategy.categoryIDMap = FileOperator.readCategoryID(CATEGORY_ID_PATH);
+		// source database
+		CrawlerStrategy.dbExternal = new H2DB(H2DB.DB_NAME_SOURCE, H2DB.DB_NAME_TARGET);
+		CrawlerStrategy.dbInMemory = new DBInMemory();
+		// add at 2013-9-23
+		CrawlerStrategy.dbInMemory.poisCrawledTimes = new HashMap<Integer, Integer>();
+		CrawlerStrategy.dbInMemory.readFromExtenalDB(category, state);
+		CrawlerStrategy.dbInMemory.index();
+		logger.info("There are in total " + CrawlerStrategy.dbInMemory.pois.size() + " points.");
+		// target database
+		CrawlerStrategy.dbExternal.createTables(H2DB.DB_NAME_TARGET);
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see mo.umac.crawler.YahooLocalCrawlerStrategy#endData()
-     * 
-     * shut down the connection
-     */
-    protected void endData() {
-	DBExternal.distroyConn();
-    }
+	/*
+	 * (non-Javadoc)
+	 * @see mo.umac.crawler.YahooLocalCrawlerStrategy#endData()
+	 * shut down the connection
+	 */
+	public static void endData() {
+		DBExternal.distroyConn();
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * mo.umac.crawler.YahooLocalCrawlerStrategy#crawlByCategoriesStates(java
-     * .util.LinkedList, java.util.List, java.util.LinkedList,
-     * java.util.HashMap)
-     */
-    protected void crawlByCategoriesStates(
-	    LinkedList<Envelope> listEnvelopeStates,
-	    List<String> listCategoryNames, LinkedList<String> nameStates,
-	    HashMap<Integer, String> categoryIDMap) {
+	/*
+	 * (non-Javadoc)
+	 * @see
+	 * mo.umac.crawler.YahooLocalCrawlerStrategy#crawlByCategoriesStates(java
+	 * .util.LinkedList, java.util.List, java.util.LinkedList,
+	 * java.util.HashMap)
+	 */
+	protected void crawlByCategoriesStates(LinkedList<Envelope> listEnvelopeStates, List<String> listCategoryNames, LinkedList<String> nameStates, HashMap<Integer, String> categoryIDMap) {
 
-	long before = System.currentTimeMillis();
-	logger.info("Start at : " + before);
+		long before = System.currentTimeMillis();
+		logger.info("Start at : " + before);
 
-	for (int i = 0; i < nameStates.size(); i++) {
-	    String state = nameStates.get(i);
-	    logger.info("crawling in the state: " + state);
-	    for (int j = 0; j < listCategoryNames.size(); j++) {
-		String query = listCategoryNames.get(j);
-		logger.info("crawling the category: " + query);
+		for (int i = 0; i < nameStates.size(); i++) {
+			String state = nameStates.get(i);
+			logger.info("crawling in the state: " + state);
+			for (int j = 0; j < listCategoryNames.size(); j++) {
+				String query = listCategoryNames.get(j);
+				logger.info("crawling the category: " + query);
 
-		// load data from the external dataset
-		prepareData(query, state);
+				// load data from the external dataset
+				prepareData(query, state);
 
-		// initial category
-		int category = -1;
-		Object searchingResult = CommonUtils.getKeyByValue(
-			categoryIDMap, query);
-		if (searchingResult != null) {
-		    category = (Integer) searchingResult;
-		    //
-		    Envelope envelopeStateLLA = listEnvelopeStates.get(i);
-		    Envelope envelopeStateECEF = GeoOperator
-			    .lla2ecef(envelopeStateLLA);
-		    if (logger.isDebugEnabled()) {
-			logger.debug(envelopeStateLLA.toString());
-			logger.debug(envelopeStateECEF.toString());
-		    }
-		    crawl(state, category, query, envelopeStateECEF);
-		    //
-		} else {
-		    logger.error("Cannot find category id for query: " + query
-			    + " in categoryIDMap");
+				// initial category
+				int category = -1;
+				Object searchingResult = CommonUtils.getKeyByValue(categoryIDMap, query);
+				if (searchingResult != null) {
+					category = (Integer) searchingResult;
+					//
+					Envelope envelopeStateLLA = listEnvelopeStates.get(i);
+					// Envelope envelopeStateECEF =
+					// GeoOperator.lla2ecef(envelopeStateLLA);
+					if (logger.isDebugEnabled()) {
+						logger.debug(envelopeStateLLA.toString());
+						// logger.debug(envelopeStateECEF.toString());
+					}
+					// crawl(state, category, query, envelopeStateECEF);
+					crawl(state, category, query, envelopeStateLLA);
+					//
+				} else {
+					logger.error("Cannot find category id for query: " + query + " in categoryIDMap");
+				}
+				CrawlerStrategy.dbInMemory.updataExternalDB();
+				endData();
+			}
 		}
-		endData();
-	    }
-	}
 
-	/**************************************************************************/
-	long after = System.currentTimeMillis();
-	logger.info("Stop at: " + after);
-	logger.info("time for crawling = " + (after - before) / 1000);
-	//
-	logger.info("countNumQueries = " + CrawlerStrategy.countNumQueries);
-	logger.info("number of points crawled = "
-		+ CrawlerStrategy.dbInMemory.poisIDs.size());
-	logger.info("Finished ! Oh ! Yeah! ");
-	logger.info("poisCrawledTimes:");
-	Iterator it1 = CrawlerStrategy.dbInMemory.poisCrawledTimes.entrySet().iterator();
-	while (it1.hasNext()) {
-	    Entry entry = (Entry) it1.next();
-	    int poiID = (Integer) entry.getKey();
-	    int times = (Integer) entry.getValue();
-	    APOI aPOI = CrawlerStrategy.dbInMemory.pois.get(poiID);
-	    double longitude = aPOI.getCoordinate().x;
-	    double latitude = aPOI.getCoordinate().y;
-	    logger.info(poiID + ": " + times + ", " + "[" + longitude + ", "
-		    + latitude + "]");
-	}
-	// delete
-	Set set = CrawlerStrategy.dbInMemory.poisIDs;
-	Iterator<Integer> it = set.iterator();
-	while (it.hasNext()) {
-	    int id = it.next();
-	    logger.info(id);
-	}
+		/**************************************************************************/
+		long after = System.currentTimeMillis();
+		logger.info("Stop at: " + after);
+		logger.info("time for crawling = " + (after - before) / 1000);
+		//
+		logger.info("countNumQueries = " + CrawlerStrategy.countNumQueries);
+		logger.info("number of points crawled = " + CrawlerStrategy.dbInMemory.poisIDs.size());
+		logger.info("Finished ! Oh ! Yeah! ");
+		
+//		logger.info("poisCrawledTimes:");
+//		Iterator it1 = CrawlerStrategy.dbInMemory.poisCrawledTimes.entrySet().iterator();
+//		while (it1.hasNext()) {
+//			Entry entry = (Entry) it1.next();
+//			int poiID = (Integer) entry.getKey();
+//			int times = (Integer) entry.getValue();
+//			APOI aPOI = CrawlerStrategy.dbInMemory.pois.get(poiID);
+//			double longitude = aPOI.getCoordinate().x;
+//			double latitude = aPOI.getCoordinate().y;
+//			logger.info(poiID + ": " + times + ", " + "[" + longitude + ", " + latitude + "]");
+//		}
+		// delete
+		// Set set = CrawlerStrategy.dbInMemory.poisIDs;
+		// Iterator<Integer> it = set.iterator();
+		// while (it.hasNext()) {
+		// int id = it.next();
+		// logger.info(id);
+		// }
 
-    }
+	}
 }

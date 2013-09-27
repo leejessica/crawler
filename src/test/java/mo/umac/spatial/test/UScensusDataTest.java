@@ -7,7 +7,7 @@ import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 
-import mo.umac.crawler.Main;
+import mo.umac.crawler.MainClawler;
 import mo.umac.spatial.UScensusData;
 
 import org.apache.log4j.Logger;
@@ -22,7 +22,7 @@ public class UScensusDataTest {
 	    .getName());
 
     public static void main(String[] args) {
-	DOMConfigurator.configure(Main.LOG_PROPERTY_PATH);
+	DOMConfigurator.configure(MainClawler.LOG_PROPERTY_PATH);
 	UScensusDataTest test = new UScensusDataTest();
 //	test.testContaining(UScensusData.STATE_SHP_FILE_NAME,
 //		UScensusData.STATE_DBF_FILE_NAME);

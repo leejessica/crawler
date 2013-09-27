@@ -453,4 +453,10 @@ public class H2DBGeo extends DBExternal {
 	// TODO Auto-generated method stub
 	return 0;
     }
+
+	@Override
+	public void updataExternalDB() {
+		// TODO Auto-generated method stub
+		
+	}
 }

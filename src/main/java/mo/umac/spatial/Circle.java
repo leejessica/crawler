@@ -5,7 +5,6 @@ package mo.umac.spatial;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
-
 /**
  * This Circle represents a query which is also an area covered.
  * 
@@ -29,6 +28,5 @@ public class Circle {
 	public double getRadius() {
 		return radius;
 	}
-
 
 }

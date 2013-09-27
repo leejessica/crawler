@@ -5,53 +5,61 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 
-import mo.umac.metadata.APOI;
-import mo.umac.metadata.AQuery;
-import mo.umac.metadata.ResultSet;
-
-import com.vividsolutions.jts.geom.Coordinate;
-
-public class Main {
+public class MainDB {
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String dbNameSource = "../crawler-data/yahoolocal-h2/source/ar";
+		MainDB m = new MainDB();
+		m.prunH2();
+		// m.convertFromH2ToFile();
+	}
+
+	public void convertFromQRFileToH2() {
+		String dbNameSource = "../crawler-data/yahoolocal-h2/source/ny";
 		String dbNameTarget = "";
 		H2DB h2 = new H2DB(dbNameSource, dbNameTarget);
-		String state = "AR";
+		String state = "NY";
 		// DBExternal.FOLDER_NAME = "../crawler-data/yahoolocal/"
 		String folderPath = DBExternal.FOLDER_NAME + "/96926236+Restaurants/" + state + "/";
 		h2.convertFileDBToH2DB(folderPath, "");
-		
-		// TODO exam the converted data
 
-		// h2.createTables(H2DB.DB_NAME_TARGET);
-		// //
-		// int queryID = 100198;
-		// Coordinate point = new Coordinate(20, -554);
-		// String state = "NY";
-		// int category = 4546546;
-		// String query = "Rest";
-		// int topK = 100;
-		// AQuery aQuary = new AQuery(point, state, category, query, topK);
-		// ResultSet resultSet = new ResultSet();
-		// List pois = new ArrayList<APOI>();
-		// APOI p1 = new APOI(1, "title", "city", state, new Coordinate(22,
-		// -12), null, 58, null, 0);
-		// pois.add(p1);
-		// resultSet.setPOIs(pois);
-		//
-		// h2.writeToExternalDB(queryID, aQuary, resultSet);
-		// //
-		// h2.examData(H2DB.DB_NAME_TARGET);
-		//
-		// Main main = new Main();
-		// main.convertFromH2ToPostgresql();
+		// exam the converted data
+		int c1 = h2.count(dbNameSource, "QUERY");
+		System.out.println("c1 = " + c1);
+		int c2 = h2.count(dbNameSource, "ITEM");
+		System.out.println("c2 = " + c2);
+		h2.closeConnection(dbNameSource);
+	}
+
+	public void prunH2() {
+		// FIXME check here
+		String dbNameSource = "../crawler-data/yahoolocal-h2/source/ny";
+		String dbNameTarget = "../crawler-data/yahoolocal-h2/source/ny-prun";
+		String categoryQ = "Restaurants";
+		String stateQ = "NY";
+
+		H2DB h2 = new H2DB(dbNameSource, dbNameTarget);
+		h2.prun(categoryQ, stateQ);
+
+		int c1 = h2.count(dbNameSource, "ITEM");
+		System.out.println("c1 = " + c1);
+		int c2 = h2.count(dbNameTarget, "ITEM");
+		System.out.println("c2 = " + c2);
+		h2.closeConnection(dbNameSource);
+		h2.closeConnection(dbNameTarget);
+	}
+
+	public void convertFromH2ToFile() {
+		// String dbName = "../crawler-data/yahoolocal-h2/source/ny";
+		// String dbName = "../crawler-data/yahoolocal-h2/source/ny-prun";
+		String dbName = "../crawler-data/yahoolocal-h2/target/ny-prun";
+		String tableName = "item";
+		String fileName = "../data-map/ny-prun-target.pois";
+		H2DB h2 = new H2DB(dbName, "");
+		h2.extractValuesFromItemTable(dbName, tableName, fileName);
 	}
 
 	private void convertFromH2ToPostgresql() {

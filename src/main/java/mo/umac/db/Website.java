@@ -54,5 +54,12 @@ public class Website extends DBExternal {
     }
 
 
+	@Override
+	public void updataExternalDB() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
 
 }

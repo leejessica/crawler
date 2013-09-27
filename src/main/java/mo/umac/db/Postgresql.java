@@ -382,4 +382,10 @@ public class Postgresql extends DBExternal {
 	return 0;
     }
 
+	@Override
+	public void updataExternalDB() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

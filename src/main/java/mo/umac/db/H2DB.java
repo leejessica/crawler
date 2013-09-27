@@ -1,10 +1,14 @@
 package mo.umac.db;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -12,9 +16,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-
-import com.vividsolutions.jts.geom.Coordinate;
+import java.util.Map.Entry;
 
 import mo.umac.crawler.CrawlerStrategy;
 import mo.umac.metadata.APOI;
@@ -25,7 +29,6 @@ import mo.umac.metadata.ResultSetYahooOnline;
 import mo.umac.metadata.YahooLocalQueryFileDB;
 import mo.umac.parser.Category;
 import mo.umac.parser.Rating;
-import mo.umac.spatial.ECEFLLA;
 import mo.umac.utils.CommonUtils;
 
 /**
@@ -36,9 +39,9 @@ import mo.umac.utils.CommonUtils;
  */
 public class H2DB extends DBExternal {
 
-	public final static String DB_NAME_SOURCE = "../crawler-data/yahoolocal-h2/source/datasets";
+	public final static String DB_NAME_SOURCE = "../crawler-data/yahoolocal-h2/source/ny-prun";
 
-	public final static String DB_NAME_TARGET = "../crawler-data/yahoolocal-h2/target/datasets";
+	public final static String DB_NAME_TARGET = "../crawler-data/yahoolocal-h2/target/ny-prun";
 
 	public final static String DB_NAME_CRAWL = "../crawler-data/yahoolocal-h2/crawl/datasets";
 
@@ -65,46 +68,17 @@ public class H2DB extends DBExternal {
 	private String sqlDeleteItemTable = "DROP TABLE ITEM";
 	private String sqlDeleteCategoryTable = "DROP TABLE CATEGORY";
 	private String sqlDeleteRelationshipTable = "DROP TABLE RELATIONSHIP";
-	/****************************** sqls for creating table ******************************/
-	/**
-	 * level: the divided level radius: the radius of the circle want to covered
-	 */
-	// private String sqlCreateQueryTable = "CREATE TABLE IF NOT EXISTS QUERY "
-	// +
-	// "(QUERYID INT PRIMARY KEY, QUERY VARCHAR(100), ZIP INT, RESULTS INT, START INT, "
-	// +
-	// "LATITUDE DOUBLE, LONGITUDE DOUBLE, RADIUS DOUBLE, LEVEL INT, PARENTID INT, "
-	// +
-	// "TOTALRESULTSAVAILABLE INT, TOTALRESULTSRETURNED INT, FIRSTRESULTPOSITION INT)";
-	// private String sqlCreateItemTable = "CREATE TABLE IF NOT EXISTS ITEM "
-	// +
-	// "(ITEMID INT PRIMARY KEY, TITLE VARCHAR(200), CITY VARCHAR(200), STATE VARCHAR(10), "
-	// + "LATITUDE DOUBLE, LONGITUDE DOUBLE, DISTANCE DOUBLE, "
-	// + "AVERAGERATING DOUBLE, TOTALRATINGS DOUBLE, TOTALREVIEWS DOUBLE)";
-	// private String sqlCreateCategoryTable =
-	// "CREATE TABLE IF NOT EXISTS CATEGORY (ITEMID INT, "
-	// +
-	// "CATEGORYID INT, CATEGORYNAME VARCHAR(200), CONSTRAINT pk_itemCategory PRIMARY KEY (ITEMID,CATEGORYID))";
-	//
-	// /**
-	// * This table records that the item is returned by which query in which
-	// * position.
-	// */
-	// private String sqlCreateRelationshipTable =
-	// "CREATE TABLE IF NOT EXISTS RELATIONSHIP "
-	// +
-	// "(ITEMID INT, QEURYID INT, POSITION INT, CONSTRAINT pk_itemquery PRIMARY KEY (ITEMID,QEURYID))";
 
 	/****************************** sqls for creating table ******************************/
 	/**
 	 * level: the divided level radius: the radius of the circle want to covered
 	 */
-	private String sqlCreateQueryTable = "CREATE TABLE IF NOT EXISTS QUERY " + "(QUERYID INT, QUERY VARCHAR(100), ZIP INT, RESULTS INT, START INT, "
+	private String sqlCreateQueryTable = "CREATE TABLE IF NOT EXISTS QUERY " + "(QUERYID INT PRIMARY KEY, QUERY VARCHAR(100), ZIP INT, RESULTS INT, START INT, "
 			+ "LATITUDE DOUBLE, LONGITUDE DOUBLE, RADIUS DOUBLE, LEVEL INT, PARENTID INT, " + "TOTALRESULTSAVAILABLE INT, TOTALRESULTSRETURNED INT, FIRSTRESULTPOSITION INT)";
 	// revised at 2013-9-26
-	private String sqlCreateItemTable = "CREATE TABLE IF NOT EXISTS ITEM " + "(ITEMID INT, TITLE VARCHAR(200), CITY VARCHAR(200), STATE VARCHAR(10), "
+	private String sqlCreateItemTable = "CREATE TABLE IF NOT EXISTS ITEM " + "(ITEMID INT PRIMARY KEY, TITLE VARCHAR(200), CITY VARCHAR(200), STATE VARCHAR(10), "
 			+ "LATITUDE DOUBLE, LONGITUDE DOUBLE, DISTANCE DOUBLE, " + "AVERAGERATING DOUBLE, TOTALRATINGS DOUBLE, TOTALREVIEWS DOUBLE, NUMCRAWLED INT)";
-	private String sqlCreateCategoryTable = "CREATE TABLE IF NOT EXISTS CATEGORY (ITEMID INT, " + "CATEGORYID INT, CATEGORYNAME VARCHAR(200))";
+	private String sqlCreateCategoryTable = "CREATE TABLE IF NOT EXISTS CATEGORY (ITEMID INT PRIMARY KEY, " + "CATEGORYID INT, CATEGORYNAME VARCHAR(200))";
 
 	/**
 	 * This table records that the item is returned by which query in which
@@ -122,6 +96,9 @@ public class H2DB extends DBExternal {
 	private String sqlPrepInsertCategory = "INSERT INTO CATEGORY (ITEMID, CATEGORYID, CATEGORYNAME) VALUES (?,?,?)";
 
 	private String sqlPrepInsertRelationship = "INSERT INTO RELATIONSHIP (ITEMID, QEURYID, POSITION) VALUES(?,?,?)";
+
+	/****************************** sqls preparation for update ******************************/
+	private String sqlPrepUpdateItem = "update item set NUMCRAWLED = ? where ITEMID = ?";
 
 	/**
 	 * sql for select all data from a table. Need concatenate the table's names.
@@ -176,9 +153,9 @@ public class H2DB extends DBExternal {
 		Connection con = getConnection(dbName);
 		//
 		// prepared statement
+		PreparedStatement prepQuery;
 		PreparedStatement prepItem;
 		PreparedStatement prepCategory;
-		PreparedStatement prepQuery;
 		PreparedStatement prepRelationship;
 		try {
 			con.setAutoCommit(false);
@@ -232,9 +209,66 @@ public class H2DB extends DBExternal {
 			prepQuery.close();
 			prepRelationship.close();
 		} catch (SQLException e) {
+			// FIXME yanhui comment "the Unique index or primary key violation"
 			e.printStackTrace();
 		}
 
+	}
+
+	/**
+	 * 
+	 */
+	public void updataExternalDB() {
+		// TODO check
+		String dbName = dbNameTarget;
+		Connection con = getConnection(dbName);
+
+		PreparedStatement prepItem;
+
+		try {
+			con.setAutoCommit(false);
+
+			prepItem = con.prepareStatement(sqlPrepUpdateItem);
+			Iterator it = CrawlerStrategy.dbInMemory.poisCrawledTimes.entrySet().iterator();
+			while (it.hasNext()) {
+				Entry entry = (Entry) it.next();
+				int poiID = (Integer) entry.getKey();
+				int times = (Integer) entry.getValue();
+				prepItem.setInt(1, times);
+				prepItem.setInt(2, poiID);
+				prepItem.addBatch();
+			}
+			prepItem.executeBatch();
+			con.commit();
+			con.setAutoCommit(true);
+			prepItem.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	public int count(String dbName, String tableName) {
+		int count = 0;
+		String sql = sqlSelectCountStar + tableName;
+		try {
+			Connection conn = getConnection(dbName);
+			Statement stat = conn.createStatement();
+			try {
+				java.sql.ResultSet rs = stat.executeQuery(sql);
+				while (rs.next()) {
+
+					count = rs.getInt(1);
+				}
+				rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			stat.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return count;
 	}
 
 	/**
@@ -256,6 +290,8 @@ public class H2DB extends DBExternal {
 		int c4 = count(dbName, RELATIONSHIP);
 		System.out.println("count RELATIONSHIP = " + c4);
 	}
+
+	/****************************** Printing tables ******************************/
 
 	private void printQueryTable(String dbName) {
 		String sqlSelectQuery = sqlSelectStar + QUERY;
@@ -306,7 +342,7 @@ public class H2DB extends DBExternal {
 		}
 	}
 
-	private void printItemTable(String dbName) {
+	public void printItemTable(String dbName) {
 		String sqlSelectItem = sqlSelectStar + ITEM;
 		try {
 			Connection conn = getConnection(dbName);
@@ -412,28 +448,7 @@ public class H2DB extends DBExternal {
 		}
 	}
 
-	private int count(String dbName, String tableName) {
-		int count = 0;
-		String sql = sqlSelectCountStar + tableName;
-		try {
-			Connection conn = getConnection(dbName);
-			Statement stat = conn.createStatement();
-			try {
-				java.sql.ResultSet rs = stat.executeQuery(sql);
-				while (rs.next()) {
-
-					count = rs.getInt(1);
-				}
-				rs.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-			stat.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return count;
-	}
+	/****************************** Insert values ******************************/
 
 	private PreparedStatement setPrepQuery(int queryID, YahooLocalQueryFileDB qc, int level, int parentID, int totalResultsAvailable, int totalResultsReturned, int firstResultPosition,
 			PreparedStatement prepQuery) {
@@ -463,7 +478,7 @@ public class H2DB extends DBExternal {
 		}
 		return prepQuery;
 	}
-	
+
 	private PreparedStatement setPrepItem(APOI result, PreparedStatement prepItem) {
 		try {
 			prepItem.setInt(1, result.getId());
@@ -519,10 +534,10 @@ public class H2DB extends DBExternal {
 			Connection conn = getConnection(dbName);
 			Statement stat = conn.createStatement();
 			//
-//			stat.execute(sqlDeleteQueryTable);
-//			stat.execute(sqlDeleteItemTable);
-//			stat.execute(sqlDeleteCategoryTable);
-//			stat.execute(sqlDeleteRelationshipTable);
+			stat.execute(sqlDeleteQueryTable);
+			stat.execute(sqlDeleteItemTable);
+			stat.execute(sqlDeleteCategoryTable);
+			stat.execute(sqlDeleteRelationshipTable);
 			//
 			stat.execute(sqlCreateQueryTable);
 			stat.execute(sqlCreateItemTable);
@@ -547,6 +562,14 @@ public class H2DB extends DBExternal {
 			}
 		}
 		return (Connection) connMap.get(dbname);
+	}
+
+	public void closeConnection(String dbname) {
+		try {
+			getConnection(dbname).close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -711,6 +734,11 @@ public class H2DB extends DBExternal {
 
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see mo.umac.db.DBExternal#readFromExtenalDB(java.lang.String,
+	 * java.lang.String)
+	 */
 	@Override
 	public HashMap<Integer, APOI> readFromExtenalDB(String categoryQ, String stateQ) {
 		HashMap<Integer, APOI> map = new HashMap<Integer, APOI>();
@@ -718,7 +746,11 @@ public class H2DB extends DBExternal {
 			Connection conn = getConnection(dbNameSource);
 			Statement stat = conn.createStatement();
 
-			String sql = "SELECT * FROM item where state = '" + stateQ + "' and itemid in (select ITEMID from CATEGORY where CATEGORYNAME = '" + categoryQ + "')";
+			// String sql = "SELECT * FROM item where state = '" + stateQ +
+			// "' and itemid in (select ITEMID from CATEGORY where CATEGORYNAME = '"
+			// + categoryQ + "')";
+			// because the database has already been prunned before
+			String sql = "select * from item";
 			try {
 				java.sql.ResultSet rs = stat.executeQuery(sql);
 				while (rs.next()) {
@@ -735,11 +767,11 @@ public class H2DB extends DBExternal {
 					double averageRating = rs.getDouble(8);
 					double totalRating = rs.getDouble(9);
 					double totalReviews = rs.getDouble(10);
-
 					Rating rating = new Rating();
 					rating.setAverageRating(averageRating);
 					rating.setTotalRatings((int) totalRating);
 					rating.setTotalReviews((int) totalReviews);
+					int numCrawled = rs.getInt(11);
 					//
 					List<Category> categories = new ArrayList<Category>();
 					Object searchingResult = CommonUtils.getKeyByValue(CrawlerStrategy.categoryIDMap, categoryQ);
@@ -749,15 +781,17 @@ public class H2DB extends DBExternal {
 						Category category = new Category(categoryID, categoryQ);
 						categories.add(category);
 					}
-					// transfer from lla to ecef
-					Coordinate lla = new Coordinate(longitude, latitude);
-					Coordinate ecef = ECEFLLA.lla2ecef(lla);
-					longitude = ecef.x;
-					latitude = ecef.y;
-					// transfer from miles to meters
-					distance = 1609.34 * distance;
 
-					APOI poi = new APOI(itemID, title, city, state, longitude, latitude, rating, distance, categories, 0);
+					// revised at 2013-9-27
+					// transfer from lla to ecef
+					// Coordinate lla = new Coordinate(longitude, latitude);
+					// Coordinate ecef = ECEFLLA.lla2ecef(lla);
+					// longitude = ecef.x;
+					// latitude = ecef.y;
+					// // transfer from miles to meters
+					// distance = 1609.34 * distance;
+
+					APOI poi = new APOI(itemID, title, city, state, longitude, latitude, rating, distance, categories, numCrawled);
 					map.put(itemID, poi);
 				}
 				rs.close();
@@ -771,10 +805,144 @@ public class H2DB extends DBExternal {
 		return map;
 	}
 
+	public void prun(String categoryQ, String stateQ) {
+		String sql = "SELECT * FROM item where state = '" + stateQ + "' and itemid in (select ITEMID from CATEGORY where CATEGORYNAME = '" + categoryQ + "')";
+		try {
+			Connection conSrc = getConnection(dbNameSource);
+			Statement statSrc = conSrc.createStatement();
+
+			Connection conTarget = getConnection(dbNameTarget);
+			conTarget.setAutoCommit(false);
+			Statement statTarget = conTarget.createStatement();
+			// create tables
+			statTarget.execute(sqlCreateItemTable);
+
+			PreparedStatement prepItem = conTarget.prepareStatement(sqlPrepInsertItem);
+
+			java.sql.ResultSet rs = statSrc.executeQuery(sql);
+			while (rs.next()) {
+
+				int itemID = rs.getInt(1);
+				String title = rs.getString(2);
+				String city = rs.getString(3);
+				String state = rs.getString(4);
+
+				double latitude = rs.getDouble(5);
+				double longitude = rs.getDouble(6);
+				double distance = rs.getDouble(7);
+
+				double averageRating = rs.getDouble(8);
+				double totalRating = rs.getDouble(9);
+				double totalReviews = rs.getDouble(10);
+				Rating rating = new Rating();
+				rating.setAverageRating(averageRating);
+				rating.setTotalRatings((int) totalRating);
+				rating.setTotalReviews((int) totalReviews);
+
+				int numCrawled = rs.getInt(11);
+
+				// write
+				prepItem.setInt(1, itemID);
+				prepItem.setString(2, title);
+				prepItem.setString(3, city);
+				prepItem.setString(4, state);
+				prepItem.setDouble(5, latitude);
+				prepItem.setDouble(6, longitude);
+				prepItem.setDouble(7, distance);
+
+				prepItem.setDouble(8, Rating.noAverageRatingValue);
+				prepItem.setDouble(9, Rating.noAverageRatingValue);
+				prepItem.setDouble(10, Rating.noAverageRatingValue);
+
+				prepItem.setDouble(11, numCrawled);
+				prepItem.addBatch();
+
+			}
+			rs.close();
+			statSrc.close();
+
+			prepItem.executeBatch();
+			conTarget.commit();
+			conTarget.setAutoCommit(true);
+			statTarget.close();
+			prepItem.close();
+			// closeConnection(dbNameSource);
+			// closeConnection(dbNameTarget);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
 	@Override
 	public int numCrawlerPoints() {
 		int c = count(dbNameTarget, ITEM);
 		return c;
+	}
+
+	/**
+	 * Convert H2DB to a files, only contain id, numCrawl, coordinates from the
+	 * table
+	 * 
+	 * @param dbName
+	 * @param tableName
+	 * @param fileName
+	 */
+	public void extractValuesFromItemTable(String dbName, String tableName, String fileName) {
+		ArrayList<Integer> idList = new ArrayList<Integer>();
+		ArrayList<Double> latList = new ArrayList<Double>();
+		ArrayList<Double> longList = new ArrayList<Double>();
+		ArrayList<Integer> numCrawledList = new ArrayList<Integer>();
+
+		try {
+			Connection conn = getConnection(dbNameSource);
+			Statement stat = conn.createStatement();
+			String sql = "SELECT ITEMID, LATITUDE, LONGITUDE, NUMCRAWLED FROM item";
+			try {
+				java.sql.ResultSet rs = stat.executeQuery(sql);
+				while (rs.next()) {
+					int itemID = rs.getInt(1);
+					double latitude = rs.getDouble(2);
+					double longitude = rs.getDouble(3);
+					int numCrawled = rs.getInt(4);
+					idList.add(itemID);
+					latList.add(latitude);
+					longList.add(longitude);
+					numCrawledList.add(numCrawled);
+				}
+				rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			stat.close();
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		// writing to the file
+		File file = new File(fileName);
+		try {
+			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, true)));
+			int n = idList.size();
+			for (int i = 0; i < n; i++) {
+				int id = idList.get(i);
+				double latitude = latList.get(i);
+				double longitude = longList.get(i);
+				int numCrawled = numCrawledList.get(i);
+				bw.write(Integer.toString(id));
+				bw.write(";");
+				bw.write(Integer.toString(numCrawled));
+				bw.write(";");
+				bw.write(Double.toString(longitude));
+				bw.write(";");
+				bw.write(Double.toString(latitude));
+				bw.newLine();
+			}
+			bw.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 }

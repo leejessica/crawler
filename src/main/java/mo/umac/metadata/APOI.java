@@ -46,6 +46,7 @@ public class APOI {
 		this.rating = rating;
 		this.distanceInMiles = distanceInMiles;
 		this.categories = categories;
+		this.numCrawled = numCrawled;
 	}
 
 	public APOI(int id, String title, String city, String state, Double longitude, Double latitude, Rating rating, double distance, List<Category> categories, int numCrawled) {
@@ -59,6 +60,7 @@ public class APOI {
 		this.rating = rating;
 		this.distanceInMiles = distance;
 		this.categories = categories;
+		this.numCrawled = numCrawled;
 	}
 
 	@Override
