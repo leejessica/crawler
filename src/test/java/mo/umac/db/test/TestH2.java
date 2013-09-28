@@ -13,7 +13,7 @@ import java.util.TreeSet;
 
 import javax.sql.DataSource;
 
-import mo.umac.crawler.MainClawler;
+import mo.umac.crawler.MainCrawler;
 import mo.umac.db.H2DB;
 
 import org.h2.jdbcx.JdbcConnectionPool;

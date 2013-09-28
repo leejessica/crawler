@@ -17,7 +17,7 @@ import org.postgis.Point;
 import org.postgresql.geometric.PGpoint;
 
 import mo.umac.crawler.CrawlerStrategy;
-import mo.umac.crawler.MainClawler;
+import mo.umac.crawler.MainCrawler;
 import mo.umac.db.Postgresql;
 import mo.umac.rtree.MyRTree;
 
@@ -32,7 +32,7 @@ public class MyRTreeTest {
      * @param args
      */
     public static void main(String[] args) {
-	DOMConfigurator.configure(MainClawler.LOG_PROPERTY_PATH);
+	DOMConfigurator.configure(MainCrawler.LOG_PROPERTY_PATH);
  
 	MyRTreeTest test = new MyRTreeTest();
 

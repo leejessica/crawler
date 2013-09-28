@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import mo.umac.crawler.CrawlerStrategy;
+import mo.umac.crawler.MainCrawler;
 import mo.umac.metadata.APOI;
 import mo.umac.metadata.AQuery;
 import mo.umac.metadata.ResultSet;
@@ -159,7 +160,7 @@ public class DBInMemory {
 	 */
 	public int numOfTuplesInExternalDB(Set set) {
 		H2DB h2db = new H2DB();
-		String dbName = H2DB.DB_NAME_TARGET;
+		String dbName = MainCrawler.DB_NAME_TARGET;
 		Connection conn = h2db.getConnection(dbName);
 		try {
 			Statement stat = conn.createStatement();

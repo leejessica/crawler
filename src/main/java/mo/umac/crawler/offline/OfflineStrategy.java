@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 import mo.umac.crawler.CrawlerStrategy;
+import mo.umac.crawler.MainCrawler;
 import mo.umac.db.DBExternal;
 import mo.umac.db.DBInMemory;
 import mo.umac.db.H2DB;
@@ -58,7 +59,7 @@ public abstract class OfflineStrategy extends CrawlerStrategy {
 		logger.info("preparing data...");
 		CrawlerStrategy.categoryIDMap = FileOperator.readCategoryID(CATEGORY_ID_PATH);
 		// source database
-		CrawlerStrategy.dbExternal = new H2DB(H2DB.DB_NAME_SOURCE, H2DB.DB_NAME_TARGET);
+		CrawlerStrategy.dbExternal = new H2DB(MainCrawler.DB_NAME_SOURCE, MainCrawler.DB_NAME_TARGET);
 		CrawlerStrategy.dbInMemory = new DBInMemory();
 		// add at 2013-9-23
 		CrawlerStrategy.dbInMemory.poisCrawledTimes = new HashMap<Integer, Integer>();
@@ -66,7 +67,7 @@ public abstract class OfflineStrategy extends CrawlerStrategy {
 		CrawlerStrategy.dbInMemory.index();
 		logger.info("There are in total " + CrawlerStrategy.dbInMemory.pois.size() + " points.");
 		// target database
-		CrawlerStrategy.dbExternal.createTables(H2DB.DB_NAME_TARGET);
+		CrawlerStrategy.dbExternal.createTables(MainCrawler.DB_NAME_TARGET);
 	}
 
 	/*

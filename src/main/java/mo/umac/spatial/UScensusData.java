@@ -11,7 +11,7 @@ import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 
-import mo.umac.crawler.MainClawler;
+import mo.umac.crawler.MainCrawler;
 import mo.umac.crawler.online.OnlineStrategy;
 
 import org.apache.log4j.Logger;

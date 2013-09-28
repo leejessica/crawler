@@ -20,6 +20,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
+import mo.umac.crawler.MainCrawler;
 import mo.umac.db.H2DB;
 import mo.umac.spatial.ECEFLLA;
 import mo.umac.spatial.GeoOperator;
@@ -97,7 +98,7 @@ public class CheckUnCrawledPoints {
 	    set = new TreeSet();
 	}
 	H2DB h2db = new H2DB();
-	String dbName = H2DB.DB_NAME_TARGET;
+	String dbName = MainCrawler.DB_NAME_TARGET;
 	Connection conn = h2db.getConnection(dbName);
 	try {
 	    Statement stat = conn.createStatement();
@@ -123,7 +124,7 @@ public class CheckUnCrawledPoints {
 	H2DB h2db = new H2DB();
 	// source list
 	List sourceList = new ArrayList<Integer>();
-	String sourceDB = H2DB.DB_NAME_SOURCE;
+	String sourceDB = MainCrawler.DB_NAME_SOURCE;
 	Connection conn = h2db.getConnection(sourceDB);
 	try {
 	    Statement stat = conn.createStatement();
@@ -143,7 +144,7 @@ public class CheckUnCrawledPoints {
 	System.out.println("source: " + sourceList.size());
 	// target list
 	Set targetSet = new HashSet<Integer>();
-	String targetDB = H2DB.DB_NAME_TARGET;
+	String targetDB = MainCrawler.DB_NAME_TARGET;
 	conn = h2db.getConnection(targetDB);
 	try {
 	    Statement stat = conn.createStatement();
@@ -176,7 +177,7 @@ public class CheckUnCrawledPoints {
 	Map map = new HashMap<Integer, Coordinate>();
 	H2DB h2db = new H2DB();
 	// source list
-	String sourceDB = H2DB.DB_NAME_SOURCE;
+	String sourceDB = MainCrawler.DB_NAME_SOURCE;
 	Connection conn = h2db.getConnection(sourceDB);
 	try {
 	    Statement stat = conn.createStatement();

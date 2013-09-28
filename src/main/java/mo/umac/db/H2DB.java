@@ -18,9 +18,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import mo.umac.crawler.CrawlerStrategy;
+import mo.umac.crawler.MainCrawler;
 import mo.umac.metadata.APOI;
 import mo.umac.metadata.AQuery;
 import mo.umac.metadata.DefaultValues;
@@ -39,12 +41,6 @@ import mo.umac.utils.CommonUtils;
  */
 public class H2DB extends DBExternal {
 
-	public final static String DB_NAME_SOURCE = "../crawler-data/yahoolocal-h2/source/ny-prun";
-
-	public final static String DB_NAME_TARGET = "../crawler-data/yahoolocal-h2/target/ny-prun";
-
-	public final static String DB_NAME_CRAWL = "../crawler-data/yahoolocal-h2/crawl/datasets";
-
 	// table names
 	private final String QUERY = "QUERY";
 	public final static String ITEM = "ITEM";
@@ -53,8 +49,8 @@ public class H2DB extends DBExternal {
 
 	public H2DB() {
 		super();
-		super.dbNameSource = DB_NAME_SOURCE;
-		super.dbNameTarget = DB_NAME_TARGET;
+		super.dbNameSource = MainCrawler.DB_NAME_SOURCE;
+		super.dbNameTarget = MainCrawler.DB_NAME_TARGET;
 	}
 
 	public H2DB(String dbNameSource, String dbNameTarget) {
@@ -72,13 +68,16 @@ public class H2DB extends DBExternal {
 	/****************************** sqls for creating table ******************************/
 	/**
 	 * level: the divided level radius: the radius of the circle want to covered
+	 * PRIMARY KEY
 	 */
-	private String sqlCreateQueryTable = "CREATE TABLE IF NOT EXISTS QUERY " + "(QUERYID INT PRIMARY KEY, QUERY VARCHAR(100), ZIP INT, RESULTS INT, START INT, "
+	private String sqlCreateQueryTable = "CREATE TABLE IF NOT EXISTS QUERY " + "(QUERYID INT, QUERY VARCHAR(100), ZIP INT, RESULTS INT, START INT, "
 			+ "LATITUDE DOUBLE, LONGITUDE DOUBLE, RADIUS DOUBLE, LEVEL INT, PARENTID INT, " + "TOTALRESULTSAVAILABLE INT, TOTALRESULTSRETURNED INT, FIRSTRESULTPOSITION INT)";
 	// revised at 2013-9-26
-	private String sqlCreateItemTable = "CREATE TABLE IF NOT EXISTS ITEM " + "(ITEMID INT PRIMARY KEY, TITLE VARCHAR(200), CITY VARCHAR(200), STATE VARCHAR(10), "
+	private String sqlCreateItemTable = "CREATE TABLE IF NOT EXISTS ITEM " + "(ITEMID INT, TITLE VARCHAR(200), CITY VARCHAR(200), STATE VARCHAR(10), "
 			+ "LATITUDE DOUBLE, LONGITUDE DOUBLE, DISTANCE DOUBLE, " + "AVERAGERATING DOUBLE, TOTALRATINGS DOUBLE, TOTALREVIEWS DOUBLE, NUMCRAWLED INT)";
-	private String sqlCreateCategoryTable = "CREATE TABLE IF NOT EXISTS CATEGORY (ITEMID INT PRIMARY KEY, " + "CATEGORYID INT, CATEGORYNAME VARCHAR(200))";
+	private String sqlCreateItemTableKey = "CREATE TABLE IF NOT EXISTS ITEM " + "(ITEMID INT PRIMARY KEY, TITLE VARCHAR(200), CITY VARCHAR(200), STATE VARCHAR(10), "
+			+ "LATITUDE DOUBLE, LONGITUDE DOUBLE, DISTANCE DOUBLE, " + "AVERAGERATING DOUBLE, TOTALRATINGS DOUBLE, TOTALREVIEWS DOUBLE, NUMCRAWLED INT)";
+	private String sqlCreateCategoryTable = "CREATE TABLE IF NOT EXISTS CATEGORY (ITEMID INT, " + "CATEGORYID INT, CATEGORYNAME VARCHAR(200))";
 
 	/**
 	 * This table records that the item is returned by which query in which
@@ -276,19 +275,20 @@ public class H2DB extends DBExternal {
 	 */
 	public void examData(String dbName) {
 		// print
-		printQueryTable(dbName);
-		printItemTable(dbName);
-		printCategoryTable(dbName);
-		printRelationshipTable(dbName);
-		// count
-		int c1 = count(dbName, QUERY);
-		System.out.println("count QUERY = " + c1);
+		// printQueryTable(dbName);
 		int c2 = count(dbName, ITEM);
 		System.out.println("count ITEM = " + c2);
-		int c3 = count(dbName, CATEGORY);
-		System.out.println("count CATEGORY = " + c3);
-		int c4 = count(dbName, RELATIONSHIP);
-		System.out.println("count RELATIONSHIP = " + c4);
+		printItemTable(dbName);
+		// printCategoryTable(dbName);
+		// printRelationshipTable(dbName);
+
+		// count
+		// int c1 = count(dbName, QUERY);
+		// System.out.println("count QUERY = " + c1);
+		// int c3 = count(dbName, CATEGORY);
+		// System.out.println("count CATEGORY = " + c3);
+		// int c4 = count(dbName, RELATIONSHIP);
+		// System.out.println("count RELATIONSHIP = " + c4);
 	}
 
 	/****************************** Printing tables ******************************/
@@ -533,11 +533,11 @@ public class H2DB extends DBExternal {
 		try {
 			Connection conn = getConnection(dbName);
 			Statement stat = conn.createStatement();
-			//
-			stat.execute(sqlDeleteQueryTable);
-			stat.execute(sqlDeleteItemTable);
-			stat.execute(sqlDeleteCategoryTable);
-			stat.execute(sqlDeleteRelationshipTable);
+			// XXX delete tables before creating
+			// stat.execute(sqlDeleteQueryTable);
+			// stat.execute(sqlDeleteItemTable);
+			// stat.execute(sqlDeleteCategoryTable);
+			// stat.execute(sqlDeleteRelationshipTable);
 			//
 			stat.execute(sqlCreateQueryTable);
 			stat.execute(sqlCreateItemTable);
@@ -564,6 +564,12 @@ public class H2DB extends DBExternal {
 		return (Connection) connMap.get(dbname);
 	}
 
+	/**
+	 * @param dbname
+	 * @deprecated
+	 * 
+	 *             See DBExternal.distroyConn();
+	 */
 	public void closeConnection(String dbname) {
 		try {
 			getConnection(dbname).close();
@@ -815,7 +821,7 @@ public class H2DB extends DBExternal {
 			conTarget.setAutoCommit(false);
 			Statement statTarget = conTarget.createStatement();
 			// create tables
-			statTarget.execute(sqlCreateItemTable);
+			statTarget.execute(sqlCreateItemTableKey);
 
 			PreparedStatement prepItem = conTarget.prepareStatement(sqlPrepInsertItem);
 
@@ -866,8 +872,6 @@ public class H2DB extends DBExternal {
 			conTarget.setAutoCommit(true);
 			statTarget.close();
 			prepItem.close();
-			// closeConnection(dbNameSource);
-			// closeConnection(dbNameTarget);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -888,10 +892,13 @@ public class H2DB extends DBExternal {
 	 * @param fileName
 	 */
 	public void extractValuesFromItemTable(String dbName, String tableName, String fileName) {
-		ArrayList<Integer> idList = new ArrayList<Integer>();
-		ArrayList<Double> latList = new ArrayList<Double>();
-		ArrayList<Double> longList = new ArrayList<Double>();
-		ArrayList<Integer> numCrawledList = new ArrayList<Integer>();
+		// delete the duplicate
+		Map idMap = new HashMap<Integer, Integer>();
+
+		List<Integer> idList = new ArrayList<Integer>();
+		List<Double> latList = new ArrayList<Double>();
+		List<Double> longList = new ArrayList<Double>();
+		List<Integer> numCrawledList = new ArrayList<Integer>();
 
 		try {
 			Connection conn = getConnection(dbNameSource);
@@ -904,17 +911,22 @@ public class H2DB extends DBExternal {
 					double latitude = rs.getDouble(2);
 					double longitude = rs.getDouble(3);
 					int numCrawled = rs.getInt(4);
-					idList.add(itemID);
-					latList.add(latitude);
-					longList.add(longitude);
-					numCrawledList.add(numCrawled);
+					//
+					if (!idMap.containsKey(itemID)) {
+						idMap.put(itemID, 0);
+
+						idList.add(itemID);
+						latList.add(latitude);
+						longList.add(longitude);
+						numCrawledList.add(numCrawled);
+					}
 				}
 				rs.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 			stat.close();
-			conn.close();
+			// conn.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
