@@ -459,4 +459,10 @@ public class H2DBGeo extends DBExternal {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public void removeDuplicate() {
+		// TODO Auto-generated method stub
+		
+	}
 }

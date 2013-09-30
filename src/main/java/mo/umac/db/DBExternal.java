@@ -55,6 +55,8 @@ public abstract class DBExternal {
 
 	public abstract int numCrawlerPoints();
 
+	public abstract void removeDuplicate();
+	
 	/**
 	 * Update the numCrawled
 	 */
@@ -76,4 +78,5 @@ public abstract class DBExternal {
 			}
 		}
 	}
+
 }

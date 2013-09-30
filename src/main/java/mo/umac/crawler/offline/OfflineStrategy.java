@@ -120,7 +120,11 @@ public abstract class OfflineStrategy extends CrawlerStrategy {
 				} else {
 					logger.error("Cannot find category id for query: " + query + " in categoryIDMap");
 				}
+				logger.info("removing duplicate records in the external db");
+				CrawlerStrategy.dbExternal.removeDuplicate();
+				logger.info("begin updating the external db");
 				CrawlerStrategy.dbInMemory.updataExternalDB();
+				logger.info("end updating the external db");
 				endData();
 			}
 		}
@@ -133,18 +137,20 @@ public abstract class OfflineStrategy extends CrawlerStrategy {
 		logger.info("countNumQueries = " + CrawlerStrategy.countNumQueries);
 		logger.info("number of points crawled = " + CrawlerStrategy.dbInMemory.poisIDs.size());
 		logger.info("Finished ! Oh ! Yeah! ");
-		
-//		logger.info("poisCrawledTimes:");
-//		Iterator it1 = CrawlerStrategy.dbInMemory.poisCrawledTimes.entrySet().iterator();
-//		while (it1.hasNext()) {
-//			Entry entry = (Entry) it1.next();
-//			int poiID = (Integer) entry.getKey();
-//			int times = (Integer) entry.getValue();
-//			APOI aPOI = CrawlerStrategy.dbInMemory.pois.get(poiID);
-//			double longitude = aPOI.getCoordinate().x;
-//			double latitude = aPOI.getCoordinate().y;
-//			logger.info(poiID + ": " + times + ", " + "[" + longitude + ", " + latitude + "]");
-//		}
+
+		// logger.info("poisCrawledTimes:");
+		// Iterator it1 =
+		// CrawlerStrategy.dbInMemory.poisCrawledTimes.entrySet().iterator();
+		// while (it1.hasNext()) {
+		// Entry entry = (Entry) it1.next();
+		// int poiID = (Integer) entry.getKey();
+		// int times = (Integer) entry.getValue();
+		// APOI aPOI = CrawlerStrategy.dbInMemory.pois.get(poiID);
+		// double longitude = aPOI.getCoordinate().x;
+		// double latitude = aPOI.getCoordinate().y;
+		// logger.info(poiID + ": " + times + ", " + "[" + longitude + ", " +
+		// latitude + "]");
+		// }
 		// delete
 		// Set set = CrawlerStrategy.dbInMemory.poisIDs;
 		// Iterator<Integer> it = set.iterator();

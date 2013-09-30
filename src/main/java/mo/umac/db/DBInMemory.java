@@ -5,16 +5,16 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import mo.umac.crawler.CrawlerStrategy;
 import mo.umac.crawler.MainCrawler;
 import mo.umac.metadata.APOI;
 import mo.umac.metadata.AQuery;
+import mo.umac.metadata.DefaultValues;
 import mo.umac.metadata.ResultSet;
 import mo.umac.metadata.ResultSetYahooOnline;
 import mo.umac.metadata.YahooLocalQueryFileDB;
@@ -39,13 +39,20 @@ public class DBInMemory {
 	public static MyRTree rtreePoints;
 
 	// TODO treeset is for debugging. change to hashset when running the program
-	public static Set<Integer> poisIDs = new TreeSet<Integer>();
+	public static Set<Integer> poisIDs = new HashSet<Integer>();
 
 	/**
 	 * add at 2013-9-23
 	 * Stores the number of times a points being crawled
 	 */
-	public static Map<Integer, Integer> poisCrawledTimes;;
+	public static Map<Integer, Integer> poisCrawledTimes;
+
+	// /**
+	// * table 4: the pair of query's id and returned poi's id
+	// */
+	// public static Set<String> queryPoiCrawled;
+	//
+	// public static Set<>
 
 	/**
 	 * @param externalDataSet
@@ -94,18 +101,17 @@ public class DBInMemory {
 			logger.debug("query point = " + queryPoint.toString());
 		}
 		List<Integer> resultsID = rtreePoints.searchNN(queryPoint, qc.getTopK());
-		// for each point: recording how many times it has been crawled
+		//
 		for (int i = 0; i < resultsID.size(); i++) {
 			int id = resultsID.get(i);
 			int times = 0;
 			if (poisCrawledTimes.containsKey(id)) {
-				times = (Integer) poisCrawledTimes.get(id);
-				// logger.info("times for " + id + " = " + times+1);
+				times = poisCrawledTimes.get(id);
 			}
 			times += 1;
 			poisCrawledTimes.put(id, times);
 		}
-		//
+
 		poisIDs.addAll(resultsID);
 
 		// FIXME add re-transfer from the break point.
@@ -118,40 +124,44 @@ public class DBInMemory {
 		ResultSet resultSet = queryByID(resultsID);
 		resultSet.setTotalResultsReturned(resultsID.size());
 
-		if (logger.isDebugEnabled()) {
-			int size1 = resultsID.size();
-			int size2 = resultSet.getPOIs().size();
-			if (size1 != size2) {
-				logger.error("size1 != size2");
-			}
-		}
+		// if (logger.isDebugEnabled()) {
+		// int size1 = resultsID.size();
+		// int size2 = resultSet.getPOIs().size();
+		// if (size1 != size2) {
+		// logger.error("size1 != size2");
+		// }
+		// }
+
 		writeToExternalDB(queryID, qc, resultSet);
+		// revised at 2013-9-30
+		// writeToInMemoryDB(queryID, qc, resultSet);
 
 		//
-//		if (logger.isDebugEnabled()) {
-//			logger.debug("countNumQueries = " + CrawlerStrategy.countNumQueries);
-//			logger.debug("number of points crawled = " + numCrawlerPoints());
-//
-//			int size1 = numCrawlerPoints();
-//			Set set = new TreeSet();
-//			int size2 = numOfTuplesInExternalDB(set);
-//			logger.debug("numCrawlerPoints in memory = " + size1);
-//			logger.debug("numCrawlerPoints in db = " + size2);
-//			if (size1 != size2) {
-//				logger.error("size1 != size2");
-//				logger.error("countNumQueries = " + CrawlerStrategy.countNumQueries);
-//				logger.error("numCrawlerPoints in memory = " + size1);
-//				logger.error("numCrawlerPoints in db = " + size2);
-//			}
-//		}
+		// if (logger.isDebugEnabled()) {
+		// logger.debug("countNumQueries = " + CrawlerStrategy.countNumQueries);
+		// logger.debug("number of points crawled = " + numCrawlerPoints());
+		//
+		// int size1 = numCrawlerPoints();
+		// Set set = new TreeSet();
+		// int size2 = numOfTuplesInExternalDB(set);
+		// logger.debug("numCrawlerPoints in memory = " + size1);
+		// logger.debug("numCrawlerPoints in db = " + size2);
+		// if (size1 != size2) {
+		// logger.error("size1 != size2");
+		// logger.error("countNumQueries = " + CrawlerStrategy.countNumQueries);
+		// logger.error("numCrawlerPoints in memory = " + size1);
+		// logger.error("numCrawlerPoints in db = " + size2);
+		// }
+		// }
 
-		if (queryID % 100 == 0) {
+		if (queryID % 10 == 0) {
 			logger.info("countNumQueries = " + CrawlerStrategy.countNumQueries);
 			logger.info("number of points crawled = " + numCrawlerPoints());
 		}
 		CrawlerStrategy.countNumQueries++;
 		return resultSet;
 	}
+
 
 	/**
 	 * Only for debugging

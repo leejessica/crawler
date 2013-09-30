@@ -16,10 +16,9 @@ public class MainCrawler {
 
 	public static String LOG_PROPERTY_PATH = "./src/main/resources/log4j.xml";
 
+	// used in offline algorithm
 	public final static String DB_NAME_SOURCE = "../crawler-data/yahoolocal-h2/source/ok-prun";
-
 	public final static String DB_NAME_TARGET = "../crawler-data/yahoolocal-h2/target/ok-prun";
-
 	public final static String DB_NAME_CRAWL = "../crawler-data/yahoolocal-h2/crawl/datasets";
 
 	public static void main(String[] args) {
@@ -47,6 +46,8 @@ public class MainCrawler {
 		listCategoryNames.add(category2);
 		//
 		PaintShapes.painting = false;
+		// change top-k
+//		CrawlerStrategy.MAX_TOTAL_RESULTS_RETURNED = 100;
 		crawlerContext.callCrawling(listNameStates, listCategoryNames);
 	}
 

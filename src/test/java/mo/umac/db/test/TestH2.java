@@ -187,4 +187,8 @@ public class TestH2 {
 		}
 	}
 
+	public void testRemoveDuplicate(){
+		
+	}
+
 }

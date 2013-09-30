@@ -49,10 +49,22 @@ public class MainDataProcess {
 		// step 2
 		// m.prunH2(dbNameSource, dbNameTarget, categoryQ, stateQ);
 		// m.examData(dbNameTarget);
+
 		// step 3
+
+		// step 4
 		String dbName = "../crawler-data/yahoolocal-h2/target/ok-prun";
 		String fileName = "../data-map/ok.pois";
-		m.convertFromH2ToFile(dbName, fileName);
+		// m.convertFromH2ToFile(dbName, fileName);
+
+		// step 4
+		String logFile = "../crawlerlog/info.log";
+		// m.numVSCrawled(logFile);
+
+		// test remove duplicate
+		m.examData(dbName);
+		m.removeDuplicate(dbName);
+		m.examData(dbName);
 
 		DBExternal.distroyConn();
 		// m.prunPoisFile();
@@ -103,6 +115,57 @@ public class MainDataProcess {
 		h2.extractValuesFromItemTable(dbName, tableName, fileName);
 	}
 
+	/**
+	 * Read from the log file, print the number of queries ,and the number of
+	 * points crawled
+	 * 
+	 * @param logFile
+	 */
+	public void numVSCrawled(String logFile) {
+		File file = new File(logFile);
+		if (!file.exists()) {
+			System.out.println("file not exist!");
+		}
+		ArrayList<Integer> numQueries = new ArrayList<Integer>();
+		ArrayList<Integer> numPoints = new ArrayList<Integer>();
+
+		BufferedReader br = null;
+		try {
+			br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+			String data = null;
+			String[] split;
+			while ((data = br.readLine()) != null) {
+				data = data.trim();
+				if (data.contains("countNumQueries")) {
+					split = data.split("=");
+					int numQuery = Integer.parseInt(split[1].trim());
+					numQueries.add(numQuery);
+				} else if (data.contains("number of points crawled")) {
+					split = data.split("=");
+					int numPoint = Integer.parseInt(split[1].trim());
+					numPoints.add(numPoint);
+				}
+			}
+			br.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		// print
+		System.out.println("numQueries");
+		for (int i = 0; i < numQueries.size(); i++) {
+			System.out.println(numQueries.get(i));
+		}
+		System.out.println("numPoints");
+		for (int i = 0; i < numPoints.size(); i++) {
+			System.out.println(numPoints.get(i));
+		}
+	}
+
+	/**
+	 * @deprecated
+	 */
 	public void prunPoisFile() {
 		// TODO
 		int threshold = 50;
@@ -119,6 +182,8 @@ public class MainDataProcess {
 	 * 
 	 * @param fileName
 	 * @return
+	 * 
+	 * @deprecated
 	 */
 	private Map numCrawledFrequency(String fileName) {
 		Map map = new HashMap<Integer, Integer>();
@@ -224,6 +289,11 @@ public class MainDataProcess {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public void removeDuplicate(String dbNameTarget) {
+		H2DB h2 = new H2DB("", dbNameTarget);
+		h2.removeDuplicate();
 	}
 
 	/**

@@ -388,4 +388,10 @@ public class Postgresql extends DBExternal {
 		
 	}
 
+	@Override
+	public void removeDuplicate() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

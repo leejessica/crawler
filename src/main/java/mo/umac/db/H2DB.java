@@ -21,8 +21,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.log4j.Logger;
+
 import mo.umac.crawler.CrawlerStrategy;
 import mo.umac.crawler.MainCrawler;
+import mo.umac.crawler.offline.OfflineStrategy;
 import mo.umac.metadata.APOI;
 import mo.umac.metadata.AQuery;
 import mo.umac.metadata.DefaultValues;
@@ -40,6 +43,8 @@ import mo.umac.utils.CommonUtils;
  * 
  */
 public class H2DB extends DBExternal {
+
+	protected static Logger logger = Logger.getLogger(H2DB.class.getName());
 
 	// table names
 	private final String QUERY = "QUERY";
@@ -60,10 +65,10 @@ public class H2DB extends DBExternal {
 	}
 
 	/****************************** sqls for deleting table ******************************/
-	private String sqlDeleteQueryTable = "DROP TABLE QUERY";
-	private String sqlDeleteItemTable = "DROP TABLE ITEM";
-	private String sqlDeleteCategoryTable = "DROP TABLE CATEGORY";
-	private String sqlDeleteRelationshipTable = "DROP TABLE RELATIONSHIP";
+	private String sqlDeleteQueryTable = "DROP TABLE IF EXISTS QUERY";
+	private String sqlDeleteItemTable = "DROP TABLE IF EXISTS ITEM";
+	private String sqlDeleteCategoryTable = "DROP TABLE IF EXISTS CATEGORY";
+	private String sqlDeleteRelationshipTable = "DROP TABLE IF EXISTS RELATIONSHIP";
 
 	/****************************** sqls for creating table ******************************/
 	/**
@@ -75,8 +80,10 @@ public class H2DB extends DBExternal {
 	// revised at 2013-9-26
 	private String sqlCreateItemTable = "CREATE TABLE IF NOT EXISTS ITEM " + "(ITEMID INT, TITLE VARCHAR(200), CITY VARCHAR(200), STATE VARCHAR(10), "
 			+ "LATITUDE DOUBLE, LONGITUDE DOUBLE, DISTANCE DOUBLE, " + "AVERAGERATING DOUBLE, TOTALRATINGS DOUBLE, TOTALREVIEWS DOUBLE, NUMCRAWLED INT)";
+
 	private String sqlCreateItemTableKey = "CREATE TABLE IF NOT EXISTS ITEM " + "(ITEMID INT PRIMARY KEY, TITLE VARCHAR(200), CITY VARCHAR(200), STATE VARCHAR(10), "
 			+ "LATITUDE DOUBLE, LONGITUDE DOUBLE, DISTANCE DOUBLE, " + "AVERAGERATING DOUBLE, TOTALRATINGS DOUBLE, TOTALREVIEWS DOUBLE, NUMCRAWLED INT)";
+
 	private String sqlCreateCategoryTable = "CREATE TABLE IF NOT EXISTS CATEGORY (ITEMID INT, " + "CATEGORYID INT, CATEGORYNAME VARCHAR(200))";
 
 	/**
@@ -105,6 +112,30 @@ public class H2DB extends DBExternal {
 	public static String sqlSelectStar = "SELECT * FROM ";
 
 	private String sqlSelectCountStar = "SELECT COUNT(*) FROM ";
+
+	/****************************** sqls revome duplicate ******************************/
+	private String s01 = "DROP TABLE IF EXISTS holdkey";
+	private String s02 = "DROP TABLE IF EXISTS holdups";
+	// table 1
+	private String s1Query = "create table holdkey as SELECT QUERYID from QUERY GROUP BY QUERYID";
+	private String s2Query = "create table holdups as SELECT DISTINCT QUERY.*  FROM QUERY, holdkey WHERE QUERY.QUERYID = holdkey.QUERYID";
+	private String s3Query = "DELETE FROM QUERY";
+	private String s4Query = "INSERT into QUERY SELECT * FROM holdups";
+	// table 2
+	private String s1Item = "create table holdkey as SELECT ITEMID from ITEM GROUP BY ITEMID";
+	private String s2Item = "create table holdups as SELECT DISTINCT ITEM.*  FROM ITEM, holdkey WHERE ITEM.ITEMID = holdkey.ITEMID";
+	private String s3Item = "DELETE FROM ITEM";
+	private String s4Item = "INSERT into ITEM SELECT * FROM holdups";
+	// table 3
+	private String s1Category = "create table holdkey as SELECT ITEMID, CATEGORYID from CATEGORY GROUP BY ITEMID, CATEGORYID";
+	private String s2Category = "create table holdups as SELECT DISTINCT CATEGORY.*  FROM CATEGORY, holdkey WHERE CATEGORY.ITEMID = holdkey.ITEMID and CATEGORY.CATEGORYID = holdkey.CATEGORYID";
+	private String s3Category = "DELETE FROM CATEGORY";
+	private String s4Category = "INSERT into CATEGORY SELECT * FROM holdups";
+	// table 4
+	private String s1Relationship = "create table holdkey as SELECT ITEMID, QEURYID from Relationship GROUP BY ITEMID, QEURYID";
+	private String s2Relationship = "create table holdups as SELECT DISTINCT Relationship.*  FROM Relationship, holdkey WHERE Relationship.ITEMID = holdkey.ITEMID and Relationship.QEURYID = holdkey.QEURYID";
+	private String s3Relationship = "DELETE FROM CATEGORY";
+	private String s4Relationship = "INSERT into Relationship SELECT * FROM holdups";
 
 	@Override
 	public void writeToExternalDBFromOnline(int queryID, int level, int parentID, YahooLocalQueryFileDB qc, ResultSetYahooOnline resultSet) {
@@ -218,7 +249,6 @@ public class H2DB extends DBExternal {
 	 * 
 	 */
 	public void updataExternalDB() {
-		// TODO check
 		String dbName = dbNameTarget;
 		Connection con = getConnection(dbName);
 
@@ -229,6 +259,7 @@ public class H2DB extends DBExternal {
 
 			prepItem = con.prepareStatement(sqlPrepUpdateItem);
 			Iterator it = CrawlerStrategy.dbInMemory.poisCrawledTimes.entrySet().iterator();
+			int i = 0;
 			while (it.hasNext()) {
 				Entry entry = (Entry) it.next();
 				int poiID = (Integer) entry.getKey();
@@ -236,6 +267,12 @@ public class H2DB extends DBExternal {
 				prepItem.setInt(1, times);
 				prepItem.setInt(2, poiID);
 				prepItem.addBatch();
+				i++;
+				if (i % 1000 == 0) {
+					logger.info("updating " + i);
+					prepItem.executeBatch();
+				}
+
 			}
 			prepItem.executeBatch();
 			con.commit();
@@ -276,19 +313,19 @@ public class H2DB extends DBExternal {
 	public void examData(String dbName) {
 		// print
 		// printQueryTable(dbName);
-		int c2 = count(dbName, ITEM);
-		System.out.println("count ITEM = " + c2);
-		printItemTable(dbName);
+		// printItemTable(dbName);
 		// printCategoryTable(dbName);
 		// printRelationshipTable(dbName);
 
 		// count
-		// int c1 = count(dbName, QUERY);
-		// System.out.println("count QUERY = " + c1);
-		// int c3 = count(dbName, CATEGORY);
-		// System.out.println("count CATEGORY = " + c3);
-		// int c4 = count(dbName, RELATIONSHIP);
-		// System.out.println("count RELATIONSHIP = " + c4);
+		int c1 = count(dbName, QUERY);
+		System.out.println("count QUERY = " + c1);
+		int c2 = count(dbName, ITEM);
+		System.out.println("count ITEM = " + c2);
+		int c3 = count(dbName, CATEGORY);
+		System.out.println("count CATEGORY = " + c3);
+		int c4 = count(dbName, RELATIONSHIP);
+		System.out.println("count RELATIONSHIP = " + c4);
 	}
 
 	/****************************** Printing tables ******************************/
@@ -534,10 +571,10 @@ public class H2DB extends DBExternal {
 			Connection conn = getConnection(dbName);
 			Statement stat = conn.createStatement();
 			// XXX delete tables before creating
-			// stat.execute(sqlDeleteQueryTable);
-			// stat.execute(sqlDeleteItemTable);
-			// stat.execute(sqlDeleteCategoryTable);
-			// stat.execute(sqlDeleteRelationshipTable);
+			stat.execute(sqlDeleteQueryTable);
+			stat.execute(sqlDeleteItemTable);
+			stat.execute(sqlDeleteCategoryTable);
+			stat.execute(sqlDeleteRelationshipTable);
 			//
 			stat.execute(sqlCreateQueryTable);
 			stat.execute(sqlCreateItemTable);
@@ -877,6 +914,73 @@ public class H2DB extends DBExternal {
 		}
 	}
 
+	public void prunDuplicate(String dbName, String duplicateTableName, String targetTableName) {
+		// FIXME
+		String sql = "SELECT * FROM item where itemid in (select distinct ITEMID from item)";
+		try {
+			Connection conSrc = getConnection(dbNameSource);
+			Statement statSrc = conSrc.createStatement();
+
+			Connection conTarget = getConnection(dbNameTarget);
+			conTarget.setAutoCommit(false);
+			Statement statTarget = conTarget.createStatement();
+			// create tables
+			statTarget.execute(sqlCreateItemTableKey);
+
+			PreparedStatement prepItem = conTarget.prepareStatement(sqlPrepInsertItem);
+
+			java.sql.ResultSet rs = statSrc.executeQuery(sql);
+			while (rs.next()) {
+
+				int itemID = rs.getInt(1);
+				String title = rs.getString(2);
+				String city = rs.getString(3);
+				String state = rs.getString(4);
+
+				double latitude = rs.getDouble(5);
+				double longitude = rs.getDouble(6);
+				double distance = rs.getDouble(7);
+
+				double averageRating = rs.getDouble(8);
+				double totalRating = rs.getDouble(9);
+				double totalReviews = rs.getDouble(10);
+				Rating rating = new Rating();
+				rating.setAverageRating(averageRating);
+				rating.setTotalRatings((int) totalRating);
+				rating.setTotalReviews((int) totalReviews);
+
+				int numCrawled = rs.getInt(11);
+
+				// write
+				prepItem.setInt(1, itemID);
+				prepItem.setString(2, title);
+				prepItem.setString(3, city);
+				prepItem.setString(4, state);
+				prepItem.setDouble(5, latitude);
+				prepItem.setDouble(6, longitude);
+				prepItem.setDouble(7, distance);
+
+				prepItem.setDouble(8, Rating.noAverageRatingValue);
+				prepItem.setDouble(9, Rating.noAverageRatingValue);
+				prepItem.setDouble(10, Rating.noAverageRatingValue);
+
+				prepItem.setDouble(11, numCrawled);
+				prepItem.addBatch();
+
+			}
+			rs.close();
+			statSrc.close();
+
+			prepItem.executeBatch();
+			conTarget.commit();
+			conTarget.setAutoCommit(true);
+			statTarget.close();
+			prepItem.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
 	@Override
 	public int numCrawlerPoints() {
 		int c = count(dbNameTarget, ITEM);
@@ -955,6 +1059,50 @@ public class H2DB extends DBExternal {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public void removeDuplicate() {
+
+		try {
+			Connection conTarget = getConnection(dbNameTarget);
+			Statement statTarget = conTarget.createStatement();
+			// table 1: query table
+			statTarget.execute(s01);
+			statTarget.execute(s02);
+			statTarget.execute(s1Query);
+			statTarget.execute(s2Query);
+			statTarget.execute(s3Query);
+			statTarget.execute(s4Query);
+			// table 2: item table
+			// create tables
+			statTarget.execute(s01);
+			statTarget.execute(s02);
+			statTarget.execute(s1Item);
+			statTarget.execute(s2Item);
+			statTarget.execute(s3Item);
+			statTarget.execute(s4Item);
+			// table 3: category table
+			// XXX =0 why?
+			statTarget.execute(s01);
+			statTarget.execute(s02);
+			statTarget.execute(s1Category);
+			statTarget.execute(s2Category);
+			statTarget.execute(s3Category);
+			statTarget.execute(s4Category);
+			// table 4: relationship table
+			statTarget.execute(s01);
+			statTarget.execute(s02);
+			statTarget.execute(s1Relationship);
+			statTarget.execute(s2Relationship);
+			statTarget.execute(s3Relationship);
+			statTarget.execute(s4Relationship);
+			//
+			statTarget.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 }
