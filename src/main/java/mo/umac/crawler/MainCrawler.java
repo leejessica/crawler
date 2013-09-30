@@ -47,7 +47,7 @@ public class MainCrawler {
 		//
 		PaintShapes.painting = false;
 		// change top-k
-//		CrawlerStrategy.MAX_TOTAL_RESULTS_RETURNED = 100;
+		CrawlerStrategy.MAX_TOTAL_RESULTS_RETURNED = 100;
 		crawlerContext.callCrawling(listNameStates, listCategoryNames);
 	}
 
