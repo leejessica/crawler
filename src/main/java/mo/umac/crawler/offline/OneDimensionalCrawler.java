@@ -58,7 +58,7 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 		Coordinate farthestCoordinate = farthest(resultSet, up, true);
 		if (farthestCoordinate == null) {
 			logger.error("farestest point is null");
-			farthestCoordinate = farthest(resultSet, up, true);
+			// farthestCoordinate = farthest(resultSet, up, true);
 		}
 		double radius = up.distance(farthestCoordinate);
 		if (logger.isDebugEnabled()) {
@@ -108,6 +108,10 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 
 		// farthest point lower than the up point
 		farthestCoordinate = farthest(resultSet, down, false);
+		if (farthestCoordinate == null) {
+			logger.error("farestest point is null");
+			// farthestCoordinate = farthest(resultSet, up, true);
+		}
 		radius = down.distance(farthestCoordinate);
 		if (logger.isDebugEnabled()) {
 			logger.debug("farthestCoordinate = " + farthestCoordinate.toString());
@@ -275,22 +279,23 @@ public class OneDimensionalCrawler extends OfflineStrategy {
 		if (size == 0) {
 			return null;
 		} else {
-			for (int i = size - 1; i >= 0; i--) {
-				APOI farthestPOI = resultSet.getPOIs().get(i);
-				Coordinate c = farthestPOI.getCoordinate();
-				if (lower) {
-					if (c.y > p.y) {
-						return c;
-					}
-				} else {
-					if (c.y < p.y) {
-						return c;
-					}
-				}
-
-			}
+			// for (int i = size - 1; i >= 0; i--) {
+			// APOI farthestPOI = resultSet.getPOIs().get(i);
+			// Coordinate c = farthestPOI.getCoordinate();
+			// if (lower) {
+			// if (c.y > p.y) {
+			// return c;
+			// }
+			// } else {
+			// if (c.y < p.y) {
+			// return c;
+			// }
+			// }
+			// }
+			// add at 2013-10-01
+			// FIXME revised farthest!!!
+			return resultSet.getPOIs().get(size - 1).getCoordinate();
 		}
-		return null;
 	}
 
 	private static void addResults(Coordinate center, LineSegment line, ResultSetOneDimensional finalResultSet, ResultSet resultSet) {

@@ -46,6 +46,7 @@ public class DBInMemory {
 	 * Stores the number of times a points being crawled
 	 */
 	public static Map<Integer, Integer> poisCrawledTimes;
+	
 
 	// /**
 	// * table 4: the pair of query's id and returned poi's id

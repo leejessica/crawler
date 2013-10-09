@@ -2,11 +2,12 @@ package mo.umac.crawler;
 
 import java.util.LinkedList;
 import java.util.List;
+
 import mo.umac.crawler.offline.SliceCrawler;
 import mo.umac.crawler.online.OnlineStrategy;
-import mo.umac.crawler.online.QuadTreeCrawler;
 import mo.umac.paint.PaintShapes;
 import mo.umac.spatial.UScensusData;
+
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 
@@ -18,7 +19,7 @@ public class MainCrawler {
 
 	// used in offline algorithm
 	public final static String DB_NAME_SOURCE = "../crawler-data/yahoolocal-h2/source/ok-prun";
-	public final static String DB_NAME_TARGET = "../crawler-data/yahoolocal-h2/target/ok-prun";
+	public final static String DB_NAME_TARGET = "../crawler-data/yahoolocal-h2/target/ok-prun-c-one";
 	public final static String DB_NAME_CRAWL = "../crawler-data/yahoolocal-h2/crawl/datasets";
 
 	public static void main(String[] args) {
@@ -28,6 +29,7 @@ public class MainCrawler {
 		/************************* Crawling Algorithm ***************************/
 		// CrawlerStrategy crawlerStrategy = new QuadTreeCrawler();
 		CrawlerStrategy crawlerStrategy = new SliceCrawler();
+		// CrawlerStrategy crawlerStrategy = new BlockCrawler();
 		/**********************************************************************/
 		CrawlerContext crawlerContext = new CrawlerContext(crawlerStrategy);
 		// specify the states to be crawled

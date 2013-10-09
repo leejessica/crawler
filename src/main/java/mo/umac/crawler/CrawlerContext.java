@@ -6,21 +6,18 @@ package mo.umac.crawler;
 import java.util.LinkedList;
 import java.util.List;
 
-
-
 /**
  * @author kate
- *
+ * 
  */
 public class CrawlerContext {
-    private CrawlerStrategy crawlerStrategy;
+	private CrawlerStrategy crawlerStrategy;
 
 	public CrawlerContext(CrawlerStrategy crawlerStrategy) {
 		this.crawlerStrategy = crawlerStrategy;
 	}
 
-	public void callCrawling(LinkedList<String> listNameStates,
-			List<String> listCategoryNames) {
+	public void callCrawling(LinkedList<String> listNameStates, List<String> listCategoryNames) {
 		this.crawlerStrategy.callCrawling(listNameStates, listCategoryNames);
 	}
 }

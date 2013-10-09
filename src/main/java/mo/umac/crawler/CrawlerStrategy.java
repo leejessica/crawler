@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import mo.umac.crawler.offline.BlockCrawler;
 import mo.umac.db.DBExternal;
 import mo.umac.db.DBInMemory;
 import mo.umac.rtree.MyRTree;
@@ -66,14 +67,12 @@ public abstract class CrawlerStrategy {
 	 * @param listCategoryNames
 	 */
 	public void callCrawling(LinkedList<String> listNameStates, List<String> listCategoryNames) {
-		LinkedList<Envelope> listEnvelopeStates = selectEnvelopes(listNameStates);
 
+		LinkedList<Envelope> listEnvelopeStates = selectEnvelopes(listNameStates);
 		if (listNameStates.size() == 0) {
 			listNameStates = (LinkedList<String>) UScensusData.stateName(UScensusData.STATE_DBF_FILE_NAME);
 		}
-
 		HashMap<Integer, String> categoryIDMap = FileOperator.readCategoryID(CATEGORY_ID_PATH);
-
 		crawlByCategoriesStates(listEnvelopeStates, listCategoryNames, listNameStates, categoryIDMap);
 	}
 
@@ -88,7 +87,6 @@ public abstract class CrawlerStrategy {
 	 */
 	private LinkedList<Envelope> selectEnvelopes(LinkedList<String> listNameStates) {
 		// State's information provided by UScensus
-		// FIXME check envelope
 		LinkedList<Envelope> allEnvelopeStates = (LinkedList<Envelope>) UScensusData.MBR(UScensusData.STATE_SHP_FILE_NAME);
 		LinkedList<String> allNameStates = (LinkedList<String>) UScensusData.stateName(UScensusData.STATE_DBF_FILE_NAME);
 

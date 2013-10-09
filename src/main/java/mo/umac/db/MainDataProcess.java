@@ -53,18 +53,18 @@ public class MainDataProcess {
 		// step 3
 
 		// step 4
-		String dbName = "../crawler-data/yahoolocal-h2/target/ok-prun";
-		String fileName = "../data-map/ok.pois";
-		// m.convertFromH2ToFile(dbName, fileName);
+		String dbName = "../crawler-data/yahoolocal-h2/target/ok-prun-c-one";
+		String fileName = "../data-map/ok-c-one.pois";
+		m.convertFromH2ToFile(dbName, fileName);
 
 		// step 4
 		String logFile = "../crawlerlog/info.log";
-		// m.numVSCrawled(logFile);
+//		m.numVSCrawled(logFile);
 
 		// test remove duplicate
-		m.examData(dbName);
-		m.removeDuplicate(dbName);
-		m.examData(dbName);
+		// m.examData(dbName);
+		// m.removeDuplicate(dbName);
+		// m.examData(dbName);
 
 		DBExternal.distroyConn();
 		// m.prunPoisFile();
@@ -88,7 +88,7 @@ public class MainDataProcess {
 	 * Step 2: prun the h2 database results
 	 */
 	public void prunH2(String dbNameSource, String dbNameTarget, String categoryQ, String stateQ) {
-
+		// FIXME add the boundary when pruning!!!
 		H2DB h2 = new H2DB(dbNameSource, dbNameTarget);
 		h2.prun(categoryQ, stateQ);
 

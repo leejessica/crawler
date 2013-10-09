@@ -30,17 +30,17 @@ public class SliceCrawler extends OfflineStrategy {
 	 * This is the implementation of the upper bound algorithm.
 	 */
 	@Override
-	public void crawl(String state, int category, String query, Envelope envelopeStateECEF) {
+	public void crawl(String state, int category, String query, Envelope envelope) {
 		if (logger.isDebugEnabled()) {
 			logger.info("------------crawling---------");
-			logger.info(envelopeStateECEF.toString());
+			logger.info(envelope.toString());
 		}
 		// finished crawling
-		if (envelopeStateECEF == null) {
+		if (envelope == null) {
 			return;
 		}
 		// left
-		LineSegment leftLine = leftLine(envelopeStateECEF);
+		LineSegment leftLine = leftLine(envelope);
 		//
 		if (logger.isDebugEnabled()) {
 			logger.debug("leftLine = " + leftLine.toString());
@@ -51,26 +51,26 @@ public class SliceCrawler extends OfflineStrategy {
 
 		sortingCircles(oneDimensionalResultSet);
 
-		double distanceX1 = distanceCovered(envelopeStateECEF, oneDimensionalResultSet);
+		double distanceX1 = distanceCovered(envelope, oneDimensionalResultSet);
 		if (logger.isDebugEnabled()) {
 			logger.debug("distanceX1 = " + distanceX1);
 		}
 		//
-		if (distanceX1 >= envelopeStateECEF.getMaxX() - envelopeStateECEF.getMinX()) {
+		if (distanceX1 >= envelope.getMaxX() - envelope.getMinX()) {
 			// this envelope has been covered, finished crawling;
 			if (logger.isDebugEnabled()) {
 				logger.debug("this envelope is covered by the one dimensional crawler");
-				logger.debug(envelopeStateECEF.toString());
+				logger.debug(envelope.toString());
 				if (PaintShapes.painting) {
 					PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-					PaintShapes.paint.addRectangle(envelopeStateECEF);
+					PaintShapes.paint.addRectangle(envelope);
 					PaintShapes.paint.myRepaint();
 				}
 			}
-			CrawlerStrategy.rtreeRectangles.addRectangle(rectangleId++, envelopeStateECEF);
+			CrawlerStrategy.rtreeRectangles.addRectangle(rectangleId++, envelope);
 			return;
 		} else {
-			Envelope envelopeDistanceX = new Envelope(envelopeStateECEF.getMinX(), envelopeStateECEF.getMinX() + distanceX1, envelopeStateECEF.getMinY(), envelopeStateECEF.getMaxY());
+			Envelope envelopeDistanceX = new Envelope(envelope.getMinX(), envelope.getMinX() + distanceX1, envelope.getMinY(), envelope.getMaxY());
 			if (logger.isDebugEnabled()) {
 				logger.debug("envelopeDistanceX is covered by the one dimensional crawler");
 				logger.debug(envelopeDistanceX.toString());
@@ -85,7 +85,7 @@ public class SliceCrawler extends OfflineStrategy {
 		}
 
 		// right
-		LineSegment rightLine = rightLine(envelopeStateECEF);
+		LineSegment rightLine = rightLine(envelope);
 		//
 		if (logger.isDebugEnabled()) {
 			logger.debug("rightLine = " + rightLine.toString());
@@ -96,27 +96,27 @@ public class SliceCrawler extends OfflineStrategy {
 
 		sortingCircles(oneDimensionalResultSet);
 
-		double distanceX2 = distanceCovered(envelopeStateECEF, oneDimensionalResultSet);
+		double distanceX2 = distanceCovered(envelope, oneDimensionalResultSet);
 		if (logger.isDebugEnabled()) {
 			logger.debug("distanceX2 = " + distanceX2);
 		}
 		//
-		if (distanceX2 >= envelopeStateECEF.getMaxX() - envelopeStateECEF.getMinX()) {
+		if (distanceX2 >= envelope.getMaxX() - envelope.getMinX()) {
 			// this envelope has been covered, finished crawling;
 			if (logger.isDebugEnabled()) {
 				logger.debug("this envelope is covered by the one dimensional crawler");
-				logger.debug(envelopeStateECEF.toString());
+				logger.debug(envelope.toString());
 				if (PaintShapes.painting) {
 
 					PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
-					PaintShapes.paint.addRectangle(envelopeStateECEF);
+					PaintShapes.paint.addRectangle(envelope);
 					PaintShapes.paint.myRepaint();
 				}
 			}
-			CrawlerStrategy.rtreeRectangles.addRectangle(rectangleId++, envelopeStateECEF);
+			CrawlerStrategy.rtreeRectangles.addRectangle(rectangleId++, envelope);
 			return;
 		} else {
-			Envelope envelopeDistanceX = new Envelope(envelopeStateECEF.getMaxX() - distanceX2, envelopeStateECEF.getMaxX(), envelopeStateECEF.getMinY(), envelopeStateECEF.getMaxY());
+			Envelope envelopeDistanceX = new Envelope(envelope.getMaxX() - distanceX2, envelope.getMaxX(), envelope.getMinY(), envelope.getMaxY());
 			if (logger.isDebugEnabled()) {
 				logger.debug("envelopeDistanceX is covered by the one dimensional crawler");
 				logger.debug(envelopeDistanceX.toString());
@@ -130,7 +130,7 @@ public class SliceCrawler extends OfflineStrategy {
 			CrawlerStrategy.rtreeRectangles.addRectangle(rectangleId++, envelopeDistanceX);
 		}
 
-		Envelope middleEnvelope = new Envelope(envelopeStateECEF.getMinX() + distanceX1, envelopeStateECEF.getMaxX() - distanceX2, envelopeStateECEF.getMinY(), envelopeStateECEF.getMaxY());
+		Envelope middleEnvelope = new Envelope(envelope.getMinX() + distanceX1, envelope.getMaxX() - distanceX2, envelope.getMinY(), envelope.getMaxY());
 
 		crawlFromMiddle(state, category, query, middleEnvelope);
 
