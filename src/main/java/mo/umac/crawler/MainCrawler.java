@@ -3,6 +3,8 @@ package mo.umac.crawler;
 import java.util.LinkedList;
 import java.util.List;
 
+import mo.umac.crawler.offline.HexagonCrawler2;
+import mo.umac.crawler.offline.PeripheryQuery;
 import mo.umac.crawler.offline.SliceCrawler;
 import mo.umac.crawler.online.OnlineStrategy;
 import mo.umac.paint.PaintShapes;
@@ -17,10 +19,10 @@ public class MainCrawler {
 
 	public static String LOG_PROPERTY_PATH = "./src/main/resources/log4j.xml";
 
-	// used in offline algorithm
-	public final static String DB_NAME_SOURCE = "../crawler-data/yahoolocal-h2/source/ok-prun";
-	public final static String DB_NAME_TARGET = "../crawler-data/yahoolocal-h2/target/ok-prun-c-one";
-	public final static String DB_NAME_CRAWL = "../crawler-data/yahoolocal-h2/crawl/datasets";
+	// used in offline algorithm 
+	public final static String DB_NAME_SOURCE = "../crawler-data/yahoolocal-h2/source/ny";
+	public final static String DB_NAME_TARGET = "../crawler-data/yahoolocal-h2/target/ny";
+	public final static String DB_NAME_CRAWL = "../crawler-data/yahoolocal-h2/crawl/ny";
 
 	public static void main(String[] args) {
 		/************************* Change these lines *************************/
@@ -28,19 +30,21 @@ public class MainCrawler {
 		DOMConfigurator.configure(MainCrawler.LOG_PROPERTY_PATH);
 		/************************* Crawling Algorithm ***************************/
 		// CrawlerStrategy crawlerStrategy = new QuadTreeCrawler();
-		CrawlerStrategy crawlerStrategy = new SliceCrawler();
+		//CrawlerStrategy crawlerStrategy = new SliceCrawler();
+		CrawlerStrategy crawlerStrategy = new HexagonCrawler2();
+		//CrawlerStrategy crawlerStrategy=new PeripheryQuery();
 		// CrawlerStrategy crawlerStrategy = new BlockCrawler();
 		/**********************************************************************/
 		CrawlerContext crawlerContext = new CrawlerContext(crawlerStrategy);
 		// specify the states to be crawled
 		LinkedList<String> listNameStates = new LinkedList<String>();
 		// if the listNameStates is empty, then crawl all states.
-		// String city1 = "NY";
-		// listNameStates.add(city1);
+		String city1 = "NY";
+		listNameStates.add(city1);
 		// String city2 = "UT";
 		// listNameStates.add(city2);
-		String city3 = "OK";
-		listNameStates.add(city3);
+		// String city3 = "OK";
+		// listNameStates.add(city3);
 		List<String> listCategoryNames = new LinkedList<String>();
 		// String category1 = "Hotels & Motels";
 		// listCategoryNames.add(category1);

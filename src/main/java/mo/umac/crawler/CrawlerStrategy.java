@@ -42,6 +42,10 @@ public abstract class CrawlerStrategy {
 	protected static int MAX_TOTAL_RESULTS_RETURNED = MAX_START + MAX_RESULTS_NUM; // =270;
 
 	public static int countNumQueries = 1;
+	
+	public static double PI=3.1415926;
+	
+	public static int NEED_POINTS=200;
 
 	protected int zip = 0;
 

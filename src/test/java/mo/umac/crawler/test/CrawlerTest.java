@@ -7,14 +7,18 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 
 import mo.umac.crawler.CrawlerStrategy;
+import mo.umac.crawler.offline.HexagonCrawler2;
+import mo.umac.crawler.offline.HexagonCrawler2_Modify;
 import mo.umac.crawler.offline.OfflineStrategy;
+import mo.umac.crawler.offline.PeripheryQuery;
+import mo.umac.crawler.offline.PerpheryQuery_Optimize;
 import mo.umac.crawler.offline.SliceCrawler;
 import mo.umac.db.DBInMemory;
 import mo.umac.db.H2DB;
@@ -29,7 +33,7 @@ import org.apache.log4j.xml.DOMConfigurator;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 
-public class SlideCrawlerTest extends SliceCrawler {
+public class CrawlerTest extends CrawlerStrategy {
 
 	public static String LOG_PROPERTY_PATH = "./src/main/resources/log4j.xml";
 
@@ -37,8 +41,8 @@ public class SlideCrawlerTest extends SliceCrawler {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		DOMConfigurator.configure(SlideCrawlerTest.LOG_PROPERTY_PATH);
-		SlideCrawlerTest test = new SlideCrawlerTest();
+		DOMConfigurator.configure(CrawlerTest.LOG_PROPERTY_PATH);
+		CrawlerTest test = new CrawlerTest();
 		PaintShapes.painting = true;
 		WindowUtilities.openInJFrame(PaintShapes.paint, 1000, 1000);
 		test.calling();
@@ -49,7 +53,11 @@ public class SlideCrawlerTest extends SliceCrawler {
 		/************************* Change these lines *************************/
 		CrawlerStrategy.CATEGORY_ID_PATH = "./src/main/resources/cat_id.txt";
 		// YahooLocalCrawlerStrategy crawlerStrategy = new QuadTreeCrawler();
-		SliceCrawler sliceCrawler = new SliceCrawler();
+		// SliceCrawler crawler = new SliceCrawler();
+		//HexagonCrawler2 crawler = new HexagonCrawler2();
+		//PeripheryQuery crawler=new PeripheryQuery();
+		//PerpheryQuery_Optimize crawler=new PerpheryQuery_Optimize();
+		HexagonCrawler2_Modify crawler=new HexagonCrawler2_Modify();
 		String state = "NY";
 		int categoryID = 96926236;
 		String category = "Restaurants";
@@ -58,17 +66,19 @@ public class SlideCrawlerTest extends SliceCrawler {
 		String testSource = "../crawler-data/yahoolocal-h2/test/source";
 		String testTarget = "../crawler-data/yahoolocal-h2/test/target";
 		//
-		int numItems = 50;
+		int numItems = 1000;
 		int topK = 10;
 		CrawlerStrategy.MAX_TOTAL_RESULTS_RETURNED = topK;
 		//
-		CrawlerStrategy.categoryIDMap = FileOperator.readCategoryID(CATEGORY_ID_PATH);
+		CrawlerStrategy.categoryIDMap = FileOperator
+				.readCategoryID(CATEGORY_ID_PATH);
 		CrawlerStrategy.dbInMemory.poisCrawledTimes = new HashMap<Integer, Integer>();
 		// source database
 		CrawlerStrategy.dbExternal = new H2DB(testSource, testTarget);
 		// generate dataset
-		List<Coordinate> points = generateSimpleCase(testSource, category, state, numItems);
-		exportToH2(points, testSource, category, state);
+		// List<Coordinate> points = generateSimpleCase(testSource, category,
+		// state, numItems);
+		// exportToH2(points, testSource, category, state);
 		//
 		CrawlerStrategy.dbInMemory = new DBInMemory();
 		DBInMemory.pois = readFromGeneratedDB(testSource);
@@ -86,7 +96,7 @@ public class SlideCrawlerTest extends SliceCrawler {
 		// target database
 		CrawlerStrategy.dbExternal.createTables(testTarget);
 
-		sliceCrawler.crawl(state, categoryID, category, envelopeECEF);
+		crawler.crawl(state, categoryID, category, envelopeECEF);
 
 		logger.info("before updating");
 		printExternalDB();
@@ -99,8 +109,11 @@ public class SlideCrawlerTest extends SliceCrawler {
 		OfflineStrategy.endData();
 
 		logger.debug("Finished ! Oh ! Yeah! ");
-		logger.debug("number of queries issued = " + CrawlerStrategy.countNumQueries);
-		logger.debug("number of points crawled = " + CrawlerStrategy.dbInMemory.poisIDs.size());
+		//logger.debug("number of queries issued = "
+			//	+ CrawlerStrategy.countNumQueries);
+		logger.debug("number of queries issued ="+HexagonCrawler2.countquery);
+		logger.debug("number of points crawled = "
+				+ CrawlerStrategy.dbInMemory.poisIDs.size());
 		Set set = CrawlerStrategy.dbInMemory.poisIDs;
 		Iterator<Integer> it = set.iterator();
 		while (it.hasNext()) {
@@ -109,7 +122,8 @@ public class SlideCrawlerTest extends SliceCrawler {
 		}
 
 		logger.info("poisCrawledTimes:");
-		Iterator it1 = CrawlerStrategy.dbInMemory.poisCrawledTimes.entrySet().iterator();
+		Iterator it1 = CrawlerStrategy.dbInMemory.poisCrawledTimes.entrySet()
+				.iterator();
 		while (it1.hasNext()) {
 			Entry entry = (Entry) it1.next();
 			int poiID = (Integer) entry.getKey();
@@ -117,14 +131,16 @@ public class SlideCrawlerTest extends SliceCrawler {
 			APOI aPOI = CrawlerStrategy.dbInMemory.pois.get(poiID);
 			double longitude = aPOI.getCoordinate().x;
 			double latitude = aPOI.getCoordinate().y;
-			logger.info(poiID + ": " + times + ", " + "[" + longitude + ", " + latitude + "]");
+			logger.info(poiID + ": " + times + ", " + "[" + longitude + ", "
+					+ latitude + "]");
 		}
 	}
 
 	/**
 	 * Generate simple case, write them to the testSource database
 	 */
-	private List<Coordinate> generateSimpleCase(String testSource, String category, String state, int numItems) {
+	private List<Coordinate> generateSimpleCase(String testSource,
+			String category, String state, int numItems) {
 		double x = 1.0;
 		double y = 1.0;
 		List list = new ArrayList<Coordinate>();
@@ -177,7 +193,8 @@ public class SlideCrawlerTest extends SliceCrawler {
 					logger.debug("latitude: " + latitude);
 					logger.debug("longitude: " + longitude);
 					logger.debug("--------------------------");
-					APOI poi = new APOI(itemID, title, city, state, longitude, latitude, rating, distance, null, numCrawled);
+					APOI poi = new APOI(itemID, title, city, state, longitude,
+							latitude, rating, distance, null, numCrawled);
 					map.put(itemID, poi);
 				}
 				rs.close();
@@ -229,7 +246,8 @@ public class SlideCrawlerTest extends SliceCrawler {
 					logger.debug("latitude: " + latitude);
 					logger.debug("longitude: " + longitude);
 					logger.debug("--------------------------");
-					APOI poi = new APOI(itemID, title, city, state, longitude, latitude, rating, distance, null, numCrawled);
+					APOI poi = new APOI(itemID, title, city, state, longitude,
+							latitude, rating, distance, null, numCrawled);
 					logger.info(poi.toString());
 				}
 				rs.close();
@@ -242,7 +260,8 @@ public class SlideCrawlerTest extends SliceCrawler {
 		}
 	}
 
-	private void exportToH2(List<Coordinate> points, String testSource, String category, String state) {
+	private void exportToH2(List<Coordinate> points, String testSource,
+			String category, String state) {
 		HashMap<Integer, APOI> map = new HashMap<Integer, APOI>();
 
 		H2DB h2 = (H2DB) CrawlerStrategy.dbExternal;
@@ -251,7 +270,8 @@ public class SlideCrawlerTest extends SliceCrawler {
 			Connection conn = h2.getConnection(dbName);
 			Statement stat = conn.createStatement();
 			// create table
-			String sqlCreate = "CREATE TABLE IF NOT EXISTS ITEM " + "(ITEMID INT PRIMARY KEY, TITLE VARCHAR(200), CITY VARCHAR(200), STATE VARCHAR(10), "
+			String sqlCreate = "CREATE TABLE IF NOT EXISTS ITEM "
+					+ "(ITEMID INT PRIMARY KEY, TITLE VARCHAR(200), CITY VARCHAR(200), STATE VARCHAR(10), "
 					+ "LATITUDE DOUBLE, LONGITUDE DOUBLE, DISTANCE DOUBLE, AVERAGERATING DOUBLE, TOTALRATINGS DOUBLE, TOTALREVIEWS DOUBLE, NUMCRAWLED INT)";
 			;
 			stat.execute(sqlCreate);
@@ -288,6 +308,15 @@ public class SlideCrawlerTest extends SliceCrawler {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+
+	}
+
+	@Override
+	protected void crawlByCategoriesStates(
+			LinkedList<Envelope> listEnvelopeStates,
+			List<String> listCategoryNames, LinkedList<String> listNameStates,
+			HashMap<Integer, String> categoryIDMap) {
+		// TODO Auto-generated method stub
 
 	}
 
