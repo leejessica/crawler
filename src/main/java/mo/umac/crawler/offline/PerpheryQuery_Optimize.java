@@ -143,6 +143,9 @@ public class PerpheryQuery_Optimize extends OfflineStrategy{
 		return vpq1;
 	}
 	
+	/*
+	 * calculate the intersect points between the circle(startPoint, radius) and line(startPoint,p)
+	 */
 	public Coordinate[] line_circle_intersect(Coordinate startPoint, double radius,Coordinate p){
 		 Coordinate[] a =new Coordinate[2];
 		 a[0]=new Coordinate();

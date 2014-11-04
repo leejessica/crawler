@@ -1,4 +1,6 @@
-/*This class used to record the information used in PeripheyQuery*/
+/*This class used to record the information used in PeripheyQuery
+ *@param left, right: record the intersection points and corresponding information of the neighbor circle
+ *@param self: record the center and radius of the query circle*/
 package mo.umac.metadata;
 
 import com.vividsolutions.jts.geom.Coordinate;
