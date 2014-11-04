@@ -54,10 +54,10 @@ public class CrawlerTest extends CrawlerStrategy {
 		CrawlerStrategy.CATEGORY_ID_PATH = "./src/main/resources/cat_id.txt";
 		// YahooLocalCrawlerStrategy crawlerStrategy = new QuadTreeCrawler();
 		// SliceCrawler crawler = new SliceCrawler();
-		HexagonCrawler2 crawler = new HexagonCrawler2();
+		//HexagonCrawler2 crawler = new HexagonCrawler2();
 		//PeripheryQuery crawler=new PeripheryQuery();
 		//PerpheryQuery_Optimize crawler=new PerpheryQuery_Optimize();
-		//HexagonCrawler2_Modify crawler=new HexagonCrawler2_Modify();
+		HexagonCrawler2_Modify crawler=new HexagonCrawler2_Modify();
 		String state = "NY";
 		int categoryID = 96926236;
 		String category = "Restaurants";

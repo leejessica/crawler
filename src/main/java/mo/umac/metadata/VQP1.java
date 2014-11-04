@@ -2,7 +2,8 @@
 package mo.umac.metadata;
 
 import com.vividsolutions.jts.geom.Coordinate;
-
+/*
+ * @left */
 public class VQP1 {
 	private PandC left=new PandC();
 	private PandC right=new PandC();

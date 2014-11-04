@@ -1,7 +1,7 @@
 package mo.umac.metadata;
 
 import com.vividsolutions.jts.geom.Coordinate;
-
+/*PandC record the */
 public class PandC {
 	private Coordinate intersection=new Coordinate();
 	private Coordinate neighborP=new Coordinate();
