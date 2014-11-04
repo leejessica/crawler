@@ -185,6 +185,8 @@ public class HexagonCrawler2_Modify extends OfflineStrategy {
 					 * round query
 					 */
 					calculatePoint(p, radius, visitedcircle_Queue, unvisited_Queue);
+					VQP c=new VQP(p, radius);
+					if(needQuery(c,visitedcircle_Queue)){
 					AQuery Hexquery = new AQuery(p, state, category, query,
 							MAX_TOTAL_RESULTS_RETURNED);
 					ResultSet resultSet = query(Hexquery);
@@ -223,6 +225,11 @@ public class HexagonCrawler2_Modify extends OfflineStrategy {
 					VQP visitedPoint = new VQP(p, crawl_radius);
 					// denote the point has been visited
 					visited_Queue.addLast(visitedPoint);
+				}
+				}else {
+				   visitedcircle_Queue.addLast(c);
+				   visited_Queue.addLast(c);
+				}
 				}
 			}
 			System.out.println("queryset.size=" + queryset.size());
