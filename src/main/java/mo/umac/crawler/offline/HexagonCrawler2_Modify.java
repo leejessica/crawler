@@ -72,6 +72,7 @@ public class HexagonCrawler2_Modify extends OfflineStrategy {
 
 	}
 
+	/*calculate the centeral points of the hexagons*/
 	public void calculatePoint(Coordinate startPoint, double radius,
 			LinkedList<VQP> visitedcircle_Queue,
 			LinkedList<Coordinate> unvisited_Queue) {
@@ -197,7 +198,11 @@ public class HexagonCrawler2_Modify extends OfflineStrategy {
 					double crawl_radius = distance1;
 					System.out.println("crawl_radius=" + crawl_radius
 							+ "   radius=" + radius);
-					//record the information of the visited point
+					/*
+					 * record the information of the visited point，using to record all the visited points 
+					 * since we want to using the information to obtain the neighbor circles and futher reduce 
+					 * the query cost
+					 * */
 					visitedcircle_Queue.addLast(new VQP(p, crawl_radius));
 					//query in the hexagon
 					if (crawl_radius < radius * key) {
@@ -272,7 +277,8 @@ public class HexagonCrawler2_Modify extends OfflineStrategy {
 			while (it.hasNext()) {
 				int id = it.next().getId();
 				APOI pp = DBInMemory.pois.get(id);
-				if (startPoint.distance(pp.getCoordinate()) <= coverRadius)
+				if (startPoint.distance(pp.getCoordinate()) < coverRadius
+						||Math.abs(startPoint.distance(pp.getCoordinate())-coverRadius)<1e-6)
 					eligibleset.add(pp);
 			}
 			countPoint = eligibleset.size();
