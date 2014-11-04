@@ -321,6 +321,7 @@ public class HexagonCrawler2_Modify extends OfflineStrategy {
 					 * determine whether need issue query in position q
 					 */
 					VQP c=new VQP(q,crawl_radius);
+					//the query is needed 
 					if(needQuery(c, visitedcircle_Queue)){
 						AQuery InhexgonQuery = new AQuery(q, state, category,
 								query, MAX_TOTAL_RESULTS_RETURNED);
@@ -359,9 +360,12 @@ public class HexagonCrawler2_Modify extends OfflineStrategy {
 						visited_Queue.addLast(qVQP);
 						System.out.println("size of visited in hexagon ="
 								+ visited_Queue.size());
+					  }else{
+						  visitedcircle_Queue.addLast(c);
+						  visited_Queue.addLast(c);
 					  }
+				   }
 				}
-			}
 
 			/* calculate the incircle */
 			double minRadius = 1e308;
@@ -391,18 +395,25 @@ public class HexagonCrawler2_Modify extends OfflineStrategy {
 	}
 	
 	public Set<VQP> obtainNeighborSet(VQP circle, LinkedList<VQP>visitedcircle_Queue){
-		Set Neighbor_set=new HashSet<VQP>();
+		Set Neighbor_set=new HashSet<VQP>();//record the effective neighbor
 		Set tempNeighbor_set=new HashSet<VQP>();
 		Iterator<VQP> it=visitedcircle_Queue.iterator();
-		//initial the Neighbor_set
+		//initial the tempNeighbor_set
 		while(it.hasNext()){
 			VQP circle1=it.next();
 			double d1=circle.getRadius()-circle1.getRadius();
+			/*
+			 * 【 Definition 】temporary neighbor: the circle intersect with the given circle 
+			 *  or contained by the given circle
+			 *  */
 			if(circles_Insecter(circle, circle1)||(d1>0&&circle_contain(circle, circle1))){
 				tempNeighbor_set.add(circle1);
 			}
 		}
-		//optimal the Neighbor_set and only retain the effective neighbors
+		/*
+		 *  optimal the Neighbor_set and only retain the effective neighbors
+		 * 【 Definition 】effective neighbors
+		 *  */
 		Iterator<VQP> it1=tempNeighbor_set.iterator();
 		while(it1.hasNext()){
 			VQP c1=it1.next();
