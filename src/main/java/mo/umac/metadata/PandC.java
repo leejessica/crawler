@@ -2,11 +2,12 @@ package mo.umac.metadata;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
-/*PandC record the */=======
 /*
- * @param intersection: a intersection point of the query circle and the centeral circle 
- * @param neighborP, radius: the center and radius of the neighbor circle corresponding the intersection point 
- */
+ * this class is used in perpheryquery and record one intersection point between one circle 
+ * and the central circle and some other information, such as the neighbor circle correspoding 
+ * to the intersection point, which is the nearest circle to the intersection point on the same 
+ * level circumference
+ * */
 
 public class PandC {
 	private Coordinate intersection=new Coordinate();

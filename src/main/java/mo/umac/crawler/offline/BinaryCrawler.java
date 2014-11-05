@@ -89,7 +89,7 @@ public class BinaryCrawler extends OfflineStrategy {
 		}
     }
 	
-	public void binaryQuery(){
+	public void binaryQuery(Coordinate refCoordinate,LinkedList<VQP>){
 		
 	}
 	
