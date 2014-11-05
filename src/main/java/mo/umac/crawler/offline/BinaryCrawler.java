@@ -75,15 +75,14 @@ public class BinaryCrawler extends OfflineStrategy {
 			PaintShapes.paint.myRepaint();
 		}
 		
-		/*the eligible points is less than the needed points, continue the query procedure*/
-		/*variable circumRadius: record the radius of the evenlope's circumcircle */
-//		double circumRadius=1e38;
+		//find the refCoordinate to determine the longest radius of the circumcircle of the MBR
 		Coordinate minCoordinate=new Coordinate(evenlopeState.getMinX(),evenlopeState.getMinY());
 		Coordinate maxCoordinate=new Coordinate(evenlopeState.getMaxX(),evenlopeState.getMaxY());
-//		circumRadius=Math.max(startPoint.distance(minCoordinate)-radius, startPoint.distance(maxCoordinate)-radius);
-		/*using the variableRadius to record the distance between the inscribed circle centered at startPoint and 
-		 * location where we will issue the next query*/
-//		double variableRadius=circumRadius;
+		Coordinate refCoordinate=new Coordinate();
+		if(startPoint.distance(minCoordinate)>startPoint.distance(maxCoordinate))
+			refCoordinate=minCoordinate;
+		else refCoordinate=maxCoordinate;
+
 		while(countpoint<NEED_POINTS_NUM){
 		     //TODO call a binary search procedure
 			//TODO calculate the eligible points

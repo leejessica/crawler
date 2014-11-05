@@ -1,14 +1,13 @@
 package mo.umac.metadata;
 
 import com.vividsolutions.jts.geom.Coordinate;
-<<<<<<< HEAD
-/*PandC record the */
-=======
+
+/*PandC record the */=======
 /*
  * @param intersection: a intersection point of the query circle and the centeral circle 
  * @param neighborP, radius: the center and radius of the neighbor circle corresponding the intersection point 
  */
->>>>>>> 16fcefcae96dafaee6143f1e30b7f9f43751769f
+
 public class PandC {
 	private Coordinate intersection=new Coordinate();
 	private Coordinate neighborP=new Coordinate();
