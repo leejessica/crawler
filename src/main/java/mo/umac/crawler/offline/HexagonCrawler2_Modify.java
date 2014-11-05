@@ -63,16 +63,17 @@ public class HexagonCrawler2_Modify extends OfflineStrategy {
 		// record points for next round query
 		LinkedList<VQP> visited_Queue = new LinkedList<VQP>();
 		// record all visited query points
-		//LinkedList<Coordinate> visited_Queue1 = new LinkedList<Coordinate>();
+		// LinkedList<Coordinate> visited_Queue1 = new LinkedList<Coordinate>();
 		LinkedList<Coordinate> unvisited_Queue = new LinkedList<Coordinate>();
-		//@param visitedcircle_Queue: record the information(coordinate, radius)of the visited points
-		LinkedList<VQP>visitedcircle_Queue=new LinkedList<VQP>();
+		// @param visitedcircle_Queue: record the information(coordinate,
+		// radius)of the visited points
+		LinkedList<VQP> visitedcircle_Queue = new LinkedList<VQP>();
 		ununiformlyquery(startPoint, visited_Queue, visitedcircle_Queue,
 				unvisited_Queue, state, category, query);
 
 	}
 
-	/*calculate the centeral points of the hexagons*/
+	/* calculate the centeral points of the hexagons */
 	public void calculatePoint(Coordinate startPoint, double radius,
 			LinkedList<VQP> visitedcircle_Queue,
 			LinkedList<Coordinate> unvisited_Queue) {
@@ -109,10 +110,10 @@ public class HexagonCrawler2_Modify extends OfflineStrategy {
 		}
 		return false;
 	}
-	
-	private boolean myContain2(LinkedList<VQP>q, Coordinate c){
-		for(int i=0;i<q.size();i++){
-			Coordinate one=q.get(i).getCoordinate();
+
+	private boolean myContain2(LinkedList<VQP> q, Coordinate c) {
+		for (int i = 0; i < q.size(); i++) {
+			Coordinate one = q.get(i).getCoordinate();
 			if (Math.abs(one.x - c.x) < 1e-6 && Math.abs(one.y - c.y) < 1e-6) {
 				return true;
 			}
@@ -121,15 +122,19 @@ public class HexagonCrawler2_Modify extends OfflineStrategy {
 	}
 
 	/*
-	 * a round query means queries to cover a series of queries in order to cover the hexagons at the same level
-	 *@param visited_Queue: record the points used to query in next round query to 
-	  serve calculate the radius of muximum inscribed circle
-	 *@param visitedcircle_Queue: record the points information(Coordinate, radius) visited so far
-	 *@param unvisited_Queue: record the points unvisited 
+	 * a round query means queries to cover a series of queries in order to
+	 * cover the hexagons at the same level
+	 * 
+	 * @param visited_Queue: record the points used to query in next round query
+	 * to serve calculate the radius of muximum inscribed circle
+	 * 
+	 * @param visitedcircle_Queue: record the points information(Coordinate,
+	 * radius) visited so far
+	 * 
+	 * @param unvisited_Queue: record the points unvisited
 	 */
 	public void ununiformlyquery(Coordinate startPoint,
-			LinkedList<VQP> visited_Queue,
-			LinkedList<VQP> visitedcircle_Queue,
+			LinkedList<VQP> visited_Queue, LinkedList<VQP> visitedcircle_Queue,
 			LinkedList<Coordinate> unvisited_Queue, String state, int category,
 			String query) {
 
@@ -153,7 +158,7 @@ public class HexagonCrawler2_Modify extends OfflineStrategy {
 		APOI farthest = resultSetStart.getPOIs().get(size - 1);
 		Coordinate farthestCoordinate = farthest.getCoordinate();
 		double distance = startPoint.distance(farthestCoordinate);
-		//update the visitedcircle_Queue
+		// update the visitedcircle_Queue
 		visitedcircle_Queue.addLast(new VQP(startPoint, distance));
 		//
 		Circle aCircle = new Circle(startPoint, distance);
@@ -184,52 +189,55 @@ public class HexagonCrawler2_Modify extends OfflineStrategy {
 					 * compute coordinates of the points which are used to next
 					 * round query
 					 */
-					calculatePoint(p, radius, visitedcircle_Queue, unvisited_Queue);
-					VQP c=new VQP(p, radius);
-					if(needQuery(c,visitedcircle_Queue)){
-					AQuery Hexquery = new AQuery(p, state, category, query,
-							MAX_TOTAL_RESULTS_RETURNED);
-					ResultSet resultSet = query(Hexquery);
-					countquery++;
-					// add the queried point to the set
-					queryset.addAll(resultSet.getPOIs());
-					int size1 = resultSet.getPOIs().size();
-					APOI farthest1 = resultSet.getPOIs().get(size1 - 1);
-					Coordinate farthest1Coordinate = farthest1.getCoordinate();
-					double distance1 = p.distance(farthest1Coordinate);
-					double crawl_radius = distance1;
-					System.out.println("crawl_radius=" + crawl_radius
-							+ "   radius=" + radius);
-					/*
-					 * record the information of the visited point，using to record all the visited points 
-					 * since we want to using the information to obtain the neighbor circles and futher reduce 
-					 * the query cost
-					 * */
-					visitedcircle_Queue.addLast(new VQP(p, crawl_radius));
-					//query in the hexagon
-					if (crawl_radius < radius * key) {
-						LinkedList<VQP> temp_visited_Queue = new LinkedList<VQP>();
-						LinkedList<Coordinate> temp_unvisited_Queue = new LinkedList<Coordinate>();
-						crawl_radius = queryInHexagon(p, crawl_radius, radius,
-								temp_visited_Queue, visitedcircle_Queue,
-								temp_unvisited_Queue, state, category, query,
-								queryset);
-						System.out.println("" + "crawl_radius=" + crawl_radius);
+					calculatePoint(p, radius, visitedcircle_Queue,
+							unvisited_Queue);
+					VQP c = new VQP(p, radius);
+					if (needQuery(c, visitedcircle_Queue)) {
+						AQuery Hexquery = new AQuery(p, state, category, query,
+								MAX_TOTAL_RESULTS_RETURNED);
+						ResultSet resultSet = query(Hexquery);
+						countquery++;
+						// add the queried point to the set
+						queryset.addAll(resultSet.getPOIs());
+						int size1 = resultSet.getPOIs().size();
+						APOI farthest1 = resultSet.getPOIs().get(size1 - 1);
+						Coordinate farthest1Coordinate = farthest1
+								.getCoordinate();
+						double distance1 = p.distance(farthest1Coordinate);
+						double crawl_radius = distance1;
+						System.out.println("crawl_radius=" + crawl_radius
+								+ "   radius=" + radius);
+						/*
+						 * record the information of the visited point，using to
+						 * record all the visited points since we want to using
+						 * the information to obtain the neighbor circles and
+						 * futher reduce the query cost
+						 */
+						visitedcircle_Queue.addLast(new VQP(p, crawl_radius));
+						// query in the hexagon
+						if (crawl_radius < radius * key) {
+							LinkedList<VQP> temp_visited_Queue = new LinkedList<VQP>();
+							LinkedList<Coordinate> temp_unvisited_Queue = new LinkedList<Coordinate>();
+							crawl_radius = queryInHexagon(p, crawl_radius,
+									radius, temp_visited_Queue,
+									visitedcircle_Queue, temp_unvisited_Queue,
+									state, category, query, queryset);
+							System.out.println("" + "crawl_radius="
+									+ crawl_radius);
+						}
+						Circle aaCircle = new Circle(p, crawl_radius);
+						if (logger.isDebugEnabled() && PaintShapes.painting) {
+							PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
+							PaintShapes.paint.addCircle(aaCircle);
+							PaintShapes.paint.myRepaint();
+						}
+						VQP visitedPoint = new VQP(p, crawl_radius);
+						// denote the point has been visited
+						visited_Queue.addLast(visitedPoint);
+					} else {
+						visitedcircle_Queue.addLast(c);
+						visited_Queue.addLast(c);
 					}
-					Circle aaCircle = new Circle(p, crawl_radius);
-					if (logger.isDebugEnabled() && PaintShapes.painting) {
-						PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
-						PaintShapes.paint.addCircle(aaCircle);
-						PaintShapes.paint.myRepaint();
-					}
-					VQP visitedPoint = new VQP(p, crawl_radius);
-					// denote the point has been visited
-					visited_Queue.addLast(visitedPoint);
-				}
-				}else {
-				   visitedcircle_Queue.addLast(c);
-				   visited_Queue.addLast(c);
-				}
 				}
 			}
 			System.out.println("queryset.size=" + queryset.size());
@@ -285,7 +293,8 @@ public class HexagonCrawler2_Modify extends OfflineStrategy {
 				int id = it.next().getId();
 				APOI pp = DBInMemory.pois.get(id);
 				if (startPoint.distance(pp.getCoordinate()) < coverRadius
-						||Math.abs(startPoint.distance(pp.getCoordinate())-coverRadius)<1e-6)
+						|| Math.abs(startPoint.distance(pp.getCoordinate())
+								- coverRadius) < 1e-6)
 					eligibleset.add(pp);
 			}
 			countPoint = eligibleset.size();
@@ -306,10 +315,12 @@ public class HexagonCrawler2_Modify extends OfflineStrategy {
 			LinkedList<VQP> visitedcircle_Queue,
 			LinkedList<Coordinate> unvisited_Queue, String state, int category,
 			String query, Set<APOI> set) {
-        //@param coverRadius:record the maximum inscribed circle of the covered region
+		// @param coverRadius:record the maximum inscribed circle of the covered
+		// region
 		double coverRadius = crawl_radius;
 		/* compute coordinates of the points which are used to next query */
-		calculatePoint(point, crawl_radius, visitedcircle_Queue, unvisited_Queue);
+		calculatePoint(point, crawl_radius, visitedcircle_Queue,
+				unvisited_Queue);
 		Circle circle = new Circle(point, coverRadius);
 		if (logger.isDebugEnabled() && PaintShapes.painting) {
 			PaintShapes.paint.color = PaintShapes.paint.greenTranslucence;
@@ -322,40 +333,45 @@ public class HexagonCrawler2_Modify extends OfflineStrategy {
 			for (int i = 1; i <= 6 * temp_Level; i++) {
 				if (!unvisited_Queue.isEmpty()) {
 					Coordinate q = unvisited_Queue.removeFirst();
-					/* compute coordinates of the points which are used to next query*/
-					calculatePoint(q, crawl_radius, visitedcircle_Queue,unvisited_Queue);
+					/*
+					 * compute coordinates of the points which are used to next
+					 * query
+					 */
+					calculatePoint(q, crawl_radius, visitedcircle_Queue,
+							unvisited_Queue);
 					/*
 					 * determine whether need issue query in position q
 					 */
-					VQP c=new VQP(q,crawl_radius);
-					//the query is needed 
-					if(needQuery(c, visitedcircle_Queue)){
+					VQP c = new VQP(q, crawl_radius);
+					// the query is needed
+					if (needQuery(c, visitedcircle_Queue)) {
 						AQuery InhexgonQuery = new AQuery(q, state, category,
 								query, MAX_TOTAL_RESULTS_RETURNED);
 						ResultSet resultSetInhexgon = query(InhexgonQuery);
 						countquery++;
 						set.addAll(resultSetInhexgon.getPOIs());
 						int size = resultSetInhexgon.getPOIs().size();
-						APOI farthest = resultSetInhexgon.getPOIs().get(size - 1);
-						Coordinate farthestCoordinate = farthest.getCoordinate();
+						APOI farthest = resultSetInhexgon.getPOIs().get(
+								size - 1);
+						Coordinate farthestCoordinate = farthest
+								.getCoordinate();
 						double distance = q.distance(farthestCoordinate);
 						double inRadius = distance;
-						System.out
-								.println("crawl_radius=" + crawl_radius
-										+ " inRadius=" + inRadius
-										+ " unvisited_Queue.size="
-										+ unvisited_Queue.size());
+						System.out.println("crawl_radius=" + crawl_radius
+								+ " inRadius=" + inRadius
+								+ " unvisited_Queue.size="
+								+ unvisited_Queue.size());
 						visitedcircle_Queue.addLast(new VQP(q, inRadius));
-						//recursively call the InHexagon algorithm 
+						// recursively call the InHexagon algorithm
 						if (inRadius < key * crawl_radius) {
 							LinkedList<VQP> temp_visited_Queue1 = new LinkedList<VQP>();
 							// LinkedList<Coordinate> temp_visited_Queue11 = new
 							// LinkedList<Coordinate>();
 							LinkedList<Coordinate> temp_unvisited_Queue1 = new LinkedList<Coordinate>();
-							inRadius = queryInHexagon(q, inRadius, crawl_radius,
-									temp_visited_Queue1, visitedcircle_Queue,
-									temp_unvisited_Queue1, state, category, query,
-									set);
+							inRadius = queryInHexagon(q, inRadius,
+									crawl_radius, temp_visited_Queue1,
+									visitedcircle_Queue, temp_unvisited_Queue1,
+									state, category, query, set);
 						}
 						Circle aaaCircle = new Circle(q, inRadius);
 						if (logger.isDebugEnabled() && PaintShapes.painting) {
@@ -367,12 +383,12 @@ public class HexagonCrawler2_Modify extends OfflineStrategy {
 						visited_Queue.addLast(qVQP);
 						System.out.println("size of visited in hexagon ="
 								+ visited_Queue.size());
-					  }else{
-						  visitedcircle_Queue.addLast(c);
-						  visited_Queue.addLast(c);
-					  }
-				   }
+					} else {
+						visitedcircle_Queue.addLast(c);
+						visited_Queue.addLast(c);
+					}
 				}
+			}
 
 			/* calculate the incircle */
 			double minRadius = 1e308;
@@ -400,41 +416,43 @@ public class HexagonCrawler2_Modify extends OfflineStrategy {
 
 		return coverRadius;
 	}
-	
-	public Set<VQP> obtainNeighborSet(VQP circle, LinkedList<VQP>visitedcircle_Queue){
-		Set Neighbor_set=new HashSet<VQP>();//record the effective neighbor
-		Set tempNeighbor_set=new HashSet<VQP>();
-		Iterator<VQP> it=visitedcircle_Queue.iterator();
-		//initial the tempNeighbor_set
-		while(it.hasNext()){
-			VQP circle1=it.next();
-			double d1=circle.getRadius()-circle1.getRadius();
+
+	public Set<VQP> obtainNeighborSet(VQP circle,
+			LinkedList<VQP> visitedcircle_Queue) {
+		Set Neighbor_set = new HashSet<VQP>();// record the effective neighbor
+		Set tempNeighbor_set = new HashSet<VQP>();
+		Iterator<VQP> it = visitedcircle_Queue.iterator();
+		// initial the tempNeighbor_set
+		while (it.hasNext()) {
+			VQP circle1 = it.next();
+			double d1 = circle.getRadius() - circle1.getRadius();
 			/*
-			 * 【 Definition 】temporary neighbor: the circle intersect with the given circle 
-			 *  or contained by the given circle
-			 *  */
-			if(circles_Insecter(circle, circle1)||(d1>0&&circle_contain(circle, circle1))){
+			 * 【 Definition 】temporary neighbor: the circle intersect with the
+			 * given circle or contained by the given circle
+			 */
+			if (circles_Insecter(circle, circle1)
+					|| (d1 > 0 && circle_contain(circle, circle1))) {
 				tempNeighbor_set.add(circle1);
 			}
 		}
 		/*
-		 *  optimal the Neighbor_set and only retain the effective neighbors
-		 * 【 Definition 】effective neighbors
-		 *  */
-		Iterator<VQP> it1=tempNeighbor_set.iterator();
-		while(it1.hasNext()){
-			VQP c1=it1.next();
-			boolean effective=true;
-			Iterator<VQP>it2=tempNeighbor_set.iterator();
-			while(it2.hasNext()&&effective){
-				VQP c2=it2.next();
-				if(!pointsequal(c1.getCoordinate(),c2.getCoordinate())){
-					if(circle_contain(c2,c1))
-						effective=false;					
+		 * optimal the Neighbor_set and only retain the effective neighbors 【
+		 * Definition 】effective neighbors
+		 */
+		Iterator<VQP> it1 = tempNeighbor_set.iterator();
+		while (it1.hasNext()) {
+			VQP c1 = it1.next();
+			boolean effective = true;
+			Iterator<VQP> it2 = tempNeighbor_set.iterator();
+			while (it2.hasNext() && effective) {
+				VQP c2 = it2.next();
+				if (!pointsequal(c1.getCoordinate(), c2.getCoordinate())) {
+					if (circle_contain(c2, c1))
+						effective = false;
 				}
 			}
-			if(effective)
-				Neighbor_set.add(c1);				
+			if (effective)
+				Neighbor_set.add(c1);
 		}
 		return Neighbor_set;
 	}
@@ -542,45 +560,46 @@ public class HexagonCrawler2_Modify extends OfflineStrategy {
 	 * @param cirlce : a circle which we want to determine whether it is covered
 	 * by its neighbor
 	 * 
-	 * @param visitedcircle_Queue: record the information of all the visited points through out the
-	  whole period of running this algorithm   
+	 * @param visitedcircle_Queue: record the information of all the visited
+	 * points through out the whole period of running this algorithm
 	 */
-	public boolean needQuery(VQP circle, LinkedList<VQP>visitedcircle_Queue) {
+	public boolean needQuery(VQP circle, LinkedList<VQP> visitedcircle_Queue) {
 		boolean needquery = false;
-		//record the effective neighbors of the circle need to be judged
-		Set Neighbor_set=new HashSet<VQP>();
-		Iterator<VQP> it=visitedcircle_Queue.iterator();
-		//"beIncluded=true" means circle was included by another visited circle 
-		boolean beIncluded=false;
-		//initial the Neighbor_set
-		Set tempNeighbor_set=new HashSet<VQP>();
-		while(it.hasNext()&&!beIncluded){
-			VQP circle1=it.next();
-			double d1=circle.getRadius()-circle1.getRadius();
-			if(circles_Insecter(circle, circle1)||(d1>0&&circle_contain(circle, circle1))){
+		// record the effective neighbors of the circle need to be judged
+		Set Neighbor_set = new HashSet<VQP>();
+		Iterator<VQP> it = visitedcircle_Queue.iterator();
+		// "beIncluded=true" means circle was included by another visited circle
+		boolean beIncluded = false;
+		// initial the Neighbor_set
+		Set tempNeighbor_set = new HashSet<VQP>();
+		while (it.hasNext() && !beIncluded) {
+			VQP circle1 = it.next();
+			double d1 = circle.getRadius() - circle1.getRadius();
+			if (circles_Insecter(circle, circle1)
+					|| (d1 > 0 && circle_contain(circle, circle1))) {
 				tempNeighbor_set.add(circle1);
-			}else if(d1<0&&circle_contain(circle1,circle)){
-				beIncluded=true;
+			} else if (d1 < 0 && circle_contain(circle1, circle)) {
+				beIncluded = true;
 			}
 		}
-		if(!beIncluded){
-			//optimal the Neighbor_set and only retain the effective neighbors
-			Iterator<VQP> it1=tempNeighbor_set.iterator();
-			while(it1.hasNext()){
-				VQP c1=it1.next();
-				boolean effective=true;
-				Iterator<VQP>it2=tempNeighbor_set.iterator();
-				while(it2.hasNext()&&effective){
-					VQP c2=it2.next();
-					if(!pointsequal(c1.getCoordinate(),c2.getCoordinate())){
-						if(circle_contain(c2,c1))
-							effective=false;					
+		if (!beIncluded) {
+			// optimal the Neighbor_set and only retain the effective neighbors
+			Iterator<VQP> it1 = tempNeighbor_set.iterator();
+			while (it1.hasNext()) {
+				VQP c1 = it1.next();
+				boolean effective = true;
+				Iterator<VQP> it2 = tempNeighbor_set.iterator();
+				while (it2.hasNext() && effective) {
+					VQP c2 = it2.next();
+					if (!pointsequal(c1.getCoordinate(), c2.getCoordinate())) {
+						if (circle_contain(c2, c1))
+							effective = false;
 					}
 				}
-				if(effective)
-					Neighbor_set.add(c1);				
+				if (effective)
+					Neighbor_set.add(c1);
 			}
-			//determine whether the circle need to be queried or not 
+			// determine whether the circle need to be queried or not
 			if (!isCircumferenceCoverage(circle, Neighbor_set))
 				needquery = true;
 			else {
@@ -607,8 +626,7 @@ public class HexagonCrawler2_Modify extends OfflineStrategy {
 	 * @param Neighbor_set: a set of circles which are the neighbor circle to
 	 * the given circle
 	 */
-	public boolean isCircumferenceCoverage(VQP circle,
-			Set<VQP> Neighbor_set) {
+	public boolean isCircumferenceCoverage(VQP circle, Set<VQP> Neighbor_set) {
 		boolean coverage = true;
 		Iterator<VQP> it1 = Neighbor_set.iterator();
 		// if there is a intersecting point is not in any other circles, the
@@ -639,8 +657,12 @@ public class HexagonCrawler2_Modify extends OfflineStrategy {
 										circle2))) {
 							stop1 = true;
 						}
-						if (!stop2&& (isinCircle(inter1.getIntersectPoint_right(),circle2) 
-								|| isAtCircumference(inter1.getIntersectPoint_right(),circle2))) {
+						if (!stop2
+								&& (isinCircle(
+										inter1.getIntersectPoint_right(),
+										circle2) || isAtCircumference(
+										inter1.getIntersectPoint_right(),
+										circle2))) {
 							stop2 = true;
 						}
 					}
@@ -656,9 +678,14 @@ public class HexagonCrawler2_Modify extends OfflineStrategy {
 	}
 
 	/*
-	 * to determine whether an arc is covered by other neighbor circles of the circle or not
+	 * to determine whether an arc is covered by other neighbor circles of the
+	 * circle or not
+	 * 
 	 * @param p1, p2: the endpoints of the arc
-	 * @param circle: a circle we want to determine whether is covered by its neighbor circles
+	 * 
+	 * @param circle: a circle we want to determine whether is covered by its
+	 * neighbor circles
+	 * 
 	 * @param Neighbor_set: a set of circles which are neighbors to the circle
 	 */
 	public boolean isPerimeterCoverage(VQP circle, VQP circle1,
@@ -728,9 +755,8 @@ public class HexagonCrawler2_Modify extends OfflineStrategy {
 		return coverage;
 	}
 
-	
-	//to determine whether 2 circles intersect or not
-	public  boolean circles_Insecter(VQP circle1, VQP circle2) {
+	// to determine whether 2 circles intersect or not
+	public boolean circles_Insecter(VQP circle1, VQP circle2) {
 		boolean intersect = false;
 		double l1 = circle1.getCoordinate().distance(circle2.getCoordinate());
 		double l2 = Math.abs(circle1.getRadius() - circle2.getRadius());
@@ -741,12 +767,13 @@ public class HexagonCrawler2_Modify extends OfflineStrategy {
 		}
 		return intersect;
 	}
-	
-	//to determine whether a circle contains another circle and assume that circle1.radius>circle2.radius
-	public boolean circle_contain(VQP circle1, VQP circle2){
-		double d1=circle1.getCoordinate().distance(circle2.getCoordinate());
-		double d2=circle1.getRadius()-circle2.getRadius();
-		if(d1<d2||Math.abs(d1-d2)<1e-6)
+
+	// to determine whether a circle contains another circle and assume that
+	// circle1.radius>circle2.radius
+	public boolean circle_contain(VQP circle1, VQP circle2) {
+		double d1 = circle1.getCoordinate().distance(circle2.getCoordinate());
+		double d2 = circle1.getRadius() - circle2.getRadius();
+		if (d1 < d2 || Math.abs(d1 - d2) < 1e-6)
 			return true;
 		return false;
 	}
