@@ -8,12 +8,14 @@ import java.util.Set;
 import mo.umac.metadata.APOI;
 import mo.umac.metadata.AQuery;
 import mo.umac.metadata.ResultSet;
+import mo.umac.metadata.VQP;
 import mo.umac.metadata.VQP1;
 import mo.umac.paint.PaintShapes;
 import mo.umac.spatial.Circle;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.LineSegment;
 
 public class BinaryCrawler extends OfflineStrategy {
 
@@ -25,8 +27,6 @@ public class BinaryCrawler extends OfflineStrategy {
 	public static Set<APOI> eligibleset = new HashSet<APOI>();// record all eligible points
 	public static Coordinate startPoint1 = new Coordinate();// record the start point of every level query
 	public static double inRadius = 0;// using it to keep track of the radius of the mixmum inscribe circle
-	public static double CP = 4; // using to adjust the binary search
-	public static int onequerycount = 0;// record the number of call the procedure onequery
 
 	public BinaryCrawler() {
 		super();
@@ -65,8 +65,10 @@ public class BinaryCrawler extends OfflineStrategy {
 		double radius=startPoint.distance(resultSetStart.getPOIs().get(size-1).getCoordinate());
 		inRadius=radius;
 		System.out.println("startquery inRadius===="+inRadius+"======");
-		
-		
+		LinkedList<VQP> visitedInfoQ=new LinkedList<VQP>();//record all the query circle 
+		LinkedList<VQP> visitedOnlineQ=new LinkedList<VQP>();//record all the query circle on the linesegment(startPoint,refCoordinate)
+		/* add circle(startPoint,radius) to the visitedInfoQ */
+		visitedInfoQ.addLast(new VQP(startPoint, radius));
 		
 		Circle aCircle=new Circle(startPoint, radius);
 		if(logger.isDebugEnabled()&&PaintShapes.painting){
@@ -85,13 +87,77 @@ public class BinaryCrawler extends OfflineStrategy {
 
 		while(countpoint<NEED_POINTS_NUM){
 		     //TODO call a binary search procedure
+			
 			//TODO calculate the eligible points
 		}
     }
 	
-	public void binaryQuery(Coordinate refCoordinate,LinkedList<VQP>){
+	/**
+	 * binary search procedure: find the nearest ring contain new points and cover the ring
+	 * @param startPoint: the given start point
+	 * @param refCoordinate: the position which has the longest distance to the startPoint
+	 * */
+	public void binaryQuery(Coordinate startPoint, Coordinate refCoordinate,String state, int category, String query,
+			LinkedList<VQP>visitedInfoQ,LinkedList<VQP>visitedOnlineQ){
+		Coordinate biCoordinate=new Coordinate();//keep track of the position for binary search
+		Coordinate [] intsectArray=line_circle_intersect(startPoint, inRadius, refCoordinate);
+		Coordinate intsectPoint=new Coordinate();//record the intersection point between the central circle and linesegment
+		//obtain the point which is on the line
+		LineSegment l=new LineSegment(startPoint, refCoordinate);
+		if(isOnLinesegment(intsectArray[0], l))
+			intsectPoint=intsectArray[0];
+		else intsectPoint=intsectArray[1];
+		//find the position of the binary search
+		biCoordinate.x=(refCoordinate.x+intsectPoint.x)/2;
+		biCoordinate.y=(refCoordinate.y+intsectPoint.y)/2;
+		VQP inscribedCircle=new VQP(startPoint,inRadius);//the maximum inscribed circle centered at startPoint
+		//exist vacancy between the biCoordinate position and the inscribed circle
+		while(!isinCircle(biCoordinate, inscribedCircle)){
+			//issue a query at the biCoordinate
+			AQuery query1=new AQuery(biCoordinate,state,category, query,MAX_TOTAL_RESULTS_RETURNED);
+			ResultSet resultSet1=query(query1);
+			countquery++;
+			queryset.addAll(resultSet1.getPOIs());
+			int size1=resultSet1.getPOIs().size();
+			double biRadius=biCoordinate.distance(resultSet1.getPOIs().get(size1-1).getCoordinate());
+			//record the circle(biCoordinate, biRadius)
+			visitedInfoQ.addLast(new VQP(biCoordinate,biRadius));
+			visitedOnlineQ.addLast(new VQP(biCoordinate,biRadius));
+			//obtain the intersection point between the linesegment l1 and circle(biCoordinate, biRadius)
+			Coordinate []intsectArray1=line_circle_intersect(biCoordinate,biRadius,startPoint);
+			LineSegment l1=new LineSegment(startPoint, biCoordinate);
+			Coordinate intsectPoint1=new Coordinate(); //record the intersection point between the l1 and circle(biCoordinate, biRadius)
+			//obtain the point which is on the line
+			if(isOnLinesegment(intsectArray1[0],l1))
+				intsectPoint1=intsectArray1[0];
+			else intsectPoint1=intsectArray1[1];
+			biCoordinate.x=(intsectPoint1.x+intsectPoint.x)/2;
+			biCoordinate.y=(intsectPoint1.y+intsectPoint.y)/2;
+		}
+		//TODO cover the ring
+	}
+	
+	public void coverRing(){
 		
 	}
+	
+	//judge whether a point is in a circle or on the circumference of the circle
+		public boolean isinCircle(Coordinate p, VQP vqp){
+			if(vqp.getCoordinate().distance(p)<vqp.getRadius()
+					||Math.abs(vqp.getCoordinate().distance(p)-vqp.getRadius())<1e-6)
+				return true;
+			return false;
+		}
+	
+	/*
+	 * judge whether a point is on a line segment or not 
+	 * */
+	public boolean isOnLinesegment(Coordinate p, LineSegment l){
+		if(Math.abs(l.distance(p)-0)<1e-6)
+			return true;
+		else return false;
+	}
+	
 	
 	/*circle: the circle centered at startPoint with radius
 	 *line: startPoint and p are on the line
