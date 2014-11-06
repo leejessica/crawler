@@ -105,7 +105,7 @@ public class PerpheryQuery_Optimize extends OfflineStrategy{
 		startPoint1.y=startPoint.y+inRadius;
 		while(countpoint<NEED_POINTS_NUM){
 			System.out.println("startPoint1="+startPoint1);
-			onelevelQuery( startPoint, inRadius, /*startPoint1,*/ state, category, query, visitedQ,levelmap, uncoveredArc );	
+			onelevelQuery( startPoint, inRadius, state, category, query, visitedQ,levelmap, uncoveredArc );	
 		}
 	}
 	
@@ -113,8 +113,6 @@ public class PerpheryQuery_Optimize extends OfflineStrategy{
 	//calculate the intersect point between the query with central circle
 	public VQP1 onequery(Coordinate startPoint,double radius, Coordinate point, String state, int category, String query,
 			LinkedList<Coordinate>visitedQ){
-		
-		onequerycount++;
 		AQuery query1=new AQuery(point, state, category, query, MAX_TOTAL_RESULTS_RETURNED);
 		ResultSet resultset1=query(query1);
 		countquery++;
@@ -139,7 +137,6 @@ public class PerpheryQuery_Optimize extends OfflineStrategy{
 			PaintShapes.paint.addCircle(aCircle);
 			PaintShapes.paint.myRepaint();
 		}
-		System.out.println("call the onequery!!!!!!!   "+onequerycount);
 		return vpq1;
 	}
 	
@@ -198,15 +195,11 @@ public class PerpheryQuery_Optimize extends OfflineStrategy{
 	 * @param map: record every level information <level, querypoint list>
 	 * @param uncoveredArc: record the uncoverd arc of the current level
 	 */
-	public void onelevelQuery(Coordinate startPoint, double radius,/*Coordinate startPoint1,*/ String state, int category,
-			String query, LinkedList<Coordinate>visitedQ,HashMap<Integer,LinkedList<VQP1>> map,LinkedList<Coordinate []>uncoveredArc){
-		System.out.println("onelevel query start: central circle  radius="+radius);
+	public void onelevelQuery(Coordinate startPoint, double radius, String state, int category,
+			String query, LinkedList<Coordinate>visitedQ,HashMap<Integer,LinkedList<VQP1>> map,
+			LinkedList<Coordinate []>uncoveredArc){
 		
 		level++;
-		//Level_info levelInfo_temp=new Level_info();
-		//levelInfo_temp.setlevel(level);
-		//first query at the current level
-		
 		System.out.println("startPoint1="+startPoint1);
 		//@param querypoint use to record all the query circle at the current level
 		LinkedList<VQP1> querypoint=new LinkedList<VQP1>();
@@ -214,9 +207,7 @@ public class PerpheryQuery_Optimize extends OfflineStrategy{
 		//calculate the second query point at the current level
 		Coordinate a[]=new Coordinate[2];
 		a=line_circle_intersect(startPoint,radius,startPoint1);
-		System.out.println("a0="+a[0]+"  a1="+a[1]);
 		Coordinate startPoint2=new Coordinate();
-		System.out.println("visitedQ="+visitedQ.get(0)+"  "+visitedQ.get(1));
 		if(!myContain(visitedQ, a[0]))
 			startPoint2=a[0];
 		else startPoint2=a[1];
@@ -242,17 +233,10 @@ public class PerpheryQuery_Optimize extends OfflineStrategy{
         vpq2.setright(pc4);
 		querypoint.addLast(vpq1);
 		querypoint.addLast(vpq2);
-		//judge if need more query,this is to say, the periphery is covered or not
-		
-		//double d1=vpq1.getleft().getintersection().distance(startPoint2);
-		//double d2=vpq2.getself().getRadius();
-		//System.out.println("sssssss="+vpq1.getleft().getintersection()+"   sssss"+vpq2.getself().getRadius());
-		//System.out.println("d1="+d1+"  d2="+d2);
 		
 		if(!isinCircle(vpq1.getleft().getintersection(), vpq2.getself()))//there are some arc haven't been covered
 		{
 			//use the array to record the arc which is not been covered	
-			System.out.println("d1>=d2");
 			Coordinate b[]=new Coordinate[2];
 			Coordinate c[]=new Coordinate[2];
 			b[0]=vpq1.getleft().getintersection();
@@ -260,7 +244,6 @@ public class PerpheryQuery_Optimize extends OfflineStrategy{
 			double d3=b[0].distance(vpq2.getleft().getintersection());
 			double d4=b[0].distance(vpq2.getright().getintersection());
 			if(d3<d4){
-				System.out.println("d3<d4");
 				b[1]=vpq2.getleft().getintersection();
 				c[1]=vpq2.getright().getintersection();
 			}
@@ -270,11 +253,10 @@ public class PerpheryQuery_Optimize extends OfflineStrategy{
 			}
 			uncoveredArc.addLast(b);
 			uncoveredArc.addLast(c);
-			System.out.println("b="+b[0]+"  "+b[1]);
-			System.out.println("c="+c[0]+"   "+c[1]);
+			
 			//if the periphery has not been covered, continue query
 			while(!uncoveredArc.isEmpty()){
-				System.out.println("uncoveredArc size="+uncoveredArc.size());
+				
 				Coordinate temp[]=new Coordinate[2];
 				temp=uncoveredArc.removeFirst();
 				continueQuery(temp,querypoint,uncoveredArc,startPoint,radius,state,category,query,visitedQ);
@@ -282,9 +264,6 @@ public class PerpheryQuery_Optimize extends OfflineStrategy{
 		}
 		//add the querypoint to the map
 		map.put(level, querypoint);
-		
-		System.out.println("level="+level+"  circle number="+querypoint.size());
-		
 		// calculate the incircle and count the eligible points
 		LinkedList<Coordinate> startPoint1Q=new LinkedList<Coordinate>();
 		double incircleRadius=getIncircleRadius(map,startPoint,startPoint1Q);
@@ -311,29 +290,22 @@ public class PerpheryQuery_Optimize extends OfflineStrategy{
 				eligibleset.add(pp);
 		}
 		countpoint=eligibleset.size();	
-		System.out.println("4444444444444444444countpoint="+countpoint);
 	}
 	
 	//calculate the radius of the incircle
-	public double getIncircleRadius(HashMap<Integer,LinkedList<VQP1>> map,Coordinate startPoint,LinkedList<Coordinate>startPoint1Q){
-		System.out.println("start getIncircleRadius level="+level);
-		//double incircleRadius=0;
-		//only one level query
+	public double getIncircleRadius(HashMap<Integer,LinkedList<VQP1>> map,Coordinate startPoint,
+			LinkedList<Coordinate>startPoint1Q){
 		double minRadius=1e308;
-		LinkedList<VQP1>tempquerypoint=map.get(level);
-		System.out.println("size="+tempquerypoint.size());
-		int i=0;
+		LinkedList<VQP1>tempquerypoint=map.get(level);				
 		Iterator<VQP1> it=tempquerypoint.iterator();
 		while(it.hasNext()){
-			i++;
-			System.out.println("i="+i);
 			VQP1 vqp1=it.next();
 			double a=calculateMaxradius(startPoint, vqp1.getself().getCoordinate(), 
 					vqp1.getself().getRadius(), vqp1.getleft().getneighborcenter(), vqp1.getleft().getRadius(),startPoint1Q);
 			
 			double b=calculateMaxradius(startPoint, vqp1.getself().getCoordinate(), 
 					vqp1.getself().getRadius(), vqp1.getright().getneighborcenter(), vqp1.getright().getRadius(),startPoint1Q);
-			System.out.println("a="+a+"   b="+b);
+			
 			minRadius=Math.min(a, minRadius);
 			minRadius=Math.min(b, minRadius);
 		}		
@@ -359,16 +331,14 @@ public class PerpheryQuery_Optimize extends OfflineStrategy{
 		    int index1=-1;
 		    int index2=-1;  
 		    //get the 2 circle which are related to the arc
-		    System.out.println("a0="+a[0]+"  a1="+a[1]);
+		    
 		    while(it.hasNext()){
 		    	VQP1 tempvqp1=it.next();
 		    	if(myContain1(a[0],tempvqp1)){
 		    	     index1=querypoint.indexOf(tempvqp1);	
-		    	System.out.println("index1="+index1);
 		    	}
 		    	else if(myContain1(a[1],tempvqp1)){
 		    		index2=querypoint.indexOf(tempvqp1);
-		    		System.out.println("index2="+index2);
 		    	}
 		    }
 		    //calculate the midpoint of the arc
@@ -380,10 +350,9 @@ public class PerpheryQuery_Optimize extends OfflineStrategy{
 		    Coordinate SQ1=new Coordinate(b[0].x-startPoint.x,b[0].y-startPoint.y);
 		    //Coordinate SQ2=new Coordinate(b[1].x-startPoint.x,b[1].y-startPoint.y);
 		    Coordinate nextcenter=new Coordinate();
-		    System.out.println("b0="+b[0]+"  b1="+b[1]);
+		    
 		    //judge the middle point of the arc through vector:colineation
 		    if((SQ1.x*SM.x+SQ1.y*SM.y)>0){
-		        System.out.println("b0!!!");
 		    	nextcenter=b[0];
 		    	}
 		    else nextcenter=b[1];
@@ -398,24 +367,15 @@ public class PerpheryQuery_Optimize extends OfflineStrategy{
 		    PandC pc1=centervqp1.getleft();
 		    double d1=tvqp1.getself().getCoordinate().distance(pc1.getintersection());
 		    double d2=tvqp2.getself().getCoordinate().distance(pc1.getintersection());
-		    System.out.println("centervqp1=[ "+centervqp1.getleft().getintersection()+","+centervqp1.getleft().getneighborcenter()+","
-		    		+centervqp1.getright().getintersection()+","+centervqp1.getright().getneighborcenter()+","+centervqp1.getself().getCoordinate()+"]");
-		    System.out.println("tvqp1=["+tvqp1.getleft().getintersection()+","+tvqp1.getleft().getneighborcenter()+","+tvqp1.getright().getintersection()
-		    		+","+tvqp1.getright().getneighborcenter()+tvqp1.getself().getCoordinate()+"]");
-		    System.out.println("tvqp2=["+tvqp2.getleft().getintersection()+","+tvqp2.getleft().getneighborcenter()+","+tvqp2.getright().getintersection()
-		    		+","+tvqp2.getright().getneighborcenter()+tvqp2.getself().getCoordinate()+"]");
 		    if(d1<d2){
 		    	//centervqp1's left neighbor is tvqp1
-		    	System.out.println("d1<d2");
 		    	centervqp1.getleft().setneighborcenter(tvqp1.getself().getCoordinate());
 		    	centervqp1.getleft().setRadius(tvqp1.getself().getRadius());
 		    	centervqp1.getright().setneighborcenter(tvqp2.getself().getCoordinate());
 		    	centervqp1.getright().setRadius(tvqp2.getself().getRadius());
 		    	Coordinate t1=tvqp1.getleft().getintersection();
-		    	System.out.println("t1="+t1);
 		    	//tvqp1's left neighbor is centervqp1
 			    if(Math.abs(t1.x-a[0].x)<1e-6&&Math.abs(t1.y-a[0].y)<1e-6){
-			    	System.out.println("YES!!!!!!!!!!!");
 			    	tvqp1.getleft().setneighborcenter(centervqp1.getself().getCoordinate());
 			    	tvqp1.getleft().setRadius(centervqp1.getself().getRadius());
 			    	if(!isinCircle(t1,centervqp1.getself())){
@@ -427,7 +387,6 @@ public class PerpheryQuery_Optimize extends OfflineStrategy{
 			    }
 			    //tvqp1's right neighbor is centervqp1
 			    else{
-			    	System.out.println("NO!!!!!!!!!!");
 			    	tvqp1.getright().setneighborcenter(centervqp1.getself().getCoordinate());
 			    	tvqp1.getright().setRadius(centervqp1.getself().getRadius());
 			    	if(!isinCircle(tvqp1.getright().getintersection(),centervqp1.getself())){
@@ -462,7 +421,6 @@ public class PerpheryQuery_Optimize extends OfflineStrategy{
 			    }
 		    }
 		    else{
-		    	System.out.println("d1>d2");
 		    	//centervqp1's left neighbor is tvqp2 
 		    	centervqp1.getright().setneighborcenter(tvqp1.getself().getCoordinate());
 		    	centervqp1.getright().setRadius(tvqp1.getself().getRadius());
@@ -519,12 +477,6 @@ public class PerpheryQuery_Optimize extends OfflineStrategy{
 		    querypoint.addLast(centervqp1);
 		    querypoint.set(index1, tvqp1);
 		    querypoint.set(index2, tvqp2);
-		    System.out.println("centervqp1=[ "+centervqp1.getleft().getintersection()+","+centervqp1.getleft().getneighborcenter()+","
-		    		+centervqp1.getright().getintersection()+","+centervqp1.getright().getneighborcenter()+","+centervqp1.getself().getCoordinate()+"]");
-		    System.out.println("tvqp1=["+tvqp1.getleft().getintersection()+","+tvqp1.getleft().getneighborcenter()+","+tvqp1.getright().getintersection()
-		    		+","+tvqp1.getright().getneighborcenter()+tvqp1.getself().getCoordinate()+"]");
-		    System.out.println("tvqp2=["+tvqp2.getleft().getintersection()+","+tvqp2.getleft().getneighborcenter()+","+tvqp2.getright().getintersection()
-		    		+","+tvqp2.getright().getneighborcenter()+tvqp2.getself().getCoordinate()+"]");
 	}
 	
 	//judge whether a point is in a circle or not

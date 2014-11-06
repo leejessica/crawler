@@ -5,7 +5,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
+import java.util.TreeSet;
 
+import mo.umac.crawler.offline.SortedBydistance;
 import mo.umac.metadata.IntersectPoint;
 import mo.umac.metadata.VQP;
 import mo.umac.metadata.VQP1;
@@ -20,20 +22,25 @@ public class Line_circle_test {
 		System.out.println("this is a test program!!!!!!\n");
 	}
 
-	public static boolean isOnLinesegment(Coordinate p, LineSegment l){
-		if(Math.abs(l.distance(p)-0)<1e-6)
-			return true;
-		else return false;
-	}
+	
 
 	public static void main(String[] args) {
-		Coordinate p=new Coordinate(1, 1);
-		Coordinate a1=new Coordinate(0, 2);
-		Coordinate a2=new Coordinate(2, 0);
-		Coordinate q=new Coordinate(2, 0.00001);
-		LineSegment l=new LineSegment(a1, a2);
-        boolean flag1=isOnLinesegment(p,l);
-        boolean flag2=isOnLinesegment(q,l);
-        System.out.println("flag1="+flag1+", flag2= "+flag2);
-	}
+		Coordinate s=new Coordinate(0, 0);
+		
+		Coordinate s1=new Coordinate(1, 1);
+		VQP p1=new VQP(s1, 0.5);
+		Coordinate s2=new Coordinate(2,2);
+		VQP p2=new VQP(s2, 1);
+		VQP p3=new VQP(new Coordinate(2,1), 1);
+		Set<VQP> set=new TreeSet<VQP>(new SortedBydistance(s));
+		set.add(p2);
+		set.add(p3);
+		set.add(p1);
+		System.out.println("size="+set.size());
+		Iterator<VQP> it=set.iterator();
+		while(it.hasNext()){
+			VQP p=it.next();
+			System.out.println("----"+p.getCoordinate()+",   "+p.getRadius());
+		}
+	}   
 }
