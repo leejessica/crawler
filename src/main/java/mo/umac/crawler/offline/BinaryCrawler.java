@@ -173,6 +173,11 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 			// record the circle(biCoordinate, biRadius)
 			visitedInfoQ.addLast(new VQP(biCoordinate, biRadius));
 			visitedOnlineQ.add(new VQP(biCoordinate, biRadius));
+			Circle aCircle = new Circle(startPoint, biRadius);
+			if (logger.isDebugEnabled() && PaintShapes.painting) {
+				PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
+				PaintShapes.paint.addCircle(aCircle);
+				PaintShapes.paint.myRepaint();
 			intsectPoint1 = getIntersectPoint(biCoordinate, startPoint,biRadius);
 			// calculate new biCoordinate
 			biCoordinate.x = (intsectPoint1.x + intsectPoint.x) / 2;
