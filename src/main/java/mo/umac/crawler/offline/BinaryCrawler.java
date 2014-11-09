@@ -25,7 +25,7 @@ import com.vividsolutions.jts.geom.LineSegment;
 public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 
 	private static int countquery = 0;
-	private static int NEED_POINTS_NUM = 30;
+	private static int NEED_POINTS_NUM = 100;
 	private static int countpoint = 0;
 	private static int level = 0;
 	private static Set<APOI> queryset = new HashSet<APOI>();// record all points
@@ -39,6 +39,9 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 	private static double inRadius = 0;// using it to keep track of the radius
 										// of
 										// the mixmum inscribe circle
+
+	// for test
+	public static int i = 0;
 
 	public BinaryCrawler() {
 		super();
@@ -60,7 +63,7 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 		Coordinate startPoint = new Coordinate();
 		startPoint.x = (evenlopeState.getMinX() + evenlopeState.getMaxX()) / 2;
 		startPoint.y = (evenlopeState.getMinY() + evenlopeState.getMaxY()) / 2;
-		startQuery(startPoint,state,category,query,evenlopeState);
+		startQuery(startPoint, state, category, query, evenlopeState);
 	}
 
 	public void startQuery(Coordinate startPoint, String state, int category,
@@ -101,42 +104,34 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 
 		// find the refCoordinate to determine the longest radius of the
 		// circumcircle of the MBR
-<<<<<<< HEAD
-		Coordinate minCoordinate = new Coordinate(evenlopeState.getMinX(),
-				evenlopeState.getMinY());
-		Coordinate maxCoordinate = new Coordinate(evenlopeState.getMaxX(),
+
+		Coordinate[] vetex = new Coordinate[4];
+		vetex[0] = new Coordinate(evenlopeState.getMaxX(),
 				evenlopeState.getMaxY());
+		vetex[1] = new Coordinate(evenlopeState.getMaxX(),
+				evenlopeState.getMinY());
+		vetex[2] = new Coordinate(evenlopeState.getMinX(),
+				evenlopeState.getMaxY());
+		vetex[3] = new Coordinate(evenlopeState.getMinX(),
+				evenlopeState.getMinY());
+		double[] d = new double[4];
 		Coordinate refCoordinate = new Coordinate();
-		if (startPoint.distance(minCoordinate) > startPoint
-				.distance(maxCoordinate))
-			refCoordinate = minCoordinate;
-		else
-			refCoordinate = maxCoordinate;
-		System.out.println("refCoordinate="+refCoordinate);
-=======
-		Coordinate []vetex=new Coordinate[4];
-		vetex[0]=new Coordinate(evenlopeState.getMaxX(),evenlopeState.getMaxY());
-		vetex[1]=new Coordinate(evenlopeState.getMaxX(),evenlopeState.getMinY());
-		vetex[2]=new Coordinate(evenlopeState.getMinX(),evenlopeState.getMaxY());
-		vetex[3]=new Coordinate(evenlopeState.getMinX(),evenlopeState.getMinY());
-		double[] d=new double[4];
-		Coordinate refCoordinate=new Coordinate();
-		int index=-1;
-		double d0=0;
-		for(int i=0;i<vetex.length;i++){
-			d[i]=startPoint.distance(vetex[i]);
-			if(d0<d[i]){
-				index=i;
-				d0=d[i];
+		int index = -1;
+		double d0 = 0;
+		for (int i = 0; i < vetex.length; i++) {
+			d[i] = startPoint.distance(vetex[i]);
+			if (d0 < d[i]) {
+				index = i;
+				d0 = d[i];
 			}
 		}
-		refCoordinate=vetex[index];
->>>>>>> 3eec90123dd6d795c3bb51c1144ed2080271119e
+		refCoordinate = vetex[index];
 		visitedOnlineQ.add(new VQP(refCoordinate, 0));
 
 		while (countpoint < NEED_POINTS_NUM) {
 			// TODO call a binary search procedure
-            binaryQuery(startPoint,refCoordinate,state,category,query,visitedInfoQ,visitedOnlineQ,visitedQ);
+			binaryQuery(startPoint, refCoordinate, state, category, query,
+					visitedInfoQ, visitedOnlineQ, visitedQ);
 			// TODO calculate the eligible points
 		}
 	}
@@ -153,8 +148,18 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 	 * */
 	public void binaryQuery(Coordinate startPoint, Coordinate refCoordinate,
 			String state, int category, String query,
-			LinkedList<VQP> visitedInfoQ, TreeSet<VQP> visitedOnlineQ,LinkedList<Coordinate>visitedQ) {
-
+			LinkedList<VQP> visitedInfoQ, TreeSet<VQP> visitedOnlineQ,
+			LinkedList<Coordinate> visitedQ) {
+		i++;
+		System.out.println("start call binary query !!!!!!! this is the" + i
+				+ "times to call it!====visitedOnlineQ.size="
+				+ visitedOnlineQ.size() + " visitedInfoQ.size"
+				+ visitedInfoQ.size());
+		Iterator<VQP> it4 = visitedOnlineQ.iterator();
+		while (it4.hasNext()) {
+			Coordinate h = it4.next().getCoordinate();
+			System.out.println("==========" + h);
+		}
 		// the maximum inscribed circle centered at startPoint
 		VQP inscribedCircle = new VQP(startPoint, inRadius);
 		/*
@@ -163,8 +168,8 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 		 */
 		Coordinate intsectPoint = getIntersectPoint(startPoint, refCoordinate,
 				inRadius);
-		//initial the startPoint1 in a fresh binary search procedure
-		startPoint1=intsectPoint;
+		// initial the startPoint1 in a fresh binary search procedure
+		startPoint1 = intsectPoint;
 		/*
 		 * calculate the intersection point between c1 and
 		 * linesegment(c1.getCoordinate(), startPoint)
@@ -193,13 +198,14 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 			// record the circle(biCoordinate, biRadius)
 			visitedInfoQ.addLast(new VQP(biCoordinate, biRadius));
 			visitedOnlineQ.add(new VQP(biCoordinate, biRadius));
-			Circle aCircle = new Circle(startPoint, biRadius);
+			Circle aCircle = new Circle(biCoordinate, biRadius);
 			if (logger.isDebugEnabled() && PaintShapes.painting) {
-				PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
+				PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
 				PaintShapes.paint.addCircle(aCircle);
 				PaintShapes.paint.myRepaint();
 			}
-			intsectPoint1 = getIntersectPoint(biCoordinate, startPoint,biRadius);
+			intsectPoint1 = getIntersectPoint(biCoordinate, startPoint,
+					biRadius);
 			// calculate new biCoordinate
 			biCoordinate.x = (intsectPoint1.x + intsectPoint.x) / 2;
 			biCoordinate.y = (intsectPoint1.y + intsectPoint.y) / 2;
@@ -208,33 +214,37 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 		double coverRadius = inRadius;
 		// obtain the first element and remove it
 		firstCircle = visitedOnlineQ.pollFirst();
+		System.out.println("visitedOnlineQ size= "+visitedOnlineQ.size());
 		double ringRadius = startPoint.distance(firstCircle.getCoordinate())
 				+ firstCircle.getRadius();
-		LinkedList<Coordinate[]>uncoveredArc=new LinkedList<Coordinate[]>();
-		HashMap<Integer,LinkedList<VQP1>>map=new HashMap<Integer,LinkedList<VQP1>>();
+		LinkedList<Coordinate[]> uncoveredArc = new LinkedList<Coordinate[]>();
+		HashMap<Integer, LinkedList<VQP1>> map = new HashMap<Integer, LinkedList<VQP1>>();
 		while (coverRadius < ringRadius) {
-         coverRadius=coverRing(startPoint,state,category,query,visitedQ,visitedInfoQ,map,uncoveredArc);
+			coverRadius = coverRing(startPoint, state, category, query,
+					visitedQ, visitedInfoQ, map, uncoveredArc);
 		}
-		//updata the inRadius
-		inRadius=coverRadius;
-		Iterator<APOI> it=queryset.iterator();
-		while(it.hasNext()){
+		// updata the inRadius
+		inRadius = coverRadius;
+		Iterator<APOI> it = queryset.iterator();
+		while (it.hasNext()) {
 			int id = it.next().getId();
 			APOI pp = DBInMemory.pois.get(id);
 			if (startPoint.distance(pp.getCoordinate()) < inRadius
-					||startPoint.distance(pp.getCoordinate())-inRadius<1e-6)
+					|| startPoint.distance(pp.getCoordinate()) - inRadius < 1e-6)
 				eligibleset.add(pp);
 		}
-		countpoint=eligibleset.size();	
-		//return inRadius;
+		countpoint = eligibleset.size();
+		// return inRadius;
 	}
 
 	/* cover the ring using PeripherQuery_Optimize algorithm */
 	public double coverRing(Coordinate startPoint, String state, int category,
-			String query, LinkedList<Coordinate> visitedQ,LinkedList<VQP>visitedInfoQ,
+			String query, LinkedList<Coordinate> visitedQ,
+			LinkedList<VQP> visitedInfoQ,
 			HashMap<Integer, LinkedList<VQP1>> map,
 			LinkedList<Coordinate[]> uncoveredArc) {
-        onelevelQuery(startPoint, inRadius, state,category,query,visitedQ,map,uncoveredArc,visitedInfoQ);
+		onelevelQuery(startPoint, inRadius, state, category, query, visitedQ,
+				map, uncoveredArc, visitedInfoQ);
 		return inRadius;
 	}
 
@@ -293,12 +303,12 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 	// calculate the intersect point between the query with central circle
 	public VQP1 onequery(Coordinate startPoint, double radius,
 			Coordinate point, String state, int category, String query,
-			LinkedList<Coordinate> visitedQ,LinkedList<VQP>visitedInfoQ) {
+			LinkedList<Coordinate> visitedQ, LinkedList<VQP> visitedInfoQ) {
 
 		AQuery query1 = new AQuery(point, state, category, query,
 				MAX_TOTAL_RESULTS_RETURNED);
 		ResultSet resultset1 = query(query1);
-		countquery++;		
+		countquery++;
 		queryset.addAll(resultset1.getPOIs());
 		int size = resultset1.getPOIs().size();
 		double radius1 = point.distance(resultset1.getPOIs().get(size - 1)
@@ -331,14 +341,14 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 			String state, int category, String query,
 			LinkedList<Coordinate> visitedQ,
 			HashMap<Integer, LinkedList<VQP1>> map,
-			LinkedList<Coordinate[]> uncoveredArc,LinkedList<VQP>visitedInfoQ) {
+			LinkedList<Coordinate[]> uncoveredArc, LinkedList<VQP> visitedInfoQ) {
 
 		level++;
 		// @param querypoint use to record all the query circle at the current
 		// level
 		LinkedList<VQP1> querypoint = new LinkedList<VQP1>();
 		VQP1 vpq1 = onequery(startPoint, radius, startPoint1, state, category,
-				query, visitedQ,visitedInfoQ);
+				query, visitedQ, visitedInfoQ);
 		// calculate the second query point at the current level
 		Coordinate a[] = new Coordinate[2];
 		a = line_circle_intersect(startPoint, radius, startPoint1);
@@ -349,7 +359,7 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 			startPoint2 = a[1];
 		// start the second query at current level
 		VQP1 vpq2 = onequery(startPoint, radius, startPoint2, state, category,
-				query, visitedQ,visitedInfoQ);
+				query, visitedQ, visitedInfoQ);
 		// update the neighbor
 		PandC pc1 = vpq1.getleft();
 		pc1.setneighborcenter(startPoint2);
@@ -392,7 +402,7 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 				Coordinate temp[] = new Coordinate[2];
 				temp = uncoveredArc.removeFirst();
 				continueQuery(temp, querypoint, uncoveredArc, startPoint,
-						radius, state, category, query, visitedQ,visitedInfoQ);
+						radius, state, category, query, visitedQ, visitedInfoQ);
 			}
 		}
 		// add the querypoint to the map
@@ -416,14 +426,12 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 			PaintShapes.paint.addCircle(aCircle);
 			PaintShapes.paint.myRepaint();
 		}
-		/*Iterator<APOI> it = queryset.iterator();
-		while (it.hasNext()) {
-			int id = it.next().getId();
-			APOI pp = DBInMemory.pois.get(id);
-			if (startPoint.distance(pp.getCoordinate()) <= incircleRadius)
-				eligibleset.add(pp);
-		}
-		countpoint = eligibleset.size();*/
+		/*
+		 * Iterator<APOI> it = queryset.iterator(); while (it.hasNext()) { int
+		 * id = it.next().getId(); APOI pp = DBInMemory.pois.get(id); if
+		 * (startPoint.distance(pp.getCoordinate()) <= incircleRadius)
+		 * eligibleset.add(pp); } countpoint = eligibleset.size();
+		 */
 	}
 
 	// calculate the radius of the incircle
@@ -434,11 +442,15 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 		Iterator<VQP1> it = tempquerypoint.iterator();
 		while (it.hasNext()) {
 			VQP1 vqp1 = it.next();
-			double a = calculateMaxradius(startPoint, vqp1.getself().getCoordinate(), vqp1.getself().getRadius(), 
-					vqp1.getleft().getneighborcenter(), vqp1.getleft().getRadius(),startPoint1Q);
+			double a = calculateMaxradius(startPoint, vqp1.getself()
+					.getCoordinate(), vqp1.getself().getRadius(), vqp1
+					.getleft().getneighborcenter(), vqp1.getleft().getRadius(),
+					startPoint1Q);
 
-			double b = calculateMaxradius(startPoint, vqp1.getself().getCoordinate(), vqp1.getself().getRadius(), 
-					vqp1.getright().getneighborcenter(), vqp1.getright().getRadius(), startPoint1Q);
+			double b = calculateMaxradius(startPoint, vqp1.getself()
+					.getCoordinate(), vqp1.getself().getRadius(), vqp1
+					.getright().getneighborcenter(), vqp1.getright()
+					.getRadius(), startPoint1Q);
 			minRadius = Math.min(a, minRadius);
 			minRadius = Math.min(b, minRadius);
 		}
@@ -530,7 +542,7 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 	public void continueQuery(Coordinate a[], LinkedList<VQP1> querypoint,
 			LinkedList<Coordinate[]> uncoveredArc, Coordinate startPoint,
 			double radius, String state, int category, String query,
-			LinkedList<Coordinate> visitedQ,LinkedList<VQP>visitedInfoQ) {
+			LinkedList<Coordinate> visitedQ, LinkedList<VQP> visitedInfoQ) {
 		Iterator<VQP1> it = querypoint.iterator();
 		int index1 = -1;
 		int index2 = -1;
@@ -570,19 +582,24 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 		/***************************************************************/
 		// update the neighbor of the centervqp1
 		PandC pc1 = centervqp1.getleft();
-		double d1 = tvqp1.getself().getCoordinate().distance(pc1.getintersection());
-		double d2 = tvqp2.getself().getCoordinate().distance(pc1.getintersection());
+		double d1 = tvqp1.getself().getCoordinate()
+				.distance(pc1.getintersection());
+		double d2 = tvqp2.getself().getCoordinate()
+				.distance(pc1.getintersection());
 		if (d1 < d2) {
 			// centervqp1's left neighbor is tvqp1
-			centervqp1.getleft().setneighborcenter(tvqp1.getself().getCoordinate());
+			centervqp1.getleft().setneighborcenter(
+					tvqp1.getself().getCoordinate());
 			centervqp1.getleft().setRadius(tvqp1.getself().getRadius());
-			centervqp1.getright().setneighborcenter(tvqp2.getself().getCoordinate());
+			centervqp1.getright().setneighborcenter(
+					tvqp2.getself().getCoordinate());
 			centervqp1.getright().setRadius(tvqp2.getself().getRadius());
 			Coordinate t1 = tvqp1.getleft().getintersection();
 			// tvqp1's left neighbor is centervqp1
 			if (Math.abs(t1.x - a[0].x) < 1e-6
 					&& Math.abs(t1.y - a[0].y) < 1e-6) {
-				tvqp1.getleft().setneighborcenter(centervqp1.getself().getCoordinate());
+				tvqp1.getleft().setneighborcenter(
+						centervqp1.getself().getCoordinate());
 				tvqp1.getleft().setRadius(centervqp1.getself().getRadius());
 				if (!isinCircle(t1, centervqp1.getself())) {
 					Coordinate A1[] = new Coordinate[2];
@@ -596,7 +613,8 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 				tvqp1.getright().setneighborcenter(
 						centervqp1.getself().getCoordinate());
 				tvqp1.getright().setRadius(centervqp1.getself().getRadius());
-				if (!isinCircle(tvqp1.getright().getintersection(),centervqp1.getself())) {
+				if (!isinCircle(tvqp1.getright().getintersection(),
+						centervqp1.getself())) {
 					Coordinate A2[] = new Coordinate[2];
 					A2[0] = centervqp1.getleft().getintersection();
 					A2[1] = tvqp1.getright().getintersection();
@@ -607,7 +625,8 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 			Coordinate t2 = tvqp2.getleft().getintersection();
 			if (Math.abs(t2.x - a[1].x) < 1e-6
 					&& Math.abs(t2.y - a[1].y) < 1e-6) {
-				tvqp2.getleft().setneighborcenter(centervqp1.getself().getCoordinate());
+				tvqp2.getleft().setneighborcenter(
+						centervqp1.getself().getCoordinate());
 				tvqp2.getleft().setRadius(centervqp1.getself().getRadius());
 				if (!isinCircle(t2, centervqp1.getself())) {
 					Coordinate A3[] = new Coordinate[2];
@@ -618,9 +637,11 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 			}
 			// tvqp2's right neighbor is centervqp1
 			else {
-				tvqp2.getright().setneighborcenter(centervqp1.getself().getCoordinate());
+				tvqp2.getright().setneighborcenter(
+						centervqp1.getself().getCoordinate());
 				tvqp2.getright().setRadius(centervqp1.getself().getRadius());
-				if (!isinCircle(tvqp2.getright().getintersection(),centervqp1.getself())) {
+				if (!isinCircle(tvqp2.getright().getintersection(),
+						centervqp1.getself())) {
 					Coordinate A4[] = new Coordinate[2];
 					A4[0] = centervqp1.getright().getintersection();
 					A4[1] = tvqp2.getright().getintersection();
@@ -629,15 +650,18 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 			}
 		} else {
 			// centervqp1's left neighbor is tvqp2
-			centervqp1.getright().setneighborcenter(tvqp1.getself().getCoordinate());
+			centervqp1.getright().setneighborcenter(
+					tvqp1.getself().getCoordinate());
 			centervqp1.getright().setRadius(tvqp1.getself().getRadius());
-			centervqp1.getleft().setneighborcenter(tvqp2.getself().getCoordinate());
+			centervqp1.getleft().setneighborcenter(
+					tvqp2.getself().getCoordinate());
 			centervqp1.getleft().setRadius(tvqp2.getself().getRadius());
 			Coordinate t3 = tvqp1.getleft().getintersection();
 			// tvqp1's left neighbor is centervqp1
 			if (Math.abs(t3.x - a[0].x) < 1e-6
 					&& Math.abs(t3.y - a[0].y) < 1e-6) {
-				tvqp1.getleft().setneighborcenter(centervqp1.getself().getCoordinate());
+				tvqp1.getleft().setneighborcenter(
+						centervqp1.getself().getCoordinate());
 				tvqp1.getleft().setRadius(centervqp1.getself().getRadius());
 				if (!isinCircle(t3, centervqp1.getself())) {
 					Coordinate A5[] = new Coordinate[2];
@@ -648,9 +672,11 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 			}
 			// tvqp1's right neighbor is centervqp1
 			else {
-				tvqp1.getright().setneighborcenter(centervqp1.getself().getCoordinate());
+				tvqp1.getright().setneighborcenter(
+						centervqp1.getself().getCoordinate());
 				tvqp1.getright().setRadius(centervqp1.getself().getRadius());
-				if (!isinCircle(tvqp1.getright().getintersection(),centervqp1.getself())) {
+				if (!isinCircle(tvqp1.getright().getintersection(),
+						centervqp1.getself())) {
 					Coordinate A6[] = new Coordinate[2];
 					A6[0] = centervqp1.getright().getintersection();
 					A6[1] = tvqp1.getright().getintersection();
@@ -659,8 +685,10 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 			}
 			// tvqp2's left neighbor is centervqp1
 			Coordinate t4 = tvqp2.getleft().getintersection();
-			if (Math.abs(t4.x - a[1].x) < 1e-6&& Math.abs(t4.y - a[1].y) < 1e-6) {
-				tvqp2.getleft().setneighborcenter(centervqp1.getself().getCoordinate());
+			if (Math.abs(t4.x - a[1].x) < 1e-6
+					&& Math.abs(t4.y - a[1].y) < 1e-6) {
+				tvqp2.getleft().setneighborcenter(
+						centervqp1.getself().getCoordinate());
 				tvqp2.getleft().setRadius(centervqp1.getself().getRadius());
 				if (!isinCircle(t4, centervqp1.getself())) {
 					Coordinate A7[] = new Coordinate[2];
@@ -671,9 +699,11 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 			}
 			// tvqp2's right neighbor is centervqp1
 			else {
-				tvqp2.getright().setneighborcenter(centervqp1.getself().getCoordinate());
+				tvqp2.getright().setneighborcenter(
+						centervqp1.getself().getCoordinate());
 				tvqp2.getright().setRadius(centervqp1.getself().getRadius());
-				if (!isinCircle(tvqp2.getright().getintersection(),centervqp1.getself())) {
+				if (!isinCircle(tvqp2.getright().getintersection(),
+						centervqp1.getself())) {
 					Coordinate A8[] = new Coordinate[2];
 					A8[0] = centervqp1.getleft().getintersection();
 					A8[1] = tvqp2.getright().getintersection();
