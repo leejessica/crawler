@@ -101,16 +101,23 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 
 		// find the refCoordinate to determine the longest radius of the
 		// circumcircle of the MBR
-		Coordinate minCoordinate = new Coordinate(evenlopeState.getMinX(),
-				evenlopeState.getMinY());
-		Coordinate maxCoordinate = new Coordinate(evenlopeState.getMaxX(),
-				evenlopeState.getMaxY());
-		Coordinate refCoordinate = new Coordinate();
-		if (startPoint.distance(minCoordinate) > startPoint
-				.distance(maxCoordinate))
-			refCoordinate = minCoordinate;
-		else
-			refCoordinate = maxCoordinate;
+		Coordinate []vetex=new Coordinate[4];
+		vetex[0]=new Coordinate(evenlopeState.getMaxX(),evenlopeState.getMaxY());
+		vetex[1]=new Coordinate(evenlopeState.getMaxX(),evenlopeState.getMinY());
+		vetex[2]=new Coordinate(evenlopeState.getMinX(),evenlopeState.getMaxY());
+		vetex[3]=new Coordinate(evenlopeState.getMinX(),evenlopeState.getMinY());
+		double[] d=new double[4];
+		Coordinate refCoordinate=new Coordinate();
+		int index=-1;
+		double d0=0;
+		for(int i=0;i<vetex.length;i++){
+			d[i]=startPoint.distance(vetex[i]);
+			if(d0<d[i]){
+				index=i;
+				d0=d[i];
+			}
+		}
+		refCoordinate=vetex[index];
 		visitedOnlineQ.add(new VQP(refCoordinate, 0));
 
 		while (countpoint < NEED_POINTS_NUM) {
@@ -178,6 +185,7 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 				PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
 				PaintShapes.paint.addCircle(aCircle);
 				PaintShapes.paint.myRepaint();
+			}
 			intsectPoint1 = getIntersectPoint(biCoordinate, startPoint,biRadius);
 			// calculate new biCoordinate
 			biCoordinate.x = (intsectPoint1.x + intsectPoint.x) / 2;
