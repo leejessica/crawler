@@ -14,6 +14,7 @@ import java.util.Random;
 import java.util.Set;
 
 import mo.umac.crawler.CrawlerStrategy;
+import mo.umac.crawler.offline.BinaryCrawler;
 import mo.umac.crawler.offline.HexagonCrawler2;
 import mo.umac.crawler.offline.HexagonCrawler2_Modify;
 import mo.umac.crawler.offline.OfflineStrategy;
@@ -56,8 +57,9 @@ public class CrawlerTest extends CrawlerStrategy {
 		// SliceCrawler crawler = new SliceCrawler();
 		//HexagonCrawler2 crawler = new HexagonCrawler2();
 		//PeripheryQuery crawler=new PeripheryQuery();
-		PerpheryQuery_Optimize crawler=new PerpheryQuery_Optimize();
+		//PerpheryQuery_Optimize crawler=new PerpheryQuery_Optimize();
 		//HexagonCrawler2_Modify crawler=new HexagonCrawler2_Modify();
+		BinaryCrawler crawler=new BinaryCrawler();
 		String state = "NY";
 		int categoryID = 96926236;
 		String category = "Restaurants";

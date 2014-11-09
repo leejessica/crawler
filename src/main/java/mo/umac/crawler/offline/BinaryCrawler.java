@@ -111,6 +111,7 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 			refCoordinate = minCoordinate;
 		else
 			refCoordinate = maxCoordinate;
+		System.out.println("refCoordinate="+refCoordinate);
 		visitedOnlineQ.add(new VQP(refCoordinate, 0));
 
 		while (countpoint < NEED_POINTS_NUM) {
@@ -152,7 +153,6 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 		Coordinate intsectPoint1 = getIntersectPoint(
 				firstCircle.getCoordinate(), startPoint,
 				firstCircle.getRadius());
-
 		// keep track of the position for binary search
 		Coordinate biCoordinate = new Coordinate();
 		biCoordinate.x = (intsectPoint1.x + intsectPoint.x) / 2;
@@ -178,6 +178,7 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 				PaintShapes.paint.color = PaintShapes.paint.redTranslucence;
 				PaintShapes.paint.addCircle(aCircle);
 				PaintShapes.paint.myRepaint();
+			}
 			intsectPoint1 = getIntersectPoint(biCoordinate, startPoint,biRadius);
 			// calculate new biCoordinate
 			biCoordinate.x = (intsectPoint1.x + intsectPoint.x) / 2;
