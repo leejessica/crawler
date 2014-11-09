@@ -24,7 +24,6 @@ public class Line_circle_test {
 
 	public static void main(String[] args) {
 		Coordinate s=new Coordinate(0, 0);
-		
 		Coordinate s1=new Coordinate(1, 1);
 		VQP p1=new VQP(s1, 0.5);
 		Coordinate s2=new Coordinate(2,2);
@@ -33,13 +32,22 @@ public class Line_circle_test {
 		TreeSet<VQP> set=new TreeSet<VQP>(new SortedBydistance(s));
 		set.add(p2);
 		set.add(p3);
-		set.add(p1);
+		
 		System.out.println("size="+set.size());
 		Iterator<VQP> it=set.iterator();
 		while(it.hasNext()){
 			VQP p=it.next();
 			System.out.println("----"+p.getCoordinate()+",   "+p.getRadius());
 		}
+		System.out.println("==================");
+		VQP p4=set.pollFirst();
+		set.add(p1);
+		Iterator<VQP> it1=set.iterator();
+		while(it1.hasNext()){
+			VQP p5=it1.next();
+			System.out.println("----"+p5.getCoordinate()+",   "+p5.getRadius());
+		}
+		
 	}   
 	
 	
