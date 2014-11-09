@@ -506,9 +506,6 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 		return intsectPoint;
 	}
 
-	public void coverRing() {
-
-	}
 
 	// judge whether a point is in a circle or not
 	public boolean isinCircle(Coordinate p, VQP vqp) {
