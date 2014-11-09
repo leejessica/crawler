@@ -22,8 +22,6 @@ public class Line_circle_test {
 		System.out.println("this is a test program!!!!!!\n");
 	}
 
-	
-
 	public static void main(String[] args) {
 		Coordinate s=new Coordinate(0, 0);
 		
@@ -32,7 +30,7 @@ public class Line_circle_test {
 		Coordinate s2=new Coordinate(2,2);
 		VQP p2=new VQP(s2, 1);
 		VQP p3=new VQP(new Coordinate(2,1), 1);
-		Set<VQP> set=new TreeSet<VQP>(new SortedBydistance(s));
+		TreeSet<VQP> set=new TreeSet<VQP>(new SortedBydistance(s));
 		set.add(p2);
 		set.add(p3);
 		set.add(p1);
@@ -43,4 +41,6 @@ public class Line_circle_test {
 			System.out.println("----"+p.getCoordinate()+",   "+p.getRadius());
 		}
 	}   
+	
+	
 }

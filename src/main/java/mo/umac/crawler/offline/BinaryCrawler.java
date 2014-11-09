@@ -101,6 +101,7 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 
 		// find the refCoordinate to determine the longest radius of the
 		// circumcircle of the MBR
+<<<<<<< HEAD
 		Coordinate minCoordinate = new Coordinate(evenlopeState.getMinX(),
 				evenlopeState.getMinY());
 		Coordinate maxCoordinate = new Coordinate(evenlopeState.getMaxX(),
@@ -112,6 +113,25 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 		else
 			refCoordinate = maxCoordinate;
 		System.out.println("refCoordinate="+refCoordinate);
+=======
+		Coordinate []vetex=new Coordinate[4];
+		vetex[0]=new Coordinate(evenlopeState.getMaxX(),evenlopeState.getMaxY());
+		vetex[1]=new Coordinate(evenlopeState.getMaxX(),evenlopeState.getMinY());
+		vetex[2]=new Coordinate(evenlopeState.getMinX(),evenlopeState.getMaxY());
+		vetex[3]=new Coordinate(evenlopeState.getMinX(),evenlopeState.getMinY());
+		double[] d=new double[4];
+		Coordinate refCoordinate=new Coordinate();
+		int index=-1;
+		double d0=0;
+		for(int i=0;i<vetex.length;i++){
+			d[i]=startPoint.distance(vetex[i]);
+			if(d0<d[i]){
+				index=i;
+				d0=d[i];
+			}
+		}
+		refCoordinate=vetex[index];
+>>>>>>> 3eec90123dd6d795c3bb51c1144ed2080271119e
 		visitedOnlineQ.add(new VQP(refCoordinate, 0));
 
 		while (countpoint < NEED_POINTS_NUM) {
