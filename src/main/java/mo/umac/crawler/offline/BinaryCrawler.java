@@ -151,15 +151,7 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 			LinkedList<VQP> visitedInfoQ, TreeSet<VQP> visitedOnlineQ,
 			LinkedList<Coordinate> visitedQ) {
 		i++;
-		System.out.println("start call binary query !!!!!!! this is the" + i
-				+ "times to call it!====visitedOnlineQ.size="
-				+ visitedOnlineQ.size() + " visitedInfoQ.size"
-				+ visitedInfoQ.size());
-		Iterator<VQP> it4 = visitedOnlineQ.iterator();
-		while (it4.hasNext()) {
-			Coordinate h = it4.next().getCoordinate();
-			System.out.println("==========" + h);
-		}
+		
 		// the maximum inscribed circle centered at startPoint
 		VQP inscribedCircle = new VQP(startPoint, inRadius);
 		/*
@@ -186,6 +178,7 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 		// exist vacancy between the biCoordinate position and the inscribed
 		// circle
 		while (!isinCircle1(biCoordinate, inscribedCircle)) {
+			
 			// issue a query at the biCoordinate
 			AQuery query1 = new AQuery(biCoordinate, state, category, query,
 					MAX_TOTAL_RESULTS_RETURNED);
@@ -195,9 +188,16 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 			int size1 = resultSet1.getPOIs().size();
 			double biRadius = biCoordinate.distance(resultSet1.getPOIs()
 					.get(size1 - 1).getCoordinate());
+			Coordinate biCoordinateclone=(Coordinate)biCoordinate.clone();
 			// record the circle(biCoordinate, biRadius)
-			visitedInfoQ.addLast(new VQP(biCoordinate, biRadius));
-			visitedOnlineQ.add(new VQP(biCoordinate, biRadius));
+			visitedInfoQ.addLast(new VQP(biCoordinateclone, biRadius));
+			visitedOnlineQ.add(new VQP(biCoordinateclone, biRadius));
+			//System.out.println("biCoordinate="+biCoordinate+"visitedOnlineQ="+visitedOnlineQ.size());
+			Iterator<VQP> it4 = visitedOnlineQ.iterator();
+			while (it4.hasNext()) {
+				Coordinate h = it4.next().getCoordinate();
+				System.out.println("==========" + h);
+			}
 			Circle aCircle = new Circle(biCoordinate, biRadius);
 			if (logger.isDebugEnabled() && PaintShapes.painting) {
 				PaintShapes.paint.color = PaintShapes.paint.blueTranslucence;
@@ -209,18 +209,20 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 			// calculate new biCoordinate
 			biCoordinate.x = (intsectPoint1.x + intsectPoint.x) / 2;
 			biCoordinate.y = (intsectPoint1.y + intsectPoint.y) / 2;
-		}// END find the right position for ringCover
+			
+		}// END find the right position for ringCover		
 		/* cover the ring */
 		double coverRadius = inRadius;
 		// obtain the first element and remove it
 		firstCircle = visitedOnlineQ.pollFirst();
-		System.out.println("visitedOnlineQ size= "+visitedOnlineQ.size());
+		System.out.println("visitedOnlineQ size= "+visitedOnlineQ.size()+"   "+firstCircle.getCoordinate()+" "
+				+firstCircle.getRadius());
 		double ringRadius = startPoint.distance(firstCircle.getCoordinate())
 				+ firstCircle.getRadius();
 		LinkedList<Coordinate[]> uncoveredArc = new LinkedList<Coordinate[]>();
 		HashMap<Integer, LinkedList<VQP1>> map = new HashMap<Integer, LinkedList<VQP1>>();
 		while (coverRadius < ringRadius) {
-			coverRadius = coverRing(startPoint, state, category, query,
+			coverRadius= coverRing(startPoint, state, category, query,
 					visitedQ, visitedInfoQ, map, uncoveredArc);
 		}
 		// updata the inRadius
@@ -432,6 +434,7 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 		 * (startPoint.distance(pp.getCoordinate()) <= incircleRadius)
 		 * eligibleset.add(pp); } countpoint = eligibleset.size();
 		 */
+		
 	}
 
 	// calculate the radius of the incircle
@@ -506,9 +509,6 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 		return intsectPoint;
 	}
 
-	public void coverRing() {
-
-	}
 
 	// judge whether a point is in a circle or not
 	public boolean isinCircle(Coordinate p, VQP vqp) {
