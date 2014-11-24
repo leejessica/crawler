@@ -109,11 +109,12 @@ public class BinaryCrawler_Modify<PeripherQuery_Optimize> extends
 			Coordinate refCoordinate = new Coordinate(startPoint.x
 					+ estimateRadius, startPoint.y);
 			visitedOnlineQ.add(new VQP(refCoordinate, 0));
-			if (inRadius < estimateRadius) {
+			while (inRadius < estimateRadius) {
+				if(countpoint<NEED_POINTS_NUM){
 				binaryQuery(startPoint, refCoordinate, state, category, query,
 						visitedInfoQ, visitedOnlineQ, visitedQ);
 			}
-
+			}
 		}
 
 	}
