@@ -25,7 +25,7 @@ import com.vividsolutions.jts.geom.LineSegment;
 public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 
 	private static int countquery = 0;
-	private static int NEED_POINTS_NUM = 100;
+	private static int NEED_POINTS_NUM = 30;
 	private static int countpoint = 0;
 	private static int level = 0;
 	private static Set<APOI> queryset = new HashSet<APOI>();// record all points
@@ -213,7 +213,7 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 				+ firstCircle.getRadius();
 		LinkedList<Coordinate[]> uncoveredArc = new LinkedList<Coordinate[]>();
 		HashMap<Integer, LinkedList<VQP1>> map = new HashMap<Integer, LinkedList<VQP1>>();
-		while (countpoint < NEED_POINTS_NUM) {
+		while (countpoint < NEED_POINTS_NUM) {//terminate the algorithm early
 			if (inRadius < ringRadius) {
 				coverRing(startPoint, state, category, query, visitedQ,
 						visitedInfoQ, map, uncoveredArc);

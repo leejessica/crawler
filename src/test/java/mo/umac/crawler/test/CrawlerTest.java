@@ -58,8 +58,8 @@ public class CrawlerTest extends CrawlerStrategy {
 		//HexagonCrawler2 crawler = new HexagonCrawler2();
 		//PeripheryQuery crawler=new PeripheryQuery();
 		//PerpheryQuery_Optimize crawler=new PerpheryQuery_Optimize();
-		//HexagonCrawler2_Modify crawler=new HexagonCrawler2_Modify();
-		BinaryCrawler crawler=new BinaryCrawler();
+		HexagonCrawler2_Modify crawler=new HexagonCrawler2_Modify();
+		//BinaryCrawler crawler=new BinaryCrawler();
 		String state = "NY";
 		int categoryID = 96926236;
 		String category = "Restaurants";
