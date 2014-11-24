@@ -26,7 +26,7 @@ public class BinaryCrawler_Modify<PeripherQuery_Optimize> extends
 		OfflineStrategy {
 
 	private static int countquery = 0;
-	private static int NEED_POINTS_NUM = 100;
+	private static int NEED_POINTS_NUM = 150;
 	private static int countpoint = 0;
 	private static int level = 0;
 	private static Set<APOI> queryset = new HashSet<APOI>();// record all points
@@ -104,16 +104,19 @@ public class BinaryCrawler_Modify<PeripherQuery_Optimize> extends
 		}
 
 		// find the refCoordinate
+		double estimateRadius = Math.sqrt(NEED_POINTS_NUM * inRadius *inRadius/ countpoint);
+		Coordinate refCoordinate = new Coordinate(startPoint.x
+				+ estimateRadius, startPoint.y);
+		visitedOnlineQ.add(new VQP(refCoordinate, 0));
 		while (countpoint < NEED_POINTS_NUM) {
-			double estimateRadius = NEED_POINTS_NUM * inRadius / countpoint;
-			Coordinate refCoordinate = new Coordinate(startPoint.x
-					+ estimateRadius, startPoint.y);
-			visitedOnlineQ.add(new VQP(refCoordinate, 0));
-			while (inRadius < estimateRadius) {
-				if(countpoint<NEED_POINTS_NUM){
+			if (inRadius < estimateRadius) {
 				binaryQuery(startPoint, refCoordinate, state, category, query,
-						visitedInfoQ, visitedOnlineQ, visitedQ);
+						visitedInfoQ, visitedOnlineQ, visitedQ);	
 			}
+			else{
+				 estimateRadius = Math.sqrt(NEED_POINTS_NUM * inRadius *inRadius/ countpoint);
+				refCoordinate=new Coordinate(startPoint.x+estimateRadius,startPoint.y);
+				visitedOnlineQ.add(new VQP(refCoordinate, 0));
 			}
 		}
 
@@ -190,22 +193,29 @@ public class BinaryCrawler_Modify<PeripherQuery_Optimize> extends
 
 		}// END find the right position for ringCover
 		/* cover the ring */
-		// obtain the first element and remove it
-		firstCircle = visitedOnlineQ.pollFirst();
-		double ringRadius = startPoint.distance(firstCircle.getCoordinate())
-				+ firstCircle.getRadius();
+		double ringRadius=startPoint.distance(refCoordinate);
+		if(!visitedOnlineQ.isEmpty()){
+			firstCircle = visitedOnlineQ.pollFirst();
+			 ringRadius = startPoint.distance(firstCircle.getCoordinate())
+					+ firstCircle.getRadius();
+			}
 		LinkedList<Coordinate[]> uncoveredArc = new LinkedList<Coordinate[]>();
 		HashMap<Integer, LinkedList<VQP1>> map = new HashMap<Integer, LinkedList<VQP1>>();
-		while (countpoint < NEED_POINTS_NUM) {
+		while (countpoint < NEED_POINTS_NUM) {//terminate the algorithm early
+			// obtain the first element and remove it
 			if (inRadius < ringRadius) {
 				coverRing(startPoint, state, category, query, visitedQ,
 						visitedInfoQ, map, uncoveredArc);
+			}
+			else{
+				binaryQuery(startPoint, refCoordinate, state, category, query, visitedInfoQ,visitedOnlineQ, visitedQ);
 			}
 		}
 		// updata the inRadius
 
 		// return inRadius;
 	}
+
 
 	/* cover the ring using PeripherQuery_Optimize algorithm */
 	public void coverRing(Coordinate startPoint, String state, int category,

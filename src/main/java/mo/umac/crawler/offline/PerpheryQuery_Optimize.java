@@ -28,7 +28,7 @@ public class PerpheryQuery_Optimize extends OfflineStrategy{
 	//private Coordinate startPoint=new Coordinate();
 	
 	public static int countquery=0;
-	public static int NEED_POINTS_NUM=30;
+	public static int NEED_POINTS_NUM=150;
 	public static int countpoint=0;
 	public static int level=0;
 	public static Set<APOI> queryset = new HashSet<APOI>();// record all points queried

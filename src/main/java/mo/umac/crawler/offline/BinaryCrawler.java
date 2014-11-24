@@ -25,7 +25,7 @@ import com.vividsolutions.jts.geom.LineSegment;
 public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 
 	private static int countquery = 0;
-	private static int NEED_POINTS_NUM = 30;
+	private static int NEED_POINTS_NUM = 150;
 	private static int countpoint = 0;
 	private static int level = 0;
 	private static Set<APOI> queryset = new HashSet<APOI>();// record all points
@@ -128,7 +128,7 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 		refCoordinate = vetex[index];
 		visitedOnlineQ.add(new VQP(refCoordinate, 0));
 
-		while (countpoint < NEED_POINTS_NUM) {
+		if (countpoint < NEED_POINTS_NUM) {
 			// TODO call a binary search procedure
 			binaryQuery(startPoint, refCoordinate, state, category, query,
 					visitedInfoQ, visitedOnlineQ, visitedQ);
@@ -207,16 +207,22 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 
 		}// END find the right position for ringCover
 		/* cover the ring */
-		// obtain the first element and remove it
-		firstCircle = visitedOnlineQ.pollFirst();
-		double ringRadius = startPoint.distance(firstCircle.getCoordinate())
-				+ firstCircle.getRadius();
+		double ringRadius=startPoint.distance(refCoordinate);
+		if(!visitedOnlineQ.isEmpty()){
+			firstCircle = visitedOnlineQ.pollFirst();
+			 ringRadius = startPoint.distance(firstCircle.getCoordinate())
+					+ firstCircle.getRadius();
+			}
 		LinkedList<Coordinate[]> uncoveredArc = new LinkedList<Coordinate[]>();
 		HashMap<Integer, LinkedList<VQP1>> map = new HashMap<Integer, LinkedList<VQP1>>();
 		while (countpoint < NEED_POINTS_NUM) {//terminate the algorithm early
+			// obtain the first element and remove it
 			if (inRadius < ringRadius) {
 				coverRing(startPoint, state, category, query, visitedQ,
 						visitedInfoQ, map, uncoveredArc);
+			}
+			else{
+				binaryQuery(startPoint, refCoordinate, state, category, query, visitedInfoQ,visitedOnlineQ, visitedQ);
 			}
 		}
 		// updata the inRadius
@@ -421,7 +427,7 @@ public class BinaryCrawler<PeripherQuery_Optimize> extends OfflineStrategy {
 				eligibleset.add(pp);
 		}
 		countpoint = eligibleset.size();
-
+        System.out.println("countpoint="+countpoint);
 	}
 
 	// calculate the radius of the incircle
