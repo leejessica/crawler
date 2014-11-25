@@ -104,18 +104,23 @@ public class BinaryCrawler_Modify<PeripherQuery_Optimize> extends
 		}
 
 		// find the refCoordinate
-		double estimateRadius = Math.sqrt(NEED_POINTS_NUM * inRadius *inRadius/ countpoint);
-		Coordinate refCoordinate = new Coordinate(startPoint.x
-				+ estimateRadius, startPoint.y);
+		//double estimateRadius = Math.sqrt(NEED_POINTS_NUM * inRadius * inRadius
+			//	/ countpoint);
+		double estimateRadius=2*inRadius;
+		Coordinate refCoordinate = new Coordinate(
+				startPoint.x + estimateRadius, startPoint.y);
 		visitedOnlineQ.add(new VQP(refCoordinate, 0));
 		while (countpoint < NEED_POINTS_NUM) {
+			System.out.println("estimateRadius="+estimateRadius);
 			if (inRadius < estimateRadius) {
 				binaryQuery(startPoint, refCoordinate, state, category, query,
-						visitedInfoQ, visitedOnlineQ, visitedQ);	
-			}
-			else{
-				 estimateRadius = Math.sqrt(NEED_POINTS_NUM * inRadius *inRadius/ countpoint);
-				refCoordinate=new Coordinate(startPoint.x+estimateRadius,startPoint.y);
+						visitedInfoQ, visitedOnlineQ, visitedQ);
+			} else {
+				estimateRadius = Math.sqrt(NEED_POINTS_NUM * inRadius
+						* inRadius / countpoint);
+				
+				refCoordinate = new Coordinate(startPoint.x + estimateRadius,
+						startPoint.y);
 				visitedOnlineQ.add(new VQP(refCoordinate, 0));
 			}
 		}
@@ -136,7 +141,6 @@ public class BinaryCrawler_Modify<PeripherQuery_Optimize> extends
 			String state, int category, String query,
 			LinkedList<VQP> visitedInfoQ, TreeSet<VQP> visitedOnlineQ,
 			LinkedList<Coordinate> visitedQ) {
-		i++;
 
 		// the maximum inscribed circle centered at startPoint
 		VQP inscribedCircle = new VQP(startPoint, inRadius);
@@ -193,38 +197,26 @@ public class BinaryCrawler_Modify<PeripherQuery_Optimize> extends
 
 		}// END find the right position for ringCover
 		/* cover the ring */
-		double ringRadius=startPoint.distance(refCoordinate);
-		if(!visitedOnlineQ.isEmpty()){
+		double ringRadius = startPoint.distance(refCoordinate);// initial the
+																// ringRadius
+		// obtain the first element and remove it
+		if (!visitedOnlineQ.isEmpty()) {
 			firstCircle = visitedOnlineQ.pollFirst();
-			 ringRadius = startPoint.distance(firstCircle.getCoordinate())
+			ringRadius = startPoint.distance(firstCircle.getCoordinate())
 					+ firstCircle.getRadius();
-			}
+		}
 		LinkedList<Coordinate[]> uncoveredArc = new LinkedList<Coordinate[]>();
 		HashMap<Integer, LinkedList<VQP1>> map = new HashMap<Integer, LinkedList<VQP1>>();
-		while (countpoint < NEED_POINTS_NUM) {//terminate the algorithm early
-			// obtain the first element and remove it
-			if (inRadius < ringRadius) {
-				coverRing(startPoint, state, category, query, visitedQ,
-						visitedInfoQ, map, uncoveredArc);
-			}
-			else{
-				binaryQuery(startPoint, refCoordinate, state, category, query, visitedInfoQ,visitedOnlineQ, visitedQ);
-			}
+		/*
+		 * the condition of termination of coverRing procedure is:
+		 * inRadius>=ringRadius or countpoint>=NEED_POINTS_NUM
+		 */
+		while (inRadius < ringRadius && countpoint < NEED_POINTS_NUM) {
+
+			onelevelQuery(startPoint, inRadius, state, category, query,
+					visitedQ, map, uncoveredArc, visitedInfoQ);
+
 		}
-		// updata the inRadius
-
-		// return inRadius;
-	}
-
-
-	/* cover the ring using PeripherQuery_Optimize algorithm */
-	public void coverRing(Coordinate startPoint, String state, int category,
-			String query, LinkedList<Coordinate> visitedQ,
-			LinkedList<VQP> visitedInfoQ,
-			HashMap<Integer, LinkedList<VQP1>> map,
-			LinkedList<Coordinate[]> uncoveredArc) {
-		onelevelQuery(startPoint, inRadius, state, category, query, visitedQ,
-				map, uncoveredArc, visitedInfoQ);
 	}
 
 	public IntersectPoint calculateIntersectPoint(Coordinate p1, double r1,
